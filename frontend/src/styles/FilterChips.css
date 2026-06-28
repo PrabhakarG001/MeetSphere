@@ -1,0 +1,44 @@
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-chip {
+  padding: 0.5rem 1.1rem;
+  border-radius: 20px;
+  border: 1px solid var(--dash-border);
+  background: transparent;
+  color: var(--dash-text-secondary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.filter-chip:hover {
+  background: var(--dash-surface-hover);
+  border-color: var(--dash-border-hover);
+  color: var(--dash-text);
+}
+
+.filter-chip--active {
+  background: var(--dash-primary);
+  border-color: var(--dash-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 16px var(--dash-primary-glow);
+}
+
+.filter-chip--active:hover {
+  background: var(--dash-primary-hover);
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .filter-chips {
+    overflow-x: auto; flex-wrap: nowrap; padding-bottom: 0.25rem; -webkit-overflow-scrolling: touch;
+  }
+}

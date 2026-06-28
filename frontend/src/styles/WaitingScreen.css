@@ -1,0 +1,321 @@
+.lobbyPage {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(
+      180deg,
+      #02082c 0%,
+      #0a1a4a 22%,
+      #1f3fb0 45%,
+      #5f6bff 65%,
+      rgba(255, 46, 166, 0.22) 82%,
+      #9bb3ff 100%
+    );
+    color: #ffffff;
+    font-family: 'DM Sans', 'Inter', -apple-system, sans-serif;
+}
+
+.lobbyNavbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px clamp(20px, 4vw, 60px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lobbyLogo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "Fantasque Sans Mono", "Fira Code", monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+
+.lobbyWorkspace {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.lobbyNavActions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.lobbySettingsIcon {
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.lobbySettingsIcon:hover {
+    color: #ffffff;
+}
+
+.lobbyAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(11, 92, 255, 0.2);
+}
+
+.lobbyMain {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 420px);
+    gap: clamp(40px, 6vw, 80px);
+    padding: clamp(32px, 5vw, 60px) clamp(20px, 4vw, 60px);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    align-items: center;
+}
+
+.lobbyPreviewContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.lobbyVideoWrapper {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000000;
+    position: relative;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 40px rgba(123, 97, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.lobbyVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.lobbyVideoPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f172a;
+}
+
+.lobbyVideoPlaceholderIcon {
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.lobbyVideoStatus {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(2, 8, 44, 0.7);
+    backdrop-filter: blur(12px);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lobbyVideoStatusDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+.lobbyVideoStatusDot.error {
+    background: #ef4444;
+}
+
+.lobbyVideoStatusDot.off {
+    background: #94a3b8;
+}
+
+.lobbyControls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.lobbyControlBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lobbyControlBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.lobbyControlBtn.off {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.lobbyControlBtn.off:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.lobbyInfoCard {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.lobbyInfoCard h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+}
+
+.lobbySubtitle {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.95rem;
+    margin: 0 0 32px;
+    line-height: 1.5;
+}
+
+.lobbyFormGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.lobbyInput {
+    width: 100%;
+    background: rgba(2, 8, 44, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.lobbyInput::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.lobbyInput:focus {
+    outline: none;
+    border-color: #7b61ff;
+    background: rgba(2, 8, 44, 0.8);
+    box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.25);
+}
+
+.lobbyJoinBtn {
+    width: 100%;
+    background: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(123, 97, 255, 0.35);
+    transition: all 0.3s ease;
+}
+
+.lobbyJoinBtn:hover {
+    background: linear-gradient(135deg, #ff2ea6 10%, #7b61ff 60%, #2d4fc2 100%);
+    box-shadow: 0 12px 32px rgba(123, 97, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.lobbyJoinBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.lobbyCreateBtn {
+    width: 100%;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.lobbyCreateBtn:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.lobbyMeetingDetails {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lobbyDetailRow {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.lobbyDetailLabel {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.lobbyDetailValue {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.lobbyDetailValue.connected {
+    color: #22c55e;
+}

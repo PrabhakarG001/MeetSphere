@@ -1,0 +1,73 @@
+.skeleton-card {
+  background: var(--dash-surface-glass);
+  border: 1px solid var(--dash-border);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeleton-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-card__circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--dash-surface) 25%, var(--dash-surface-hover) 50%, var(--dash-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-card__badge {
+  width: 80px;
+  height: 24px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--dash-surface) 25%, var(--dash-surface-hover) 50%, var(--dash-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.skeleton-card__line {
+  height: 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--dash-surface) 25%, var(--dash-surface-hover) 50%, var(--dash-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-card__line--wide {
+  width: 85%;
+}
+
+.skeleton-card__line--medium {
+  width: 60%;
+}
+
+.skeleton-card__line--narrow {
+  width: 40%;
+}
+
+.skeleton-card__footer {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--dash-border);
+}
+
+.skeleton-card__btn {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--dash-surface) 25%, var(--dash-surface-hover) 50%, var(--dash-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

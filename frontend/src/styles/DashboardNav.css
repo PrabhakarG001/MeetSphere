@@ -1,0 +1,106 @@
+.dash-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(2, 8, 44, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--dash-border);
+  padding: 0.75rem clamp(1.25rem, 3.4vw, 3.5rem);
+  min-height: 72px;
+}
+
+.dash-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dash-nav__logo {
+  font-family: 'Fantasque Sans Mono', 'Fira Code', monospace;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.dash-nav__back {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--dash-border);
+  background: var(--dash-surface);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.dash-nav__back:hover {
+  background: var(--dash-surface-hover);
+  border-color: var(--dash-border-hover);
+  transform: translateY(-1px);
+}
+
+.dash-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dash-nav__btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--dash-border);
+  background: var(--dash-surface);
+  color: var(--dash-text-secondary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.dash-nav__btn:hover {
+  background: var(--dash-surface-hover);
+  color: #ffffff;
+  border-color: var(--dash-border-hover);
+  transform: translateY(-1px);
+}
+
+.dash-nav__btn--logout:hover {
+  color: var(--dash-danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.dash-nav__btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .dash-nav {
+    padding: 0.75rem 1rem;
+        min-height: 64px;
+  }
+
+  .dash-nav__btn span {
+    display: none;
+  }
+
+  .dash-nav__btn {
+    padding: 0.5rem; border-radius: 10px;
+  }
+}

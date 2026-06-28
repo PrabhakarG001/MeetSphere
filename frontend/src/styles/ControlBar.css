@@ -1,0 +1,89 @@
+.buttonContainers {
+    position: absolute;
+    left: 50%;
+    bottom: 22px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateX(-50%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+}
+
+.controlButton {
+    width: 52px !important;
+    height: 52px !important;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%) !important;
+    box-shadow: 0 8px 24px rgba(123, 97, 255, 0.35) !important;
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.controlButton:hover {
+    background: linear-gradient(135deg, #ff2ea6 10%, #7b61ff 60%, #2d4fc2 100%) !important;
+    box-shadow: 0 12px 32px rgba(123, 97, 255, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+.controlButtonOff {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.controlButtonOff:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+}
+
+.endCallButton {
+    color: #ffffff !important;
+    background: #dc2626 !important;
+}
+
+.endCallButton:hover {
+    background: #b91c1c !important;
+    box-shadow: 0 12px 28px rgba(220, 38, 38, 0.32);
+}
+
+.copyInviteButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 800;
+    padding: 0 14px;
+    backdrop-filter: blur(12px);
+}
+
+.copyInviteButton:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.connectionBadge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.14);
+    color: #bbf7d0;
+    font-size: 0.86rem;
+    font-weight: 800;
+}

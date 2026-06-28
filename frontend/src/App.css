@@ -1,0 +1,150 @@
+
+.App {
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-primary-soft: rgba(79, 70, 229, 0.1);
+  --color-secondary: #0f766e;
+  --color-secondary-soft: rgba(15, 118, 110, 0.12);
+  --color-accent: #d97706;
+  --color-background: #f8fafc;
+  --color-background-tinted: #eef2ff;
+  --color-surface: #ffffff;
+  --color-surface-glass: rgba(255, 255, 255, 0.9);
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-soft: #64748b;
+  --color-border: #dbe4f0;
+  --color-danger: #dc2626;
+  --shadow-primary: rgba(79, 70, 229, 0.24);
+  --shadow-ink: rgba(15, 23, 42, 0.16);
+
+  /* Dark dashboard theme - Premium Unified Theme */
+  --dash-bg: #02082c;
+  --dash-bg-secondary: #0a1a4a;
+  --dash-surface: rgba(255, 255, 255, 0.05);
+  --dash-surface-hover: rgba(255, 255, 255, 0.09);
+  --dash-surface-glass: rgba(255, 255, 255, 0.05);
+  --dash-border: rgba(255, 255, 255, 0.15);
+  --dash-border-hover: rgba(255, 255, 255, 0.25);
+  --dash-text: #ffffff;
+  --dash-text-secondary: rgba(255, 255, 255, 0.7);
+  --dash-text-muted: rgba(255, 255, 255, 0.45);
+  --dash-primary: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
+  --dash-primary-hover: linear-gradient(135deg, #ff2ea6 10%, #7b61ff 60%, #2d4fc2 100%);
+  --dash-primary-glow: rgba(123, 97, 255, 0.4);
+  --dash-accent: #6a7cff;
+  --dash-success: #22c55e;
+  --dash-warning: #f59e0b;
+  --dash-danger: #ef4444;
+
+  min-height: 100vh;
+}
+
+/* Global Auth Theme Utilities */
+.auth-gradient-bg {
+background: linear-gradient(
+  180deg,
+  #02082c 0%,
+  #0c1c54 18%,
+  #2950d9 40%,
+  #5b67f5 56%,
+  #7b69f8 68%,
+  #a765e8 78%,
+  #d95db3 88%,
+  #8aa2f5 100%
+) !important;
+  color: #ffffff;
+  background-attachment: fixed !important;
+}
+
+.auth-glass-card {
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 22px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  color: #ffffff !important;
+}
+
+.auth-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%) !important;
+  color: #ffffff !important;
+  cursor: pointer;
+  font-weight: 800 !important;
+  box-shadow: 0 8px 24px rgba(123, 97, 255, 0.35) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.auth-primary-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff2ea6 10%, #7b61ff 60%, #2d4fc2 100%) !important;
+  box-shadow: 0 12px 32px rgba(123, 97, 255, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+.auth-primary-btn:active:not(:disabled) {
+  transform: translateY(0) !important;
+}
+
+.auth-danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: rgba(220, 38, 38, 0.15) !important;
+  color: #ef4444 !important;
+  cursor: pointer;
+  font-weight: 700 !important;
+  border: 1px solid rgba(220, 38, 38, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.auth-danger-btn:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.25) !important;
+  border-color: rgba(220, 38, 38, 0.5) !important;
+}
+
+/* ── Dashboard Animations ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(11, 92, 255, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(11, 92, 255, 0.3); }
+}
+
+@keyframes orbFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+@keyframes orbFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 20px) scale(0.95); }
+  66% { transform: translate(20px, -15px) scale(1.05); }
+}

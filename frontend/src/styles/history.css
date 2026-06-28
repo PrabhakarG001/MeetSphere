@@ -1,0 +1,201 @@
+/* ═══════════════════════════════════════════════════════
+   history.css — Meeting History Page
+   Dark glassmorphism theme · MeetSphere
+   ═══════════════════════════════════════════════════════ */
+
+/* ── History Page ── */
+.history-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    #02082c 0%,
+    #0a1a4a 22%,
+    #1f3fb0 45%,
+    #5f6bff 65%,
+    rgba(255, 46, 166, 0.22) 82%,
+    #9bb3ff 100%
+  );
+  color: var(--dash-text);
+  font-family: 'Almaden Sans', 'DM Sans', sans-serif;
+}
+
+
+/* ── History Content ── */
+.history-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem clamp(1.25rem, 3.4vw, 3.5rem) 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+
+/* ── History Header ── */
+.history-header {
+  animation: fadeInUp 0.6s ease;
+}
+
+
+/* ── History Toolbar ── */
+.history-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+
+/* ── History Results Count ── */
+.history-results-count {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--dash-text-muted);
+  font-weight: 500;
+  animation: fadeIn 0.4s ease;
+}
+
+
+/* ── History Grid ── */
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+/* ── Toast Notification ── */
+.history-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--dash-surface-glass);
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--dash-border);
+  color: var(--dash-text);
+  font-weight: 500;
+  font-size: 0.95rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  animation: toastSlideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.history-toast--success {
+  border-left: 4px solid var(--dash-success);
+}
+
+.history-toast--error {
+  border-left: 4px solid var(--dash-danger);
+}
+
+@keyframes toastSlideUp {
+  to { transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Confirmation Modal ── */
+.history-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 8, 44, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.history-modal {
+  background: var(--dash-surface-glass);
+  border: 1px solid var(--dash-border);
+  padding: 2rem;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.3s ease;
+}
+
+.history-modal h3 {
+  margin: 0 0 0.5rem 0;
+  font-family: 'Happy Display', 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  color: var(--dash-text);
+}
+
+.history-modal p {
+  margin: 0 0 1.5rem 0;
+  color: var(--dash-text-muted);
+  font-size: 0.95rem;
+}
+
+.history-modal__actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.history-modal__btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.history-modal__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.history-modal__btn--cancel {
+  background: var(--dash-surface);
+  color: var(--dash-text);
+  border: 1px solid var(--dash-border);
+}
+
+.history-modal__btn--cancel:hover:not(:disabled) {
+  background: var(--dash-surface-hover);
+}
+
+.history-modal__btn--delete {
+  background: var(--dash-danger);
+  color: #fff;
+}
+
+.history-modal__btn--delete:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .history-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .history-content {
+    padding: 1.5rem 1rem 3rem; gap: 1.5rem;
+  }
+
+  .history-toolbar {
+    flex-direction: column;
+  }
+
+  .history-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 480px) {
+  .history-content {
+    padding: 1rem 0.75rem 2.5rem;
+  }
+}

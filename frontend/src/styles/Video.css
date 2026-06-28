@@ -1,0 +1,136 @@
+.videoMeetPage {
+    min-height: 100vh;
+    background: #f4f7fb;
+    color: #111827;
+}
+
+.meetVideoContainer {
+    position: relative;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 18px;
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      #02082c 0%,
+      #0a1a4a 22%,
+      #1f3fb0 45%,
+      #5f6bff 65%,
+      rgba(255, 46, 166, 0.22) 82%,
+      #9bb3ff 100%
+    );
+    color: #f8fafc;
+}
+
+.meetingTopBar {
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 8px 18px;
+}
+
+.meetingTopBar h1 {
+    margin: 0;
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    font-weight: 800;
+}
+
+.meetingTopActions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+@media (max-width: 900px) {
+    .lobbyMain {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    .lobbyInfoCard {
+        max-width: 500px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .meetVideoContainer {
+        padding: 14px;
+    }
+
+    .conferenceView,
+    .emptyStage {
+        min-height: 58vh;
+    }
+
+    .localTile {
+        width: 180px;
+        right: 14px;
+        bottom: 104px;
+    }
+}
+
+@media (max-width: 640px) {
+    .lobbyNavbar {
+        padding: 16px 20px;
+    }
+    .lobbyMain {
+        padding: 24px 20px;
+        gap: 24px;
+    }
+    .lobbyNavActions {
+        display: none;
+    }
+    .lobbyInfoCard {
+        padding: 24px;
+    }
+
+    .meetingTopBar {
+        align-items: flex-start;
+    }
+
+    .meetingTopActions {
+        align-items: flex-end;
+        flex-direction: column;
+    }
+
+    .connectionBadge {
+        min-height: 30px;
+        padding-inline: 10px;
+        font-size: 0.78rem;
+    }
+
+    .videoStage {
+        padding-bottom: 148px;
+    }
+
+    .conferenceView {
+        grid-auto-rows: minmax(260px, 1fr);
+    }
+
+    .localTile {
+        right: 14px;
+        bottom: 128px;
+        width: 138px;
+        min-width: 138px;
+        border-radius: 14px;
+    }
+
+    .buttonContainers {
+        width: calc(100vw - 28px);
+        flex-wrap: wrap;
+        border-radius: 22px;
+    }
+
+    .controlButton {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    .chatRoom {
+        top: 76px;
+        bottom: 136px;
+    }
+}
