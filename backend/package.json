@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --exec \"node --env-file-if-exists=.env\" src/app.js",
+    "start": "node --env-file-if-exists=.env src/app.js",
+    "prod": "pm2 src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "MeetSphere"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "http-status": "^2.1.0",
+    "mongodb": "^7.2.0",
+    "mongoose": "^9.6.2",
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.8.3"
+  },
+  "keywords": []
+}
