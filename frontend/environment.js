@@ -1,3 +1,3 @@
-const server = import.meta.env.VITE_BACKEND_URL || "https://meetsphere-0syn.onrender.com";
+const server = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 export default server;
