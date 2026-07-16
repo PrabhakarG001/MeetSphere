@@ -1,0 +1,11 @@
+# Environment variables
+.env
+.env.*
+
+# Node modules
+node_modules/
+
+# Editor directories and files
+.vscode/
+.idea/
+.DS_Store
