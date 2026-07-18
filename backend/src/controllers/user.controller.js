@@ -6,11 +6,13 @@ import { Meeting } from "./models/meetings.model.js";
 
 const login = async (req, res)  => {
 
-    const { username, password }  = req.body;
+    let { username, password }  = req.body;
     
     if(!username || !password){
         return res.status(400).json({message: "Please Provide"})
     }
+
+    username = username.trim().toLowerCase();
 
 
     try{
@@ -44,11 +46,13 @@ const login = async (req, res)  => {
 
 
 const register = async (req, res)  => {
-    const { name, username, password } = req.body;
+    let { name, username, password } = req.body;
 
     if (!name || !username || !password) {
         return res.status(httpStatus.BAD_REQUEST).json({ message: "Name, username and password are required" });
     }
+
+    username = username.trim().toLowerCase();
 
     try {
        const existingUser = await User.findOne({ username });
