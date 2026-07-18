@@ -138,7 +138,7 @@ export default function Authentication({ initialMode = 'signup' }) {
             setFormState(0);
             resetFormFeedback();
         } catch (err) {
-            const apiMessage = err?.response?.data?.message || 'Something went wrong. Please try again.';
+            const apiMessage = err?.response?.data?.message || err.message || 'Something went wrong. Please try again.';
             setError(apiMessage);
         } finally {
             setLoading(false);
