@@ -40,6 +40,7 @@ export default function LandingPage() {
 
     const createMeeting = () => {
         const meetingId = createMeetingId();
+        localStorage.setItem(`host_${meetingId}`, "true");
         localStorage.setItem("pendingMeetingId", meetingId);
         router(`/room/${meetingId}`);
     }

@@ -34,44 +34,40 @@ export default function PreJoin() {
     useEffect(() => { audioRef.current = audio; }, [audio]);
 
     useEffect(() => {
-        const s = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
-        socketRef.current = s;
+        const isHostLocally = localStorage.getItem(`host_${url}`);
+        let s;
 
-        s.on('connect', () => {
-            const token = localStorage.getItem("token");
-            s.emit("check-role", url, token);
-        });
-
-        s.on("you-are-host", () => {
+        if (isHostLocally) {
             setMeetingIsValid(true);
             setIsHost(true);
             navigate(`/meeting/${url}`, { replace: true });
-        });
-
-        s.on("you-are-participant", () => {
+        } else {
             setMeetingIsValid(true);
             setIsHost(false);
-        });
 
-        s.on("join-approved", () => {
-            sessionStorage.setItem(`approved_${url}`, "true");
-            navigate(`/meeting/${url}`, { 
-                state: { 
-                    username: usernameRef.current, 
-                    video: videoRef.current, 
-                    audio: audioRef.current 
-                } 
+            s = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
+            socketRef.current = s;
+
+            s.on("join-approved", () => {
+                sessionStorage.setItem(`approved_${url}`, "true");
+                navigate(`/meeting/${url}`, { 
+                    state: { 
+                        username: usernameRef.current, 
+                        video: videoRef.current, 
+                        audio: audioRef.current 
+                    } 
+                });
             });
-        });
 
-        s.on("join-rejected", () => {
-            setRequestStatus("rejected");
-        });
+            s.on("join-rejected", () => {
+                setRequestStatus("rejected");
+            });
 
-        s.on("join-error", (msg) => {
-            alert(msg || "Could not request join");
-            setRequestStatus("idle");
-        });
+            s.on("join-error", (msg) => {
+                alert(msg || "Could not request join");
+                setRequestStatus("idle");
+            });
+        }
 
         return () => {
             if (s) {

@@ -92,6 +92,7 @@ function HomeComponent() {
             const data = await response.json();
             
             if (response.ok && data.meetingCode) {
+                localStorage.setItem(`host_${data.meetingCode}`, "true");
                 addToUserHistory(data.meetingCode).catch(e => console.error("Could not add to history:", e));
                 navigate(`/join/${data.meetingCode}`);
             } else {
@@ -116,12 +117,14 @@ function HomeComponent() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify({ userId: userData.username || userData.name || "Host" })
             });
             const data = await response.json();
             
             if (response.ok && data.meetingCode) {
+                localStorage.setItem(`host_${data.meetingCode}`, "true");
                 const link = `${window.location.origin}/join/${data.meetingCode}`;
                 setGeneratedLink(link);
                 setShowDropdown(false);
@@ -130,8 +133,8 @@ function HomeComponent() {
                 alert(data.message || "Failed to create meeting");
             }
         } catch (error) {
-            console.error("Error creating meeting:", error);
-            alert("Error creating meeting. Please try again.");
+            console.error("Error creating meeting for later:", error);
+            alert("Could not connect to server");
         }
     }, [userData, navigate]);
 
