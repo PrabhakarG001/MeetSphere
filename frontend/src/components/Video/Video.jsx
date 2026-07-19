@@ -10,12 +10,12 @@ import { useScreenShare } from './hooks/useScreenShare';
 import { useAudio } from './hooks/useAudio';
 import { useChat } from './hooks/useChat';
 
-import WaitingScreen from './WaitingScreen';
 import TopBar from './TopBar';
 import VideoGrid from './VideoGrid';
 import ControlBar from './ControlBar';
 import ChatPanel from './ChatPanel';
 import SettingsModal from './SettingsModal';
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Video() {
     const { userData } = useContext(AuthContext);
@@ -25,6 +25,8 @@ export default function Video() {
     const connectionsRef = useRef({});
     const localVideoref = useRef(null);
     const localStreamRef = useRef(null);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {
         askForUsername, setAskForUsername,
@@ -58,19 +60,20 @@ export default function Video() {
         localStreamRef, localVideoref, connectionsRef, socketIdRef, socketRef, getUserMedia, attachLocalStream
     );
 
-    const connect = async (overrideUsername) => {
+    const connect = async (overrideUsername, forceAudio, forceVideo) => {
         joinedWithExistingStreamRef.current = false;
         // Wait for the stream initialization attempt
-        await getUserMedia({ forceVideo: video, forceAudio: audio });
+        await getUserMedia({ forceVideo, forceAudio });
 
         closeChat();
         setAskForUsername(false);
-        connectToSocketServer(overrideUsername || username);
+        connectToSocketServer(overrideUsername);
     };
 
     const hasAutoConnected = useRef(false);
     const [meetingIsValid, setMeetingIsValid] = useState(null); // null = loading, true = valid, false = invalid
     const [meetingError, setMeetingError] = useState("");
+    const [joinRequests, setJoinRequests] = useState([]);
 
     useEffect(() => {
         const validateMeeting = async () => {
@@ -79,15 +82,36 @@ export default function Video() {
                 const pathParts = window.location.pathname.split('/');
                 const meetingCode = pathParts[pathParts.length - 1];
 
-                const response = await fetch(`${server}/api/v1/meetings/validate/${meetingCode}`);
+                const headers = {};
+                const token = localStorage.getItem("token");
+                if (token) headers["Authorization"] = `Bearer ${token}`;
+
+                const response = await fetch(`${server}/api/v1/meetings/validate/${meetingCode}`, { headers });
                 const data = await response.json();
                 
                 if (response.ok && data.valid) {
+                    
+                    const isApproved = sessionStorage.getItem(`approved_${meetingCode}`);
+                    
+                    if (!data.isHost && !isApproved) {
+                        // User needs to go through lobby
+                        navigate(`/join/${meetingCode}`);
+                        return;
+                    }
+
                     setMeetingIsValid(true);
                     
-                    // Do not auto-bypass WaitingScreen, but do pre-fill name
-                    if (userData && userData.name) {
-                        setUsername(userData.name);
+                    // Determine initial states from location state (set in PreJoin)
+                    const stateName = location.state?.username || userData?.name || "Participant";
+                    const stateVideo = location.state?.video !== undefined ? location.state.video : true;
+                    const stateAudio = location.state?.audio !== undefined ? location.state.audio : true;
+                    
+                    setUsername(stateName);
+                    
+                    // Auto-connect
+                    if (!hasAutoConnected.current) {
+                        hasAutoConnected.current = true;
+                        connect(stateName, stateAudio, stateVideo);
                     }
                 } else {
                     setMeetingIsValid(false);
@@ -101,7 +125,36 @@ export default function Video() {
         };
 
         validateMeeting();
-    }, [userData, setUsername]);
+    }, [userData, navigate, location]);
+
+    // Listen for join requests if host
+    useEffect(() => {
+        if (!socketRef.current) return;
+        
+        const handleJoinRequest = (req) => {
+            setJoinRequests(prev => [...prev, req]);
+        };
+
+        socketRef.current.on("join-request", handleJoinRequest);
+
+        return () => {
+            socketRef.current?.off("join-request", handleJoinRequest);
+        };
+    }, [socketRef.current]);
+
+    const handleAdmit = (socketId, username, path) => {
+        if (socketRef.current) {
+            socketRef.current.emit("admit-user", socketId, path, username);
+            setJoinRequests(prev => prev.filter(r => r.socketId !== socketId));
+        }
+    };
+
+    const handleReject = (socketId, path) => {
+        if (socketRef.current) {
+            socketRef.current.emit("reject-user", socketId, path);
+            setJoinRequests(prev => prev.filter(r => r.socketId !== socketId));
+        }
+    };
 
     const handleMuteUser = (socketId) => {
         if (socketRef.current) {
@@ -125,21 +178,8 @@ export default function Video() {
                 </div>
             ) : meetingIsValid === null ? (
                 <div className="flex items-center justify-center h-full text-white">
-                    <p>Loading meeting details...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8ab4f8] mb-4"></div>
                 </div>
-            ) : askForUsername === true ? (
-                <WaitingScreen
-                    mediaError={mediaError}
-                    audio={audio}
-                    handleAudio={handleAudio}
-                    video={video}
-                    handleVideo={handleVideo}
-                    username={username}
-                    setUsername={setUsername}
-                    connect={connect}
-                    setLocalVideoElement={setLocalVideoElement}
-                    userData={userData}
-                />
             ) : (
                 <div className="relative w-full h-full flex bg-[#202124]">
                     <div className="flex-1 flex flex-col relative h-full overflow-hidden">
@@ -149,6 +189,30 @@ export default function Video() {
                             handleCopyInviteLink={() => handleCopyInviteLink(setMediaError)}
                             inviteCopied={inviteCopied}
                         />
+
+                        {joinRequests.length > 0 && (
+                            <div className="absolute top-16 right-4 z-50 flex flex-col gap-3 max-w-sm w-full">
+                                {joinRequests.map(req => (
+                                    <div key={req.socketId} className="bg-[#3c4043] rounded-lg shadow-2xl p-4 flex flex-col gap-3 border border-[#5f6368]">
+                                        <p className="text-white font-medium">{req.username} wants to join</p>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => handleReject(req.socketId, req.path)}
+                                                className="flex-1 py-1.5 rounded bg-transparent border border-red-500 text-red-400 hover:bg-red-500/10 transition-colors text-sm"
+                                            >
+                                                Reject
+                                            </button>
+                                            <button 
+                                                onClick={() => handleAdmit(req.socketId, req.username, req.path)}
+                                                className="flex-1 py-1.5 rounded bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] font-medium transition-colors text-sm"
+                                            >
+                                                Admit
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         <VideoGrid 
                             videos={videos} 

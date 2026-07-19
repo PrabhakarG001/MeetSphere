@@ -35,7 +35,8 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         socketRef.current.on('signal', gotMessageFromServer);
 
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', window.location.href, username);
+            const token = localStorage.getItem("token");
+            socketRef.current.emit('join-call', window.location.pathname, username, token);
             socketIdRef.current = socketRef.current.id;
 
             socketRef.current.on('chat-message', addMessage);

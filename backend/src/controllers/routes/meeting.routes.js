@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { Meeting } from "../models/meetings.model.js";
+import { User } from "../models/user.model.js";
 
 const router = Router();
 
@@ -50,7 +51,22 @@ router.get("/validate/:meetingCode", async (req, res) => {
             return res.status(403).json({ message: "Meeting has ended", valid: false });
         }
 
-        return res.status(200).json({ message: "Meeting is valid", valid: true, settings: meeting.settings });
+        let isHost = false;
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.split(" ")[1];
+            const user = await User.findOne({ token });
+            if (user && meeting.user_id && meeting.user_id.toString() === user._id.toString()) {
+                isHost = true;
+            }
+        }
+
+        return res.status(200).json({ 
+            message: "Meeting is valid", 
+            valid: true, 
+            settings: meeting.settings,
+            isHost
+        });
     } catch (error) {
         console.error("Error validating meeting:", error);
         return res.status(500).json({ message: "Internal server error" });

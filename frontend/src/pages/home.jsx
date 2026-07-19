@@ -69,7 +69,7 @@ function HomeComponent() {
             const parts = code.split('/');
             code = parts[parts.length - 1];
         }
-        navigate(`/room/${code}`);
+        navigate(`/join/${code}`);
     }, [meetingCode, navigate]);
 
     const handleNewMeeting = useCallback(async () => {
@@ -92,7 +92,7 @@ function HomeComponent() {
             
             if (response.ok && data.meetingCode) {
                 addToUserHistory(data.meetingCode).catch(e => console.error("Could not add to history:", e));
-                navigate(`/room/${data.meetingCode}`);
+                navigate(`/join/${data.meetingCode}`);
             } else {
                 alert(data.message || "Failed to create meeting");
             }
@@ -121,7 +121,7 @@ function HomeComponent() {
             const data = await response.json();
             
             if (response.ok && data.meetingCode) {
-                const link = `${window.location.origin}/room/${data.meetingCode}`;
+                const link = `${window.location.origin}/join/${data.meetingCode}`;
                 setGeneratedLink(link);
                 setShowDropdown(false);
                 setShowLaterModal(true);
