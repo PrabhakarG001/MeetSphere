@@ -30,6 +30,7 @@ export default function RemoteVideo({ video }) {
             <div className="absolute bottom-3 left-3 flex items-center gap-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-md text-xs font-medium text-white shadow-sm border border-white/5">
                 {video.isAudioEnabled === false && <MicOff size={12} className="text-red-500" />}
                 <span className="truncate max-w-[120px]">{video.username || "Guest"}</span>
+                {video.isHost && <span className="bg-blue-600/80 text-[10px] px-1.5 py-0.5 rounded font-semibold tracking-wide flex-shrink-0">Host</span>}
             </div>
 
             {/* Hand Raised overlay */}

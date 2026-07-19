@@ -10,6 +10,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
     const [mediaError, setMediaError] = useState("");
 
     const selectedVideoDeviceIdRef = useRef(null);
+    const camerasRef = useRef([]);
 
     const attachLocalStream = (stream) => {
         localStreamRef.current = stream;

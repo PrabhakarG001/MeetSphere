@@ -22,7 +22,7 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
                     title="Back to Home"
                 >
                     <img src="/logo-navbar.png" alt="MeetSphere" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-                    <span className="text-[#4f46e5] font-bold text-base sm:text-sm tracking-wide drop-shadow-sm" style={{ fontFamily: '"Fantasque Sans Mono", "Fira Code", monospace' }}>
+                    <span className="text-[#4f46e5] font-bold text-base sm:text-lg drop-shadow-sm" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.5px' }}>
                         MeetSphere
                     </span>
                 </button>

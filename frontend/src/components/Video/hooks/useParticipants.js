@@ -91,6 +91,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     // Backwards compatibility for if clients array has strings or objects
                     const socketListId = typeof clientInfo === 'string' ? clientInfo : clientInfo.socketId;
                     const peerUsername = typeof clientInfo === 'string' ? "Guest" : clientInfo.username;
+                    const peerIsHost = typeof clientInfo === 'string' ? false : !!clientInfo.isHost;
 
                     if (connectionsRef.current[socketListId] === undefined) {
                         connectionsRef.current[socketListId] = new RTCPeerConnection(PEER_CONFIG_CONNECTIONS);
@@ -102,7 +103,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         };
 
                         connectionsRef.current[socketListId].onaddstream = (event) => {
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream, peerUsername);
+                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream, peerUsername, peerIsHost);
                         };
 
                         const currentStream = localStreamRef.current || window.localStream;

@@ -220,6 +220,7 @@ export default function ControlBar({
 
             {/* Mobile Layout (hidden on desktop) */}
             <div className="sm:hidden flex items-center justify-between w-full max-w-sm gap-2 bg-white dark:bg-[#202124] px-4 py-3 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700/50 pointer-events-auto relative" ref={moreMenuRef}>
+                {/* Mobile audio toggle */}
                 <ControlButton
                     onClick={handleAudio}
                     isActive={false}
@@ -231,6 +232,7 @@ export default function ControlBar({
                     {audio ? <Mic size={20} /> : <MicOff size={20} />}
                 </ControlButton>
 
+                {/* Mobile video toggle */}
                 <ControlButton
                     onClick={handleVideo}
                     isActive={false}
@@ -259,8 +261,11 @@ export default function ControlBar({
 
                     {/* More Menu Popover */}
                     {showMoreMenu && (
-                        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-[280px] bg-white dark:bg-[#202124] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700/50 p-4 grid grid-cols-3 gap-4 justify-items-center animate-slide-up origin-bottom">
-                            {extraControls}
+                        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-[280px] bg-white dark:bg-[#202124] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700/50 p-4 animate-slide-up origin-bottom">
+                            {/* Scrollable extra controls on mobile */}
+                            <div className="overflow-x-auto flex gap-2">
+                                {extraControls}
+                            </div>
                         </div>
                     )}
                 </div>
