@@ -244,13 +244,11 @@ export default function PreJoin() {
                     {requestStatus === "pending" && (
     <div className="fixed inset-0 flex items-center justify-center bg-[#111111] bg-opacity-80 backdrop-blur-sm z-50">
         <div className="text-center">
-            <div className="w-12 h-12 border-4 border-[#8ab4f8] border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
-            <h2 className="text-xl font-medium text-[#8ab4f8] animate-pulse">Waiting for host to admit you...</h2>
-        </div>
-    </div>
-)}
-                        <div className="w-full max-w-sm py-3 px-6 rounded-full font-medium text-sm tracking-wide border border-[#5f6368] text-slate-300">
-                            Asking to join... Wait for host
+                        <div className="fixed inset-0 flex items-center justify-center bg-[#111111] bg-opacity-80 backdrop-blur-sm z-50">
+                            <div className="text-center">
+                                <div className="w-12 h-12 border-4 border-[#8ab4f8] border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
+                                <h2 className="text-xl font-medium text-[#8ab4f8] animate-pulse">Waiting for host to admit you...</h2>
+                            </div>
                         </div>
                     )}
 
