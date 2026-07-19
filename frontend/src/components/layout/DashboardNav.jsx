@@ -1,24 +1,33 @@
 import '../../styles/DashboardNav.css';
-import { useState, useEffect } from "react";
-import { ChevronLeft, Clock, LogOut } from 'lucide-react';
+import { useState, useEffect, useRef } from "react";
+import { ChevronLeft, Clock, LogOut, MoreVertical } from 'lucide-react';
 
 export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) {
     const [scrolled, setScrolled] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
+    const menuRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 10);
         };
         window.addEventListener('scroll', handleScroll);
-        // Check initial state
         handleScroll();
 
         const timer = setInterval(() => setCurrentTime(new Date()), 1000 * 60);
 
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setShowMobileMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+
         return () => {
             window.removeEventListener('scroll', handleScroll);
             clearInterval(timer);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
@@ -57,8 +66,10 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) 
                     </h2>
                 </div>
             </div>
-            <div className="flex items-center gap-4 sm:gap-6">
-                <div className="hidden sm:flex items-center gap-2 text-slate-500 font-medium text-lg">
+            
+            {/* Desktop View */}
+            <div className="hidden sm:flex items-center gap-6">
+                <div className="flex items-center gap-2 text-slate-500 font-medium text-lg">
                     <span>{timeString}</span>
                     <span className="text-slate-300">•</span>
                     <span>{dateString}</span>
@@ -77,6 +88,37 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) 
                             className="w-10 h-10 object-cover"
                         />
                     </button>
+                )}
+            </div>
+
+            {/* Mobile View */}
+            <div className="sm:hidden relative" ref={menuRef}>
+                <button 
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-full transition-colors"
+                >
+                    <MoreVertical size={24} />
+                </button>
+
+                {showMobileMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#202124] border border-slate-700 rounded-lg shadow-xl overflow-hidden py-2 z-50">
+                        <div className="px-4 py-3 border-b border-slate-700">
+                            <div className="text-white font-medium">{timeString}</div>
+                            <div className="text-slate-400 text-sm">{dateString}</div>
+                        </div>
+                        {onLogout && (
+                            <button 
+                                onClick={() => {
+                                    setShowMobileMenu(false);
+                                    onLogout();
+                                }}
+                                className="w-full text-left px-4 py-3 text-red-400 hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
+                            >
+                                <LogOut size={16} />
+                                <span>Logout</span>
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
         </nav>
