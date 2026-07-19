@@ -56,8 +56,12 @@ router.get("/validate/:meetingCode", async (req, res) => {
         if (authHeader && authHeader.startsWith("Bearer ")) {
             const token = authHeader.split(" ")[1];
             const user = await User.findOne({ token });
-            if (user && meeting.user_id && meeting.user_id.toString() === user._id.toString()) {
-                isHost = true;
+            if (user && meeting.user_id) {
+                if (meeting.user_id.toString() === user._id.toString() || 
+                    meeting.user_id === user.username || 
+                    meeting.user_id === user.name) {
+                    isHost = true;
+                }
             }
         }
 
