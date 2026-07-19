@@ -17,7 +17,16 @@ const generateMeetingCode = () => {
 
 router.post("/create", async (req, res) => {
     try {
-        const { userId, settings } = req.body;
+        let { userId, settings } = req.body;
+        
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.split(" ")[1];
+            const user = await User.findOne({ token });
+            if (user) {
+                userId = user._id.toString();
+            }
+        }
         
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized. Must be logged in to create a meeting." });

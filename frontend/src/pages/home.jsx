@@ -75,7 +75,7 @@ function HomeComponent() {
     const handleNewMeeting = useCallback(async () => {
         try {
             const token = localStorage.getItem("token");
-            if (!token || !userData) {
+            if (!token) {
                 alert("Please login to create a meeting.");
                 navigate('/login');
                 return;
@@ -85,8 +85,9 @@ function HomeComponent() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({ userId: userData.username || userData.name || "Host" })
+                body: JSON.stringify({ userId: userData?.username || userData?.name || "Host" })
             });
             const data = await response.json();
             
