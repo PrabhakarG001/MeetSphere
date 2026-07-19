@@ -1,5 +1,5 @@
 import '../styles/home.css';
-import '../styles/Landing.css'; // Import Landing CSS for heroButton styles
+import '../styles/landing.css'; // Import Landing CSS for heroButton styles
 import { useContext, useState, useCallback, useEffect, useRef } from "react";
 import withAuth from '../utils/withAuth';
 import { useNavigate } from 'react-router-dom';
