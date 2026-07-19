@@ -213,7 +213,7 @@ export default function PreJoin() {
                 <div className="flex flex-col items-center text-center px-4">
                     <h1 className="text-3xl font-normal text-white mb-8 tracking-tight">Ready to join?</h1>
                     
-                    {!userData && (
+                    {!userData?.token && (
                         <div className="w-full max-w-sm mb-6">
                             <input 
                                 type="text"
@@ -226,12 +226,23 @@ export default function PreJoin() {
                     )}
 
                     {requestStatus === "idle" && (
-                        <button 
-                            onClick={handleAskToJoin}
-                            className="w-full max-w-sm py-3 px-6 rounded-full font-medium text-sm tracking-wide bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] hover:shadow-lg transition-all"
-                        >
-                            Ask to join
-                        </button>
+                        <div className="w-full max-w-sm flex flex-col gap-3">
+                            <button 
+                                onClick={handleAskToJoin}
+                                className="w-full py-3 px-6 rounded-full font-medium text-sm tracking-wide bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] hover:shadow-lg transition-all"
+                            >
+                                Ask to join
+                            </button>
+                            
+                            {!userData?.token && (
+                                <button 
+                                    onClick={() => navigate('/login')}
+                                    className="w-full py-3 px-6 rounded-full font-medium text-sm tracking-wide border border-[#5f6368] text-slate-300 hover:bg-[#3c4043] transition-all"
+                                >
+                                    Login to join as host
+                                </button>
+                            )}
+                        </div>
                     )}
 
                     {requestStatus === "pending" && (
