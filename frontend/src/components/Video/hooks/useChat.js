@@ -4,7 +4,7 @@ export const useChat = (socketRef, socketIdRef) => {
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
     const [newMessages, setNewMessages] = useState(0);
-    const [showModal, setModal] = useState(true);
+    const [showModal, setModal] = useState(false);
 
     const openChat = () => {
         setModal(true);

@@ -11,8 +11,10 @@ export default function WaitingScreen({
     username,
     setUsername,
     connect,
-    setLocalVideoElement
+    setLocalVideoElement,
+    userData
 }) {
+    const isGuest = !userData || !userData.name;
     return (
         <div className="min-h-screen auth-gradient-bg flex flex-col font-sans relative overflow-hidden selection:bg-blue-500/30 selection:text-white text-slate-300">
             
@@ -41,7 +43,7 @@ export default function WaitingScreen({
                     <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/20">
                         {video ? (
                             <video 
-                                className="w-full h-full object-cover mirror-mode" 
+                                className="w-full h-full object-cover scale-x-[-1]" 
                                 ref={setLocalVideoElement} 
                                 autoPlay 
                                 muted 
@@ -90,24 +92,35 @@ export default function WaitingScreen({
                 <div className="w-full lg:w-[380px] flex flex-col gap-4 relative z-50 pointer-events-auto">
                     <div className="auth-glass-card p-8">
                         <h1 className="text-xl font-semibold text-white mb-1">Ready to join?</h1>
-                        <p className="text-white/70 text-sm mb-6">Enter your display name to enter the workspace.</p>
+                        <p className="text-white/70 text-sm mb-6">
+                            {isGuest ? "Enter your display name to enter the workspace." : `You are joining as ${userData.name}.`}
+                        </p>
 
                         <div className="flex flex-col gap-4">
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
-                                <input 
-                                    className="w-full bg-black/20 border border-white/20 text-white text-sm rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0b5cff] focus:border-transparent transition-all placeholder-white/50" 
-                                    type="text" 
-                                    placeholder="Enter your name" 
-                                    value={username} 
-                                    onChange={e => setUsername(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && connect()}
-                                />
-                            </div>
+                            {isGuest ? (
+                                <>
+                                    <div className="relative">
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
+                                        <input 
+                                            className="w-full bg-black/20 border border-white/20 text-white text-sm rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0b5cff] focus:border-transparent transition-all placeholder-white/50" 
+                                            type="text" 
+                                            placeholder="Enter your name" 
+                                            value={username} 
+                                            onChange={e => setUsername(e.target.value)}
+                                            onKeyDown={e => e.key === 'Enter' && connect()}
+                                        />
+                                    </div>
+                                    <div className="text-center mt-1">
+                                        <a href="/login" className="text-sm text-[#7b61ff] hover:text-[#ff2ea6] transition-colors">
+                                            Login for faster access
+                                        </a>
+                                    </div>
+                                </>
+                            ) : null}
 
                             <button 
                                 className="relative z-50 pointer-events-auto w-full py-2.5 mt-2 auth-primary-btn" 
-                                onClick={connect} 
+                                onClick={() => connect(isGuest ? undefined : userData.name)} 
                                 type="button"
                             >
                                 Join Meeting

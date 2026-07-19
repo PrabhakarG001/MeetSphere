@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import connectToSocket from "./controllers/socketManager.js";
 import cors from "cors";
 import userRoutes from "./controllers/routes/users.routes.js";
+import meetingRoutes from "./controllers/routes/meeting.routes.js";
 
 
 const app = express();
@@ -16,7 +17,7 @@ const MONGODB_URI =
     process.env.MONGO_URI ||
     process.env.MONGODB_URL ||
     process.env.DATABASE_URL ||
-    "";
+    "mongodb://127.0.0.1:27017/meetsphere";
 const DB_RETRY_MS = Number(process.env.DB_RETRY_MS) || 10000;
 const MONGO_CONNECT_OPTIONS = {
     readPreference: "secondaryPreferred",
@@ -59,6 +60,7 @@ app.use((req, res, next) => {
 
 app.use("/users", userRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/meetings", meetingRoutes);
 
 const connectDatabase = async () => {
     if (!MONGODB_URI) {
@@ -110,3 +112,4 @@ server.listen(PORT, () => {
     console.log(`LISTENING ON PORT ${PORT}`);
     connectDatabase();
 });
+

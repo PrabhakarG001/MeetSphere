@@ -1,7 +1,8 @@
-import './App.css';
+﻿import './App.css';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import LandingPage from './pages/landing';
 import Authentication from './pages/authentication';
+import Signup from './pages/signup';
 import { AuthProvider } from './contexts/AuthContext';
 import VideoMeetComponent from './components/Video/Video';
 import HomeComponent, { GuestHomeComponent } from './pages/home';
@@ -24,13 +25,13 @@ function App() {
 
             <Route path='/auth' element={<Authentication />} />
             <Route path='/login' element={<Authentication initialMode="login" />} />
-            <Route path='/signup' element={<Authentication initialMode="signup" />} />
+            <Route path='/signup' element={<Signup />} />
 
             <Route path='/home' element={<HomeComponent />} />
             <Route path='/join' element={<GuestHomeComponent />} />
             <Route path='/history' element={<History />} />
+            <Route path='/meet/:url' element={<VideoMeetComponent />} />
             <Route path='/room/:url' element={<VideoMeetComponent />} />
-            <Route path='/:url' element={<VideoMeetComponent />} />
           </Routes>
         </AuthProvider>
       </Router>
@@ -39,3 +40,5 @@ function App() {
 }
 
 export default App;
+
+

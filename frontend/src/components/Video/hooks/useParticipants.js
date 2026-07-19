@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { initializeSocket } from '../utils/socketHelpers';
 import { PEER_CONFIG_CONNECTIONS } from '../utils/constants';
-import { removeParticipant, updateOrAddParticipant } from '../utils/participantHelpers';
+import { removeParticipant, updateOrAddParticipant, updateParticipantState } from '../utils/participantHelpers';
 import { black, silence } from '../utils/mediaHelpers';
 
 export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdRef, connectionsRef) => {
@@ -30,12 +30,12 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         }
     };
 
-    const connectToSocketServer = () => {
+    const connectToSocketServer = (username) => {
         socketRef.current = initializeSocket();
         socketRef.current.on('signal', gotMessageFromServer);
 
         socketRef.current.on('connect', () => {
-            socketRef.current.emit('join-call', window.location.href);
+            socketRef.current.emit('join-call', window.location.href, username);
             socketIdRef.current = socketRef.current.id;
 
             socketRef.current.on('chat-message', addMessage);
@@ -48,8 +48,45 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                 removeParticipant(setVideos, videoRef, id);
             });
 
-            socketRef.current.on('user-joined', (id, clients) => {
-                clients.forEach((socketListId) => {
+            socketRef.current.on('user-raised-hand', (id, isRaised) => {
+                updateParticipantState(setVideos, videoRef, id, { isRaisedHand: isRaised });
+            });
+
+            socketRef.current.on('user-reaction', (id, emoji) => {
+                const isLocal = (id === socketIdRef.current);
+                const event = new CustomEvent('show-reaction', { detail: { id: isLocal ? 'local' : id, emoji } });
+                window.dispatchEvent(event);
+            });
+
+            socketRef.current.on('user-audio-status', (id, isAudioEnabled) => {
+                updateParticipantState(setVideos, videoRef, id, { isAudioEnabled });
+            });
+
+            socketRef.current.on('force-mute', () => {
+                // If the user gets forcefully muted, we emit an event that other components can listen to, or we directly turn off the mic
+                const event = new CustomEvent('force-mute-local');
+                window.dispatchEvent(event);
+            });
+
+            socketRef.current.on('force-remove', () => {
+                alert("You have been removed from the meeting by the host.");
+                window.location.href = '/';
+            });
+
+            socketRef.current.on('participant-kicked', (id) => {
+                if (connectionsRef.current[id]) {
+                    connectionsRef.current[id].close();
+                    delete connectionsRef.current[id];
+                }
+                removeParticipant(setVideos, videoRef, id);
+            });
+
+            socketRef.current.on('user-joined', (id, clients, joinedUsername) => {
+                clients.forEach((clientInfo) => {
+                    // Backwards compatibility for if clients array has strings or objects
+                    const socketListId = typeof clientInfo === 'string' ? clientInfo : clientInfo.socketId;
+                    const peerUsername = typeof clientInfo === 'string' ? "Guest" : clientInfo.username;
+
                     if (connectionsRef.current[socketListId] === undefined) {
                         connectionsRef.current[socketListId] = new RTCPeerConnection(PEER_CONFIG_CONNECTIONS);
                         
@@ -60,7 +97,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         };
 
                         connectionsRef.current[socketListId].onaddstream = (event) => {
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream);
+                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream, peerUsername);
                         };
 
                         const currentStream = localStreamRef.current || window.localStream;

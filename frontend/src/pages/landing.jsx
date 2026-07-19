@@ -19,10 +19,11 @@ const landingCards = [
 export default function LandingPage() {
     const router = useNavigate();
     const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 20) {
+            if (window.scrollY > 80) {
                 setScrolled(true);
             } else {
                 setScrolled(false);
@@ -53,27 +54,33 @@ export default function LandingPage() {
             </article>
         ));
 
+    const renderNavContent = (isScrolled) => (
+        <>
+            <div className='navHeader shrink-0'>
+                <button className="landingLogo flex items-center gap-1 sm:gap-2" type="button" onClick={() => router("/")}>
+                    <img src="/logo-navbar.png" alt="MeetSphere" style={{ width: isScrolled ? '1.5em' : '1.8em', height: isScrolled ? '1.5em' : '1.8em', objectFit: 'contain', transition: 'all 0.3s ease' }} />
+                    <span className="inline-block font-bold text-[24px] sm:text-[36px]" style={{ transition: 'all 0.3s ease' }}>MeetSphere</span>
+                </button>
+            </div>
+
+            <div className={`navlist landingNavActions flex gap-2 sm:gap-4 flex-nowrap items-center justify-end shrink-0`}>
+                <button className={`navPillButton navPillBlue text-[12px] sm:text-sm px-3 sm:px-5 ${isScrolled ? 'h-8 sm:h-10' : 'h-9 sm:h-11'} transition-all whitespace-nowrap font-medium`} type="button" onClick={() => router("/login")} style={{ borderRight: '3px solid #ff2ea6' }}>
+                    Sign in to continue
+                </button>
+            </div>
+        </>
+    );
+
     return (
         <div className='landingPageContainer'>
-            <nav className={`landingNav ${scrolled ? 'scrolled' : ''}`}>
-                <div className='navHeader'>
-                    <button className="landingLogo" type="button" onClick={() => router("/")} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <img src="/logo-navbar.png" alt="MeetSphere" style={{ width: '1.8em', height: '1.8em', objectFit: 'contain' }} />
-                        MeetSphere
-                    </button>
-                </div>
+            {/* Static Header always visible at the top */}
+            <header className="landingNavStatic w-full flex flex-row flex-nowrap items-center justify-between px-3 md:px-14 py-4 sm:py-5 min-h-[70px] gap-2 sm:gap-0">
+                {renderNavContent(false)}
+            </header>
 
-                <div className='navlist landingNavActions'>
-                    <button className="navPillButton navPillGuest" type="button" onClick={() => router("/join")}>
-                        Join as Guest
-                    </button>
-                    <button className="navPillButton navPillBlue" type="button" onClick={() => router("/login")}>
-                        Login
-                    </button>
-                    <button className="navPillButton navPillBlue" type="button" onClick={() => router("/signup")}>
-                        Register
-                    </button>
-                </div>
+            {/* Scroll-activated sticky navbar */}
+            <nav className={`landingNav w-full flex flex-row flex-nowrap items-center justify-between px-3 md:px-14 py-2 sm:py-2 gap-3 transition-all duration-300 ${scrolled ? 'scrolled' : ''}`}>
+                {renderNavContent(true)}
             </nav>
 
             <div className="landingMainContainer">
@@ -83,7 +90,6 @@ export default function LandingPage() {
 
 
                     <div className="landingCtaGroup">
-                        <button className="heroButton heroButtonPrimary" type="button" onClick={createMeeting}>Get Started</button>
                     </div>
                 </div>
             </div>
@@ -95,7 +101,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* ── Footer ── */}
+            {/* â”€â”€ Footer â”€â”€ */}
             <footer className="landingFooter">
                 <div className="footerInner">
                     <div className="footerCol footerProject">
@@ -109,7 +115,7 @@ export default function LandingPage() {
                     </div>
 
                     <div className="footerCol footerConnect">
-                        <h3 className="footerHeading">Connect</h3>
+                        <h3 className="footerHeading">Connect to Developer</h3>
                         <div className="footerSocials">
                             <a href="https://prabhakar-gupta-dev.vercel.app/" target="_blank" rel="noopener noreferrer" className="footerSocialLink" aria-label="Portfolio">
                                 <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
@@ -138,3 +144,5 @@ export default function LandingPage() {
         </div>
     )
 }
+
+

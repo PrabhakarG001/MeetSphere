@@ -20,6 +20,15 @@ export default {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      keyframes: {
+        'float-up': {
+          '0%': { transform: 'translate(-50%, 0)', opacity: '1' },
+          '100%': { transform: 'translate(-50%, -100px)', opacity: '0' },
+        }
+      },
+      animation: {
+        'float-up': 'float-up 2s ease-out forwards',
+      }
     },
   },
   plugins: [],

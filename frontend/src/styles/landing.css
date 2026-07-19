@@ -22,27 +22,35 @@
 }
 
 .landingNav {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
   min-height: 96px;
   padding: 1.25rem clamp(1.25rem, 3.4vw, 3.5rem);
-  background: transparent;
-  transition: min-height 0.4s ease, padding 0.4s ease, background 0.4s ease, box-shadow 0.4s ease, border 0.4s ease, backdrop-filter 0.4s ease;
+  
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-20px);
+  transition: all 0.3s ease;
 }
 
 .landingNav.scrolled {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   background: rgba(2, 8, 44, 0.45);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  min-height: 72px;
-  padding: 0.75rem clamp(1.25rem, 3.4vw, 3.5rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 h1, h2, h3, h4, h5, h6, button {
@@ -285,15 +293,15 @@ h1, h2, h3, h4, h5, h6, button {
 
 .landingProductCard {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   flex: 0 0 clamp(300px, 19.6vw, 380px);
   height: 380px;
-  border: none; /* No visible border */
-  border-radius: 24px; /* Smooth rounded corners */
-  background: rgba(255, 255, 255, 0.04); /* Soft translucent glass */
+  border: none;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15); /* Soft ambient shadow for floating appearance */
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.15);
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -327,14 +335,14 @@ h1, h2, h3, h4, h5, h6, button {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  border-radius: 24px; /* Aligned with card border radius */
-  transform: scale(1.04); /* Small portion extends beyond corners elegantly */
+  object-fit: cover;
+  border-radius: 24px;
+  transform: scale(1.0);
   transition: transform 0.4s ease;
 }
 
 .landingProductCard:hover .landingCardImage img {
-  transform: scale(1.06); 
+  transform: scale(1.05); 
 }
 @media (hover: none) {
   .landingProductCard:active {

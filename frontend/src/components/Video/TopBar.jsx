@@ -1,25 +1,50 @@
 import '../../styles/TopBar.css';
 import { Copy, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-export default function TopBar({ username, handleCopyInviteLink, inviteCopied }) {
+export default function TopBar({ user, username, handleCopyInviteLink, inviteCopied }) {
+    const router = useNavigate();
+
+    // Helper to get initials if user has no picture
+    const getInitials = (name) => {
+        if (!name) return '?';
+        return name.charAt(0).toUpperCase();
+    };
+
     return (
-        <div className="absolute top-4 left-4 z-30 pointer-events-none flex items-center gap-3">
-            {/* Meeting Info Badge */}
-            <div className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded text-sm text-white shadow-sm">
-                <ShieldCheck size={16} className="text-green-500" />
-                <span className="font-medium">{username || "Meeting Room"}</span>
+        <div className="absolute top-0 left-0 right-0 w-full p-4 z-30 pointer-events-none flex items-center justify-between">
+            {/* Left side: MeetSphere Logo */}
+            <div className="flex items-center">
+                <button 
+                    className="pointer-events-auto flex items-center sm:flex-col sm:justify-center gap-2 sm:gap-0 sm:-mt-1" 
+                    type="button" 
+                    onClick={() => router("/")} 
+                    title="Back to Home"
+                >
+                    <img src="/logo-navbar.png" alt="MeetSphere" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
+                    <span className="text-[#4f46e5] font-bold text-base sm:text-sm tracking-wide drop-shadow-sm" style={{ fontFamily: '"Fantasque Sans Mono", "Fira Code", monospace' }}>
+                        MeetSphere
+                    </span>
+                </button>
             </div>
 
-            {/* Copy Link Button */}
-            <button 
-                className={`pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-md border border-white/10 rounded text-sm transition-colors shadow-sm ${inviteCopied ? 'text-green-400' : 'text-slate-300 hover:bg-black/80 hover:text-white'}`}
-                type="button" 
-                onClick={handleCopyInviteLink}
-                title="Copy Invite Link"
-            >
-                <Copy size={14} />
-                <span className="hidden md:inline font-medium">{inviteCopied ? "Copied" : "Copy Link"}</span>
-            </button>
+            {/* Right side: User Profile (Google Meet Style) */}
+            {user && (
+                <div className="pointer-events-auto flex items-center">
+                    {user.picture ? (
+                        <img 
+                            src={user.picture} 
+                            alt={user.name} 
+                            className="w-9 h-9 rounded-full border border-white/20 shadow-md object-cover"
+                            referrerPolicy="no-referrer"
+                        />
+                    ) : (
+                        <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium border border-white/20 shadow-md">
+                            {getInitials(user.name)}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

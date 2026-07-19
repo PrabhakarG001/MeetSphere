@@ -1,5 +1,5 @@
 import '../../styles/RemoteVideo.css';
-import { } from 'lucide-react';
+import { MicOff, Hand } from 'lucide-react';
 
 export default function RemoteVideo({ video }) {
     return (
@@ -21,9 +21,16 @@ export default function RemoteVideo({ video }) {
 
             {/* Name tag and Mic status */}
             <div className="absolute bottom-3 left-3 flex items-center gap-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-md text-xs font-medium text-white shadow-sm border border-white/5">
-                {/* Assuming remote video doesn't provide audio state dynamically in this scope, we simulate or omit. If we had audio state, we'd show it. */}
-                <span className="truncate max-w-[120px]">Guest</span>
+                {video.isAudioEnabled === false && <MicOff size={12} className="text-red-500" />}
+                <span className="truncate max-w-[120px]">{video.username || "Guest"}</span>
             </div>
+
+            {/* Hand Raised overlay */}
+            {video.isRaisedHand && (
+                <div className="absolute top-3 left-3 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-md p-1.5 border border-white/5 shadow-sm text-yellow-500 animate-bounce">
+                    <Hand size={18} strokeWidth={2.5} />
+                </div>
+            )}
         </div>
     );
 }

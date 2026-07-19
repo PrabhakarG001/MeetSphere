@@ -1,4 +1,5 @@
 import '../styles/authentication.css';
+import '../styles/authentication.css';
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Snackbar from '@mui/material/Snackbar';
@@ -8,7 +9,9 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
-import { Link as RouterLink } from 'react-router-dom';
+import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
+import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import '../App.css';
 
@@ -38,7 +41,9 @@ const getPasswordStrength = (password = '') => {
     return { label: 'Strong password', className: 'strong', score };
 };
 
-export default function Authentication({ initialMode = 'signup' }) {
+export default function Authentication({ initialMode = 'login' }) {
+    const navigate = useNavigate();
+    const [showLoginForm, setShowLoginForm] = React.useState(false);
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [confirmPassword, setConfirmPassword] = React.useState('');
@@ -55,7 +60,7 @@ export default function Authentication({ initialMode = 'signup' }) {
     const [touched, setTouched] = React.useState({});
 
     const { handleRegister, handleLogin } = React.useContext(AuthContext);
-    const isSignup = formState === 1;
+    const isSignup = false;
     const passwordStrength = React.useMemo(() => getPasswordStrength(password), [password]);
 
     const resetFormFeedback = () => {
@@ -151,22 +156,23 @@ export default function Authentication({ initialMode = 'signup' }) {
 
             {/* Visual Panel (Left Side) */}
             <section className="authVisualPanel" aria-label="MeetSphere product preview">
-                <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                    <img src="/logo-navbar.png" alt="MeetSphere Logo" className="transition-transform hover:scale-105" style={{ width: '1.8em', height: '1.8em', objectFit: 'contain' }} />
-                    <span style={{ 
-                        background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
-                        WebkitBackgroundClip: 'text', 
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: '800'
-                    }}>
-                        MeetSphere
-                    </span>
-                </RouterLink>
+                  <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                      <img src="/logo-navbar.png" alt="MeetSphere Logo" className="transition-transform hover:scale-105" style={{ width: '2.5em', height: '2.5em', objectFit: 'contain' }} />
+                      <span style={{ 
+                          fontSize: '2rem',
+                          background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
+                          WebkitBackgroundClip: 'text', 
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: '800'
+                      }}>
+                          MeetSphere
+                      </span>
+                  </RouterLink>
 
                 <div className="authHeroCopy">
                     {/* Enhanced Quote Typography */}
                     <h1 className="authHeroQuote">
-                        “Connect with anyone, anywhere. Secure video calls start here.”
+                        "Connect with anyone, anywhere. Secure video calls start here." 
                     </h1>
                     
                     {/* Vector Illustration directly below the quote */}
@@ -183,17 +189,25 @@ export default function Authentication({ initialMode = 'signup' }) {
             {/* Form Section (Right Side) */}
             <section className="authFormPanel" aria-label={isSignup ? 'Create account' : 'Login'}>
                 <div className="authCard">
-                    <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                        <img src="/logo-navbar.png" alt="MeetSphere Logo" className="transition-transform hover:scale-105" style={{ width: '1.8em', height: '1.8em', objectFit: 'contain' }} />
-                        <span style={{ 
-                            background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
-                            WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent',
-                            fontWeight: '800'
-                        }}>
-                            MeetSphere
-                        </span>
-                    </RouterLink>
+                      <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                          <img src="/logo-navbar.png" alt="MeetSphere Logo" className="transition-transform hover:scale-105" style={{ width: '2.2em', height: '2.2em', objectFit: 'contain' }} />
+                          <span style={{ 
+                              fontSize: '1.5rem',
+                              background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
+                              WebkitBackgroundClip: 'text', 
+                              WebkitTextFillColor: 'transparent',
+                              fontWeight: '800'
+                          }}>
+                              MeetSphere
+                          </span>
+                      </RouterLink>
+
+                                        <div className="signupMobileVisual">
+                        <img src="/Vector.png" alt="Illustration" style={{ width: '100%', maxWidth: '280px', margin: '0 auto' }} />
+                        <h1 className="authHeroQuote" style={{ fontSize: '1.25rem', marginTop: '1rem', textAlign: 'center' }}>
+                            "Connect with anyone, anywhere. Secure video calls start here."
+                        </h1>
+                    </div>
 
                     <div className="authHeader">
                         <p className="authEyebrow">{isSignup ? 'Create account' : 'Welcome back'}</p>
@@ -205,201 +219,148 @@ export default function Authentication({ initialMode = 'signup' }) {
                         </p>
                     </div>
 
-                    <div className="authTabs" role="tablist" aria-label="Authentication mode">
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-selected={!isSignup}
-                            className={!isSignup ? 'active' : ''}
-                            onClick={() => switchForm(0)}
-                        >
-                            Login
-                        </button>
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-selected={isSignup}
-                            className={isSignup ? 'active' : ''}
-                            onClick={() => switchForm(1)}
-                        >
-                            Sign Up
-                        </button>
-                    </div>
+                                        {!showLoginForm ? (
+                        <div className="authOptionsContainer" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '2rem' }}>
+                            <button 
+                                type="button"
+                                className="authPrimaryButton googleLoginBtn" 
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', backgroundColor: '#fff', color: '#fff', border: '1px solid #dadce0', boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)' }}
+                                onClick={() => alert("Google Login to be implemented!")}
+                            >
+                                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20px" height="20px"><g><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></g></svg>
+                                Continue with Google
+                            </button>
+                            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#94a3b8', margin: '-0.25rem 0 0 0', opacity: 0.8 }}>
+                                Recommended: Login with Google for faster access
+                            </p>
 
-                    <form className="authForm" onSubmit={handleAuth} noValidate>
-                        {isSignup && (
-                            <label className="authField" htmlFor="fullName">
-                                <span>Full Name</span>
-                                <input
-                                    id="fullName"
-                                    name="fullName"
-                                    type="text"
-                                    autoComplete="name"
-                                    value={name}
-                                    onBlur={() => setTouched((current) => ({ ...current, name: true }))}
-                                    onChange={(event) => setName(event.target.value)}
-                                    aria-invalid={Boolean(showFieldError('name'))}
-                                    aria-describedby={showFieldError('name') ? 'fullName-error' : undefined}
-                                    placeholder="Aditya Gupta"
-                                />
-                                {showFieldError('name') && (
-                                    <small id="fullName-error" className="fieldError">
-                                        <ErrorOutlineOutlinedIcon fontSize="inherit" />
-                                        {fieldErrors.name}
-                                    </small>
-                                )}
-                            </label>
-                        )}
-
-                        <label className="authField" htmlFor="email">
-                            <span>Email Address</span>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                value={username}
-                                onBlur={() => setTouched((current) => ({ ...current, username: true }))}
-                                onChange={(event) => setUsername(event.target.value)}
-                                aria-invalid={Boolean(showFieldError('username'))}
-                                aria-describedby={showFieldError('username') ? 'email-error' : undefined}
-                                placeholder="you@example.com"
-                            />
-                            {showFieldError('username') && (
-                                <small id="email-error" className="fieldError">
-                                    <ErrorOutlineOutlinedIcon fontSize="inherit" />
-                                    {fieldErrors.username}
-                                </small>
-                            )}
-                        </label>
-
-                        <label className="authField" htmlFor="password">
-                            <span>Password</span>
-                            <div className="passwordInput">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? 'text' : 'password'}
-                                    autoComplete={isSignup ? 'new-password' : 'current-password'}
-                                    value={password}
-                                    onBlur={() => setTouched((current) => ({ ...current, password: true }))}
-                                    onChange={(event) => setPassword(event.target.value)}
-                                    aria-invalid={Boolean(showFieldError('password'))}
-                                    aria-describedby={showFieldError('password') ? 'password-error' : undefined}
-                                    placeholder="Enter your password"
-                                />
-                                <button
-                                    type="button"
-                                    className="passwordToggle"
-                                    onClick={() => setShowPassword((current) => !current)}
-                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                >
-                                    {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-                                </button>
+                            <div style={{ display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
+                                <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                                <span style={{ padding: '0 10px', color: '#94a3b8', fontSize: '0.875rem' }}>or</span>
+                                <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
                             </div>
-                            {isSignup && (
-                                <div className={`passwordMeter ${passwordStrength.className}`}>
-                                    <span>
-                                        <i style={{ width: `${Math.max(passwordStrength.score, 1) * 25}%` }}></i>
-                                    </span>
-                                    <small>{passwordStrength.label}</small>
-                                </div>
-                            )}
-                            {showFieldError('password') && (
-                                <small id="password-error" className="fieldError">
-                                    <ErrorOutlineOutlinedIcon fontSize="inherit" />
-                                    {fieldErrors.password}
-                                </small>
-                            )}
-                        </label>
 
-                        {isSignup && (
-                            <label className="authField" htmlFor="confirmPassword">
-                                <span>Confirm Password</span>
-                                <div className="passwordInput">
+                            <button 
+                                type="button"
+                                className="authPrimaryButton" 
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+                                onClick={() => setShowLoginForm(true)}
+                            >
+                                <LoginOutlinedIcon fontSize="small" /> Login
+                            </button>
+
+                            <button 
+                                type="button"
+                                className="authPrimaryButton" 
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', borderRight: '3px solid #ff2ea6' }}
+                                onClick={() => navigate('/signup')}
+                            >
+                                <PersonAddOutlinedIcon fontSize="small" /> Signup
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="loginFormExpand">
+                            <form className="authForm" onSubmit={handleAuth} noValidate style={{ marginTop: '1.5rem' }}>
+                                <label className="authField" htmlFor="email">
+                                    <span>Email Address</span>
                                     <input
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        type={showConfirmPassword ? 'text' : 'password'}
-                                        autoComplete="new-password"
-                                        value={confirmPassword}
-                                        onBlur={() => setTouched((current) => ({ ...current, confirmPassword: true }))}
-                                        onChange={(event) => setConfirmPassword(event.target.value)}
-                                        aria-invalid={Boolean(showFieldError('confirmPassword'))}
-                                        aria-describedby={
-                                            showFieldError('confirmPassword') ? 'confirmPassword-error' : undefined
-                                        }
-                                        placeholder="Repeat your password"
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        value={username}
+                                        onBlur={() => setTouched((current) => ({ ...current, username: true }))}
+                                        onChange={(event) => setUsername(event.target.value)}
+                                        aria-invalid={Boolean(showFieldError('username'))}
+                                        aria-describedby={showFieldError('username') ? 'email-error' : undefined}
+                                        placeholder="you@example.com"
                                     />
-                                    <button
-                                        type="button"
-                                        className="passwordToggle"
-                                        onClick={() => setShowConfirmPassword((current) => !current)}
-                                        aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                                    {showFieldError('username') && (
+                                        <small id="email-error" className="fieldError">
+                                            <ErrorOutlineOutlinedIcon fontSize="inherit" />
+                                            {fieldErrors.username}
+                                        </small>
+                                    )}
+                                </label>
+
+                                <label className="authField" htmlFor="password">
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                        <span>Password</span>
+                                        <a href="#" style={{ fontSize: '0.75rem', color: '#7b61ff', textDecoration: 'none' }} onClick={(e) => { e.preventDefault(); alert('Forgot password to be implemented'); }}>Forgot Password?</a>
+                                    </div>
+                                    <div className="passwordInput">
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            autoComplete={'current-password'}
+                                            value={password}
+                                            onBlur={() => setTouched((current) => ({ ...current, password: true }))}
+                                            onChange={(event) => setPassword(event.target.value)}
+                                            aria-invalid={Boolean(showFieldError('password'))}
+                                            aria-describedby={showFieldError('password') ? 'password-error' : undefined}
+                                            placeholder="Enter your password"
+                                        />
+                                        <button
+                                            type="button"
+                                            className="passwordToggle"
+                                            onClick={() => setShowPassword((current) => !current)}
+                                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+                                        </button>
+                                    </div>
+                                    {showFieldError('password') && (
+                                        <small id="password-error" className="fieldError">
+                                            <ErrorOutlineOutlinedIcon fontSize="inherit" />
+                                            {fieldErrors.password}
+                                        </small>
+                                    )}
+                                </label>
+
+                                {error && (
+                                    <div className="authError" role="alert">
+                                        <ErrorOutlineOutlinedIcon fontSize="small" />
+                                        {error}
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                                    <button 
+                                        className="authPrimaryButton" 
+                                        type="button" 
+                                        style={{ backgroundColor: 'rgba(255,255,255,0.1)', flex: 0.4 }}
+                                        onClick={() => {
+                                            setShowLoginForm(false);
+                                            resetFormFeedback();
+                                        }}
                                     >
-                                        {showConfirmPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+                                        Back
+                                    </button>
+                                    <button className="authPrimaryButton" type="submit" disabled={loading} style={{ flex: 1 }}>
+                                        {loading ? (
+                                            <>
+                                                <CircularProgress size={18} color="inherit" />
+                                                Signing in...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Login
+                                                <DoneOutlinedIcon fontSize="small" />
+                                            </>
+                                        )}
                                     </button>
                                 </div>
-                                {showFieldError('confirmPassword') && (
-                                    <small id="confirmPassword-error" className="fieldError">
-                                        <ErrorOutlineOutlinedIcon fontSize="inherit" />
-                                        {fieldErrors.confirmPassword}
-                                    </small>
-                                )}
-                            </label>
-                        )}
-
-                        {isSignup && (
-                            <label className="termsRow" htmlFor="acceptedTerms">
-                                <input
-                                    id="acceptedTerms"
-                                    type="checkbox"
-                                    checked={acceptedTerms}
-                                    onBlur={() => setTouched((current) => ({ ...current, acceptedTerms: true }))}
-                                    onChange={(event) => setAcceptedTerms(event.target.checked)}
-                                />
-                                <span>
-                                    I agree to the <a href="/terms" onClick={(event) => event.preventDefault()}>Terms</a>
-                                    {' '}and <a href="/privacy" onClick={(event) => event.preventDefault()}>Privacy Policy</a>.
-                                </span>
-                            </label>
-                        )}
-
-                        {showFieldError('acceptedTerms') && (
-                            <small className="fieldError">
-                                <ErrorOutlineOutlinedIcon fontSize="inherit" />
-                                {fieldErrors.acceptedTerms}
-                            </small>
-                        )}
-
-                        {error && (
-                            <div className="authError" role="alert">
-                                <ErrorOutlineOutlinedIcon fontSize="small" />
-                                {error}
-                            </div>
-                        )}
-
-                        <button className="authPrimaryButton" type="submit" disabled={loading} style={{ marginTop: '0.5rem' }}>
-                            {loading ? (
-                                <>
-                                    <CircularProgress size={18} color="inherit" />
-                                    {isSignup ? 'Creating account...' : 'Signing in...'}
-                                </>
-                            ) : (
-                                <>
-                                    {isSignup ? 'Sign Up' : 'Login'}
-                                    <DoneOutlinedIcon fontSize="small" />
-                                </>
-                            )}
-                        </button>
-                    </form>
-
-                    <p className="authSwitchCopy">
-                        {isSignup ? 'Already have an account?' : 'New to MeetSphere?'}
-                        <button type="button" onClick={() => switchForm(isSignup ? 0 : 1)}>
-                            {isSignup ? 'Login' : 'Create account'}
-                        </button>
-                    </p>
+                            </form>
+                            
+                            <p className="authSwitchCopy" style={{ marginTop: '2rem' }}>
+                                New to MeetSphere?
+                                <button type="button" onClick={() => navigate('/signup')}>
+                                    Create account
+                                </button>
+                            </p>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -416,3 +377,11 @@ export default function Authentication({ initialMode = 'signup' }) {
         </main>
     );
 }
+
+
+
+
+
+
+
+

@@ -6,9 +6,10 @@ export const isLocalSecureContext = () => {
 export const copyInviteLink = async (setInviteCopied, setMediaError) => {
     // Extract the meeting code from the URL path (e.g., /meet-abc-123 -> meet-abc-123)
     const meetingCode = window.location.pathname.split('/').filter(Boolean).pop();
+    const fullLink = `${window.location.origin}/meet/${meetingCode}`;
 
     try {
-        await navigator.clipboard.writeText(meetingCode);
+        await navigator.clipboard.writeText(fullLink);
         setInviteCopied(true);
         window.setTimeout(() => setInviteCopied(false), 1800);
     } catch (error) {
