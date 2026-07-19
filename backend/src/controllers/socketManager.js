@@ -24,6 +24,31 @@ export const connectToSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
+    socket.on("check-role", async (roomId, token) => {
+      try {
+        const meetingCode = roomId.replace(/^\/room\//, '').replace(/^\/meet\//, '').replace(/^\/join\//, '').replace(/^\/meeting\//, '');
+        const meeting = await Meeting.findOne({ meetingCode });
+        
+        if (!meeting) {
+            socket.emit("you-are-participant");
+            return;
+        }
+
+        if (token) {
+            const user = await User.findOne({ token });
+            if (user && meeting.user_id && meeting.user_id.toString() === user._id.toString()) {
+                socket.emit("you-are-host");
+                return;
+            }
+        }
+        
+        socket.emit("you-are-participant");
+      } catch (err) {
+        console.error("Error in check-role:", err);
+        socket.emit("you-are-participant");
+      }
+    });
+
     socket.on("join-call", async (path, username, token) => {
       if (!path) {
         return;

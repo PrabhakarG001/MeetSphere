@@ -25,35 +25,59 @@ export default function PreJoin() {
     const localStreamRef = useRef(null);
     const socketRef = useRef(null);
 
+    const usernameRef = useRef(username);
+    const videoRef = useRef(video);
+    const audioRef = useRef(audio);
+
+    useEffect(() => { usernameRef.current = username; }, [username]);
+    useEffect(() => { videoRef.current = video; }, [video]);
+    useEffect(() => { audioRef.current = audio; }, [audio]);
+
     useEffect(() => {
-        const validateMeeting = async () => {
-            try {
-                const headers = {};
-                const token = localStorage.getItem("token");
-                if (token) {
-                    headers["Authorization"] = `Bearer ${token}`;
-                }
-                const response = await fetch(`${server}/api/v1/meetings/validate/${url}`, { headers });
-                const data = await response.json();
-                
-                if (response.ok && data.valid) {
-                    setMeetingIsValid(true);
-                    setIsHost(!!data.isHost);
-                    if (data.isHost) {
-                        // Host bypasses waiting room, go directly to meeting
-                        navigate(`/meeting/${url}`, { replace: true });
-                    }
-                } else {
-                    setMeetingIsValid(false);
-                    setMeetingError(data.message || "Invalid meeting link");
-                }
-            } catch (error) {
-                console.error("Error validating meeting:", error);
-                setMeetingIsValid(false);
-                setMeetingError("Could not connect to server");
+        const s = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
+        socketRef.current = s;
+
+        s.on('connect', () => {
+            const token = localStorage.getItem("token");
+            s.emit("check-role", url, token);
+        });
+
+        s.on("you-are-host", () => {
+            setMeetingIsValid(true);
+            setIsHost(true);
+            navigate(`/meeting/${url}`, { replace: true });
+        });
+
+        s.on("you-are-participant", () => {
+            setMeetingIsValid(true);
+            setIsHost(false);
+        });
+
+        s.on("join-approved", () => {
+            sessionStorage.setItem(`approved_${url}`, "true");
+            navigate(`/meeting/${url}`, { 
+                state: { 
+                    username: usernameRef.current, 
+                    video: videoRef.current, 
+                    audio: audioRef.current 
+                } 
+            });
+        });
+
+        s.on("join-rejected", () => {
+            setRequestStatus("rejected");
+        });
+
+        s.on("join-error", (msg) => {
+            alert(msg || "Could not request join");
+            setRequestStatus("idle");
+        });
+
+        return () => {
+            if (s) {
+                s.disconnect();
             }
         };
-        validateMeeting();
     }, [url, navigate]);
 
     useEffect(() => {
@@ -111,35 +135,9 @@ export default function PreJoin() {
 
         setRequestStatus("pending");
 
-        // Connect a temporary socket to request join
-        socketRef.current = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
-        
-        socketRef.current.on('connect', () => {
+        if (socketRef.current) {
             socketRef.current.emit("request-join", `/meeting/${url}`, username);
-        });
-
-        socketRef.current.on("join-approved", () => {
-            // Wait a moment then redirect
-            // Before redirecting, save state to local storage so the meeting component knows this user is approved
-            // E.g. save the session flag
-            sessionStorage.setItem(`approved_${url}`, "true");
-            navigate(`/meeting/${url}`, { state: { username, video, audio } });
-        });
-
-        socketRef.current.on("join-rejected", () => {
-            setRequestStatus("rejected");
-            socketRef.current.disconnect();
-        });
-
-        socketRef.current.on("join-error", (msg) => {
-            alert(msg || "Could not request join");
-            setRequestStatus("idle");
-            socketRef.current.disconnect();
-        });
-
-        socketRef.current.on("join-pending", (msg) => {
-            setRequestStatus("pending");
-        });
+        }
     };
 
     if (meetingIsValid === null) {
