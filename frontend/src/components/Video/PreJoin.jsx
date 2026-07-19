@@ -242,8 +242,6 @@ export default function PreJoin() {
                     )}
 
                     {requestStatus === "pending" && (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#111111] bg-opacity-80 backdrop-blur-sm z-50">
-        <div className="text-center">
                         <div className="fixed inset-0 flex items-center justify-center bg-[#111111] bg-opacity-80 backdrop-blur-sm z-50">
                             <div className="text-center">
                                 <div className="w-12 h-12 border-4 border-[#8ab4f8] border-t-transparent rounded-full animate-spin mb-4 mx-auto"></div>
