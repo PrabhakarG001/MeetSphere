@@ -5,6 +5,7 @@ import { User } from "./models/user.model.js";
 const connections = {};
 const messages = {};
 const timeOnline = {};
+const pendingJoinRequests = {}; // new: to track requests when host isn't there
 
 const findRoomBySocketId = (socketId) => {
   return Object.keys(connections).find((roomKey) => 
@@ -68,6 +69,13 @@ export const connectToSocket = (server) => {
       connections[roomKey].forEach((peer) => {
         io.to(peer.socketId).emit("user-joined", socket.id, connections[roomKey], finalUsername);
       });
+
+      // If this is the host joining, send them all pending requests for this room
+      if (isHost && pendingJoinRequests[roomKey]) {
+        pendingJoinRequests[roomKey].forEach(req => {
+            io.to(socket.id).emit("join-request", req);
+        });
+      }
     });
 
     socket.on("request-join", (path, username) => {
@@ -76,7 +84,14 @@ export const connectToSocket = (server) => {
       if (hostPeer) {
         io.to(hostPeer.socketId).emit("join-request", { socketId: socket.id, username, path: roomKey });
       } else {
-        socket.emit("join-error", "Host is not in the meeting yet. Please wait.");
+        if (!pendingJoinRequests[roomKey]) {
+            pendingJoinRequests[roomKey] = [];
+        }
+        // Remove duplicate requests from the same socket
+        pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== socket.id);
+        pendingJoinRequests[roomKey].push({ socketId: socket.id, username, path: roomKey });
+        
+        socket.emit("join-pending", "Waiting for host to start the meeting...");
       }
     });
 
@@ -85,6 +100,9 @@ export const connectToSocket = (server) => {
       const hostPeer = connections[roomKey]?.find(p => p.socketId === socket.id && p.isHost);
       if (hostPeer) {
         io.to(targetSocketId).emit("join-approved");
+        if (pendingJoinRequests[roomKey]) {
+          pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== targetSocketId);
+        }
       }
     });
 
@@ -93,6 +111,9 @@ export const connectToSocket = (server) => {
       const hostPeer = connections[roomKey]?.find(p => p.socketId === socket.id && p.isHost);
       if (hostPeer) {
         io.to(targetSocketId).emit("join-rejected");
+        if (pendingJoinRequests[roomKey]) {
+          pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== targetSocketId);
+        }
       }
     });
 
@@ -168,6 +189,14 @@ export const connectToSocket = (server) => {
     });
 
     socket.on("disconnect", () => {
+      // Clear pending requests for this socket across all rooms
+      Object.keys(pendingJoinRequests).forEach(roomKey => {
+        pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== socket.id);
+        if (pendingJoinRequests[roomKey].length === 0) {
+            delete pendingJoinRequests[roomKey];
+        }
+      });
+
       const roomKey = findRoomBySocketId(socket.id);
       if (!roomKey) {
         delete timeOnline[socket.id];

@@ -136,6 +136,10 @@ export default function PreJoin() {
             setRequestStatus("idle");
             socketRef.current.disconnect();
         });
+
+        socketRef.current.on("join-pending", (msg) => {
+            setRequestStatus("pending");
+        });
     };
 
     if (meetingIsValid === null) {
