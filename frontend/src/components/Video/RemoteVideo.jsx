@@ -1,11 +1,12 @@
 import '../../styles/RemoteVideo.css';
 import { MicOff, Hand } from 'lucide-react';
+import Avatar from './Avatar';
 
 export default function RemoteVideo({ video }) {
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover ${video.isVideoEnabled === false ? 'opacity-0' : 'opacity-100'}`}
                 data-socket={video.socketId}
                 ref={ref => {
                     if (ref && video.stream) {
@@ -15,6 +16,12 @@ export default function RemoteVideo({ video }) {
                 autoPlay
                 playsInline
             ></video>
+
+            {video.isVideoEnabled === false && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
+                    <Avatar name={video.username || "Guest"} size={96} />
+                </div>
+            )}
             
             {/* Dark gradient overlay */}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent pointer-events-none"></div>

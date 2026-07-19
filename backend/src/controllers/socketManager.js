@@ -49,31 +49,33 @@ export const connectToSocket = (server) => {
       }
     });
 
-    socket.on("join-call", async (path, username, token) => {
-      if (!path) {
-        return;
-      }
-
-      let isHost = false;
-
-      try {
-        const meetingCode = path.replace(/^\/room\//, '').replace(/^\/meet\//, '').replace(/^\/join\//, '').replace(/^\/meeting\//, '');
-        const meeting = await Meeting.findOne({ meetingCode });
-        
-        if (!meeting || !meeting.isActive) {
-            socket.emit("join-error", "Invalid or expired meeting link.");
-            return;
+    socket.on("join-call", async (path, username, token, isHostLocally) => {
+        if (!path) {
+          return;
         }
-
-        if (token) {
-            const user = await User.findOne({ token });
-            if (user && meeting.user_id && meeting.user_id.toString() === user._id.toString()) {
-                isHost = true;
-            }
+  
+        let isHost = !!isHostLocally;
+  
+        try {
+          const meetingCode = path.replace(/^\/room\//, '').replace(/^\/meet\//, '').replace(/^\/join\//, '').replace(/^\/meeting\//, '');
+          const meeting = await Meeting.findOne({ meetingCode });
+          
+          if (!meeting || !meeting.isActive) {
+              if (!isHost) {
+                  socket.emit("join-error", "Invalid or expired meeting link.");
+                  return;
+              }
+          }
+  
+          if (token && !isHost) {
+              const user = await User.findOne({ token });
+              if (user && meeting && meeting.user_id && meeting.user_id.toString() === user._id.toString()) {
+                  isHost = true;
+              }
+          }
+        } catch (err) {
+          console.error("Socket meeting validation error:", err);
         }
-      } catch (err) {
-        console.error("Socket meeting validation error:", err);
-      }
 
       // Convert paths to a canonical room path for sockets to group properly regardless of URL route
       const roomKey = path.replace(/^\/join\//, '/meeting/').replace(/^\/room\//, '/meeting/');

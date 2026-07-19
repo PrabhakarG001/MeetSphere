@@ -15,6 +15,7 @@ import VideoGrid from './VideoGrid';
 import ControlBar from './ControlBar';
 import ChatPanel from './ChatPanel';
 import SettingsModal from './SettingsModal';
+import Avatar from './Avatar';
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Video() {
@@ -191,20 +192,26 @@ export default function Video() {
                         />
 
                         {joinRequests.length > 0 && (
-                            <div className="absolute top-16 right-4 z-50 flex flex-col gap-3 max-w-sm w-full">
+                            <div className="absolute top-16 right-4 sm:right-6 z-50 flex flex-col gap-3 w-[320px] max-w-[calc(100vw-32px)]">
                                 {joinRequests.map(req => (
-                                    <div key={req.socketId} className="bg-[#3c4043] rounded-lg shadow-2xl p-4 flex flex-col gap-3 border border-[#5f6368]">
-                                        <p className="text-white font-medium">{req.username} wants to join</p>
-                                        <div className="flex gap-2">
+                                    <div key={req.socketId} className="bg-white dark:bg-[#202124] rounded-lg shadow-2xl p-4 flex flex-col gap-3 border border-gray-200 dark:border-[#5f6368] animate-slide-up">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar name={req.username} size={40} />
+                                            <div className="flex flex-col overflow-hidden">
+                                                <span className="text-gray-900 dark:text-white font-medium truncate">{req.username}</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">wants to join this call</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 justify-end mt-1">
                                             <button 
                                                 onClick={() => handleReject(req.socketId, req.path)}
-                                                className="flex-1 py-1.5 rounded bg-transparent border border-red-500 text-red-400 hover:bg-red-500/10 transition-colors text-sm"
+                                                className="px-4 py-1.5 rounded-full bg-transparent text-[#ea4335] hover:bg-red-50 dark:hover:bg-red-500/10 font-medium transition-colors text-sm"
                                             >
-                                                Reject
+                                                Deny entry
                                             </button>
                                             <button 
                                                 onClick={() => handleAdmit(req.socketId, req.username, req.path)}
-                                                className="flex-1 py-1.5 rounded bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] font-medium transition-colors text-sm"
+                                                className="px-6 py-1.5 rounded-full bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] font-medium transition-colors text-sm"
                                             >
                                                 Admit
                                             </button>
@@ -217,6 +224,7 @@ export default function Video() {
                         <VideoGrid 
                             videos={videos} 
                             setLocalVideoElement={setLocalVideoElement}
+                            video={video}
                             audio={audio}
                             username={username}
                             isRaisedHand={isRaisedHand}

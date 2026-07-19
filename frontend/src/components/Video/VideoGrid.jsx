@@ -3,7 +3,7 @@ import '../../styles/VideoGrid.css';
 import LocalVideo from './LocalVideo';
 import RemoteVideo from './RemoteVideo';
 
-export default function VideoGrid({ videos, setLocalVideoElement, audio, username, isRaisedHand }) {
+export default function VideoGrid({ videos, setLocalVideoElement, video, audio, username, isRaisedHand }) {
     const totalParticipants = videos.length + 1; // including local
     const [reactions, setReactions] = useState([]);
 
@@ -47,7 +47,7 @@ export default function VideoGrid({ videos, setLocalVideoElement, audio, usernam
                     style={isRaisedHand ? { backgroundImage: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)' } : {}}
                 >
                     <div className="w-full h-full rounded-[10px] overflow-hidden relative">
-                        <LocalVideo setLocalVideoElement={setLocalVideoElement} audio={audio} username={username} isRaisedHand={isRaisedHand} />
+                        <LocalVideo setLocalVideoElement={setLocalVideoElement} video={video} audio={audio} username={username} isRaisedHand={isRaisedHand} />
                     </div>
                     
                     {/* Render local reactions (where socketId matches a special local token or just self) */}

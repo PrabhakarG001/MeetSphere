@@ -4,6 +4,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import server from '../../../environment';
 import { io } from 'socket.io-client';
 import { Mic, MicOff, Video, VideoOff, Settings } from 'lucide-react';
+import Avatar from './Avatar';
 import '../../styles/Video.css';
 
 export default function PreJoin() {
@@ -176,11 +177,8 @@ export default function PreJoin() {
                                 className="w-full h-full object-cover transform scale-x-[-1]"
                             />
                         ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-[#202124]">
-                                <div className="w-24 h-24 rounded-full bg-[#3c4043] flex items-center justify-center mb-4">
-                                    <VideoOff size={32} className="text-slate-400" />
-                                </div>
-                                <p className="text-slate-300">Camera is off</p>
+                            <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
+                                <Avatar name={username || "You"} size={96} />
                             </div>
                         )}
                         
