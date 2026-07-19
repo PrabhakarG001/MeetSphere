@@ -57,9 +57,9 @@ export default function LandingPage() {
     const renderNavContent = (isScrolled) => (
         <>
             <div className='navHeader shrink-0'>
-                <button className="landingLogo flex items-center gap-1 sm:gap-2" type="button" onClick={() => router("/")}>
+                <button className="landingLogo flex items-center gap-1 sm:gap-2 flex-nowrap whitespace-nowrap" type="button" onClick={() => router("/")}>
                     <img src="/logo-navbar.png" alt="MeetSphere" style={{ width: isScrolled ? '1.5em' : '1.8em', height: isScrolled ? '1.5em' : '1.8em', objectFit: 'contain', transition: 'all 0.3s ease' }} />
-                    <span className="inline-block font-bold text-[24px] sm:text-[36px]" style={{ transition: 'all 0.3s ease' }}>MeetSphere</span>
+                    <span className="inline-block font-bold text-[20px] sm:text-[36px]" style={{ transition: 'all 0.3s ease' }}>MeetSphere</span>
                 </button>
             </div>
 
