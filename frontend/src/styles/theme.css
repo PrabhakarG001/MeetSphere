@@ -23,7 +23,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5em; /* Consistent spacing relative to font size */
+    gap: 0.2em; /* Reduced spacing */
     font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsive base size */
     text-decoration: none;
     cursor: pointer;
@@ -47,8 +47,8 @@
 }
 
 .logo-icon {
-    width: 1.8em; /* Explicitly much larger than the text (1em) */
-    height: 1.8em;
+    width: 2em; /* Exactly 100% larger than the text (1em) */
+    height: 2em;
     object-fit: contain;
     flex-shrink: 0;
 }
