@@ -251,7 +251,7 @@ function HomeComponent() {
                                 
                                 <button
                                     onClick={handleScheduleMeeting}
-                                    className="flex items-center justify-center gap-2 w-full sm:w-1/2 h-[52px] font-medium text-white bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/10 shadow-sm"
+                                    className="heroButton heroButtonGhost flex items-center justify-center gap-2 w-full sm:w-1/2 h-[52px] font-medium transition-all"
                                 >
                                     <Calendar size={20} />
                                     <span>Schedule</span>
