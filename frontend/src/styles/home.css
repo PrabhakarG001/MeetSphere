@@ -9,7 +9,8 @@
   min-height: 100vh;
   font-family: 'Almaden Sans', 'DM Sans', sans-serif;
   overflow-x: hidden;
-  background: linear-gradient(180deg, #0b1426 0%, #112240 50%, #1a365d 100%);
+  /* Premium, subtle SaaS blue gradient (Zoom-inspired) */
+  background: linear-gradient(180deg, #020b1f 0%, #081836 50%, #0f2754 100%);
   background-attachment: fixed;
   color: #f8fafc;
 }
