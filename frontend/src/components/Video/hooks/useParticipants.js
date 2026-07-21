@@ -8,24 +8,43 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
     const videoRef = useRef([]);
     const [videos, setVideos] = useState([]);
 
-    const gotMessageFromServer = (fromId, message) => {
+    const iceCandidateQueue = useRef({});
+
+    const gotMessageFromServer = async (fromId, message) => {
         var signal = JSON.parse(message);
 
         if (fromId !== socketIdRef.current) {
             if (signal.sdp) {
-                connectionsRef.current[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {
+                try {
+                    await connectionsRef.current[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp));
                     if (signal.sdp.type === 'offer') {
-                        connectionsRef.current[fromId].createAnswer().then((description) => {
-                            connectionsRef.current[fromId].setLocalDescription(description).then(() => {
-                                socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': connectionsRef.current[fromId].localDescription }));
-                            }).catch(e => console.error(e));
-                        }).catch(e => console.error(e));
+                        const description = await connectionsRef.current[fromId].createAnswer();
+                        await connectionsRef.current[fromId].setLocalDescription(description);
+                        socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': connectionsRef.current[fromId].localDescription }));
                     }
-                }).catch(e => console.error(e));
+                    // Process queued ICE candidates
+                    if (iceCandidateQueue.current[fromId]) {
+                        for (let ice of iceCandidateQueue.current[fromId]) {
+                            await connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.error(e));
+                        }
+                        iceCandidateQueue.current[fromId] = [];
+                    }
+                } catch (e) {
+                    console.error("Error processing SDP:", e);
+                }
             }
 
             if (signal.ice) {
-                connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e => console.error(e));
+                try {
+                    if (connectionsRef.current[fromId].remoteDescription) {
+                        await connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(signal.ice));
+                    } else {
+                        if (!iceCandidateQueue.current[fromId]) iceCandidateQueue.current[fromId] = [];
+                        iceCandidateQueue.current[fromId].push(signal.ice);
+                    }
+                } catch (e) {
+                    console.error("Error processing ICE:", e);
+                }
             }
         }
     };
@@ -104,7 +123,23 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         };
 
                         connectionsRef.current[socketListId].ontrack = (event) => {
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.streams[0], peerUsername, peerIsHost, peerPicture);
+                            const newStream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
+                            
+                            const existingVideo = videoRef.current.find(v => v.socketId === socketListId);
+                            let finalStream = newStream;
+                            
+                            // If stream already exists, we should merge the tracks to prevent overwriting audio with video or vice versa
+                            if (existingVideo && existingVideo.stream && existingVideo.stream.id !== newStream.id) {
+                                // Create a new MediaStream instance to ensure React triggers re-render (reference change)
+                                const allTracks = new Set([...existingVideo.stream.getTracks(), event.track]);
+                                finalStream = new MediaStream(Array.from(allTracks));
+                                
+                                event.track.onended = () => {
+                                    // Handle track end if needed, though React state updates usually recreate it
+                                };
+                            }
+                            
+                            updateOrAddParticipant(setVideos, videoRef, socketListId, finalStream, peerUsername, peerIsHost, peerPicture);
                         };
 
                         const currentStream = localStreamRef.current || window.localStream;

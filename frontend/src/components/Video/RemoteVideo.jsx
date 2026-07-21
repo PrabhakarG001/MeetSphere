@@ -12,6 +12,15 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
             if (videoElRef.current.srcObject !== video.stream) {
                 videoElRef.current.srcObject = video.stream;
             }
+            
+            // Explicitly call play to handle cases where autoPlay attribute is not enough
+            const playPromise = videoElRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error("Error playing remote video:", error);
+                    // Browsers require user interaction to play unmuted video.
+                });
+            }
         }
     }, [video.stream]);
 
