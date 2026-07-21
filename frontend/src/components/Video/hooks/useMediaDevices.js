@@ -302,13 +302,19 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             // Wait 300ms for mobile hardware to fully release the camera
             await new Promise(resolve => setTimeout(resolve, 300));
             
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            const nextIsRear = !isRearCamera;
+            setIsRearCamera(nextIsRear);
             selectedVideoDeviceIdRef.current = nextCamera.deviceId;
-            setIsRearCamera(!isRearCamera);
             
             try {
+                const videoConstraints = isMobile 
+                    ? { facingMode: { ideal: nextIsRear ? "environment" : "user" } }
+                    : { deviceId: { exact: nextCamera.deviceId } };
+
                 // Request ONLY the new video track
                 const newVideoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: nextCamera.deviceId } },
+                    video: videoConstraints,
                     audio: false
                 });
                 
