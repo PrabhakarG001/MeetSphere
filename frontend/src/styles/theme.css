@@ -47,8 +47,8 @@
 }
 
 .logo-icon {
-    width: 1.35em; /* Explicitly larger than the text (1em) */
-    height: 1.35em;
+    width: 1.8em; /* Explicitly much larger than the text (1em) */
+    height: 1.8em;
     object-fit: contain;
     flex-shrink: 0;
 }

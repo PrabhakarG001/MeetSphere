@@ -10,12 +10,12 @@ import { Video, Keyboard, ChevronLeft, ChevronRight, ShieldCheck, Link, Calendar
 
 const carouselItems = [
     {
-        icon: Link,
+        image: "/Sharelink.png",
         title: "Get a link you can share",
         text: <>Click <strong>New meeting</strong> to get a link you can send to people you want to meet with</>,
     },
     {
-        icon: ShieldCheck,
+        image: "/Secure.png",
         title: "Your meeting is safe",
         text: "No one can join a meeting unless invited or admitted by the host",
     }
@@ -301,16 +301,12 @@ function HomeComponent() {
                             </button>
 
                             <div className="w-52 h-52 sm:w-64 sm:h-64 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                {(() => {
-                                    const IconComponent = carouselItems[currentSlide].icon;
-                                    return IconComponent ? (
-                                        <IconComponent 
-                                            size={140} 
-                                            className="text-white transition-opacity duration-500 drop-shadow-[0_4px_12px_rgba(255,255,255,0.15)]" 
-                                            strokeWidth={1.2} 
-                                        />
-                                    ) : null;
-                                })()}
+                                <img 
+                                    src={carouselItems[currentSlide].image} 
+                                    alt={carouselItems[currentSlide].title} 
+                                    className="h-40 sm:h-56 w-full object-contain transition-all duration-500 scale-[1.35]"
+                                    style={{ filter: "brightness(0) invert(1) drop-shadow(0px 4px 10px rgba(255,255,255,0.2))" }}
+                                />
                             </div>
 
                             <button 
