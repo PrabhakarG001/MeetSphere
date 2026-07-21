@@ -106,7 +106,7 @@ export default function LandingPage() {
                 <div className="footerInner">
                     <div className="footerCol footerProject">
                         <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-start' }}>
-                            <Logo asLink={false} style={{ fontSize: '1.75rem' }} />
+                            <span style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'white' }}>MeetSphere</span>
                         </div>
                         <p>A real-time communication platform built for seamless, low-latency video interaction. Crystal-clear calls, instant connections, zero compromise.</p>
                     </div>
