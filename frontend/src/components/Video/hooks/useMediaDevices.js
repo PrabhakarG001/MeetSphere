@@ -290,9 +290,13 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         const nextCamera = camerasRef.current[nextIndex];
         
         if (nextCamera) {
+            stopStream(localStreamRef.current); // Force stop to bypass cache
+            
+            // Wait 300ms for mobile hardware to fully release the camera before requesting it again
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
             selectedVideoDeviceIdRef.current = nextCamera.deviceId;
             setIsRearCamera(!isRearCamera);
-            stopStream(localStreamRef.current); // Force stop to bypass cache
             await getUserMedia({ forceVideo: true });
         }
     };
