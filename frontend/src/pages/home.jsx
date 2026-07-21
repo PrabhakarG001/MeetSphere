@@ -251,7 +251,8 @@ function HomeComponent() {
                                 
                                 <button
                                     onClick={handleScheduleMeeting}
-                                    className="heroButton heroButtonGhost flex items-center justify-center gap-2 w-full sm:w-1/2 h-[52px] font-medium transition-all"
+                                    className="heroButton flex items-center justify-center gap-2 w-full sm:w-1/2 h-[52px] font-medium transition-all"
+                                    style={{ backgroundColor: 'aliceblue', color: '#0F172A' }}
                                 >
                                     <Calendar size={20} />
                                     <span>Schedule</span>
@@ -275,7 +276,8 @@ function HomeComponent() {
                                 <button 
                                     onClick={handleJoinVideoCall}
                                     disabled={meetingCode.trim().length === 0}
-                                    className={`h-[52px] px-8 font-semibold rounded-lg transition-all ${meetingCode.trim().length > 0 ? 'bg-[#7b61ff] text-white hover:bg-[#694ce6] shadow-md hover:shadow-lg' : 'bg-white/10 text-white/40 cursor-not-allowed'}`}
+                                    className={`h-[52px] px-8 font-semibold transition-all heroButton flex items-center justify-center ${meetingCode.trim().length > 0 ? 'heroButtonPrimary hover:shadow-md' : 'bg-white/10 text-white/40 cursor-not-allowed border-0'}`}
+                                    style={meetingCode.trim().length > 0 ? { borderRight: '3px solid #ff2ea6' } : {}}
                                 >
                                     Join
                                 </button>
