@@ -156,12 +156,15 @@ export default function PreJoin() {
     };
 
     const handleAskToJoin = () => {
-        const finalName = username.trim() ? username.trim() : "Guest";
-        
+        if (!username.trim()) {
+            alert("Please enter your name");
+            return;
+        }
+
         setRequestStatus("pending");
 
         if (socketRef.current) {
-            socketRef.current.emit("request-join", `/meeting/${url}`, finalName);
+            socketRef.current.emit("request-join", `/meeting/${url}`, username);
         }
     };
 
@@ -238,7 +241,15 @@ export default function PreJoin() {
                 <div className="flex flex-col items-center text-center px-4">
                     <h1 className="text-3xl font-normal text-white mb-8 tracking-tight">Ready to join?</h1>
                     
-                    {/* Name input removed as per request */}
+                    <div className="w-full max-w-sm mb-6">
+                        <input 
+                            type="text"
+                            placeholder="Enter your name"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full px-4 py-3 bg-transparent border border-[#5f6368] rounded-lg text-white placeholder-[#8ab4f8] focus:outline-none focus:border-[#8ab4f8] focus:ring-1 focus:ring-[#8ab4f8] transition-all"
+                        />
+                    </div>
 
                     {requestStatus === "idle" && (
                         <div className="w-full max-w-sm flex flex-col gap-3">
