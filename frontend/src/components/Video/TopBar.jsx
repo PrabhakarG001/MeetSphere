@@ -17,7 +17,7 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
             {/* Left side: MeetSphere Logo */}
             <div className="flex items-center">
                 <div className="pointer-events-auto">
-                    <Logo />
+                    <Logo hideText={true} />
                 </div>
             </div>
 

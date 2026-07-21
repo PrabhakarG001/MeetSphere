@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../../styles/theme.css';
 
-export default function Logo({ asLink = true, className = "", style = {}, onClick }) {
+export default function Logo({ asLink = true, className = "", style = {}, onClick, hideText = false }) {
     const content = (
         <div className={`logo-container ${className}`} style={style} onClick={onClick}>
             <img 
@@ -10,6 +10,11 @@ export default function Logo({ asLink = true, className = "", style = {}, onClic
                 alt="MeetSphere Icon" 
                 className="logo-icon transition-transform hover:scale-105" 
             />
+            {!hideText && (
+                <span className="logo-text tracking-tight transition-transform hover:scale-105">
+                    MeetSphere
+                </span>
+            )}
         </div>
     );
 
