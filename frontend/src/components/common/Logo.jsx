@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '../../styles/theme.css';
 
 export default function Logo({ asLink = true, className = "", style = {}, onClick }) {
     const content = (

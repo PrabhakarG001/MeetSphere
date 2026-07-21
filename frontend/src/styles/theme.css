@@ -34,7 +34,7 @@
 }
 
 .logo-text {
-    font-family: "Sofia", cursive;
+    font-family: "Sofia", cursive !important;
     font-weight: 400;
     font-style: normal;
     font-size: 1em; /* Inherits from container */
