@@ -94,7 +94,7 @@ function HomeComponent() {
             const data = await response.json();
             
             if (response.ok && data.meetingCode) {
-                localStorage.setItem(`host_${data.meetingCode}`, "true");
+                sessionStorage.setItem(`host_${data.meetingCode}`, "true");
                 addToUserHistory(data.meetingCode).catch(e => console.error("Could not add to history:", e));
                 navigate(`/join/${data.meetingCode}`);
             } else {
@@ -126,7 +126,7 @@ function HomeComponent() {
             const data = await response.json();
             
             if (response.ok && data.meetingCode) {
-                localStorage.setItem(`host_${data.meetingCode}`, "true");
+                sessionStorage.setItem(`host_${data.meetingCode}`, "true");
                 const link = `${window.location.origin}/join/${data.meetingCode}`;
                 setGeneratedLink(link);
                 setShowDropdown(false);
@@ -160,7 +160,7 @@ function HomeComponent() {
             const data = await response.json();
             
             if (response.ok && data.meetingCode) {
-                localStorage.setItem(`host_${data.meetingCode}`, "true");
+                sessionStorage.setItem(`host_${data.meetingCode}`, "true");
                 const meetingUrl = `${window.location.origin}/join/${data.meetingCode}`;
                 
                 const calUrl = new URL('https://calendar.google.com/calendar/r/eventedit');

@@ -35,7 +35,7 @@ export default function PreJoin() {
     useEffect(() => { audioRef.current = audio; }, [audio]);
 
     useEffect(() => {
-        const isHostLocally = localStorage.getItem(`host_${url}`);
+        const isHostLocally = sessionStorage.getItem(`host_${url}`);
         let s;
 
         if (isHostLocally) {
