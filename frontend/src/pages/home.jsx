@@ -196,7 +196,7 @@ function HomeComponent() {
 
     return (
         <div className="min-h-screen dash-page home-page-bg font-sans flex flex-col">
-            <DashboardNav onHistory={() => navigate("/history")} onLogout={handleLogout} userPicture={userData?.picture} userName={userData?.name} />
+            <DashboardNav onHistory={() => navigate("/history")} onLogout={handleLogout} userPicture={userData?.picture} userName={userData?.name} userEmail={userData?.username} />
             
             <main className="flex-1 max-w-7xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
                 

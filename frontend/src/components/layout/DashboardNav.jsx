@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, Clock, LogOut, MoreVertical } from 'lucide-react';
 import Logo from '../common/Logo';
 
-export default function DashboardNav({ showBack, onBack, onHistory, onLogout, userPicture, userName }) {
+export default function DashboardNav({ showBack, onBack, onHistory, onLogout, userPicture, userName, userEmail }) {
     const [scrolled, setScrolled] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [showMobileMenu, setShowMobileMenu] = useState(false);
-    const menuRef = useRef(null);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const profileMenuRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -20,8 +20,8 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
         const timer = setInterval(() => setCurrentTime(new Date()), 1000 * 60);
 
         const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setShowMobileMenu(false);
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+                setShowProfileMenu(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -66,26 +66,55 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
                     <span className="hidden sm:inline">{dateString}</span>
                 </div>
                 {onLogout && (
-                    <button 
-                        className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-accent transition-all overflow-hidden border border-transparent hover:border-accent" 
-                        onClick={onLogout} 
-                        type="button" 
-                        title="Click to logout"
-                        aria-label="Log out"
-                    >
-                        {userPicture ? (
-                            <img 
-                                src={userPicture} 
-                                alt="User account" 
-                                className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-full"
-                                referrerPolicy="no-referrer"
-                            />
-                        ) : (
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#ff2ea6] via-[#7b61ff] to-[#2d4fc2] flex items-center justify-center text-white font-bold text-sm sm:text-lg">
-                                {userName?.charAt(0)?.toUpperCase() || '?'}
+                    <div className="relative" ref={profileMenuRef}>
+                        <button 
+                            className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-accent transition-all overflow-hidden border border-transparent hover:border-accent" 
+                            onClick={() => setShowProfileMenu(!showProfileMenu)} 
+                            type="button" 
+                            title="Account options"
+                            aria-label="Account options"
+                        >
+                            {userPicture ? (
+                                <img 
+                                    src={userPicture} 
+                                    alt="User account" 
+                                    className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-full"
+                                    referrerPolicy="no-referrer"
+                                />
+                            ) : (
+                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#ff2ea6] via-[#7b61ff] to-[#2d4fc2] flex items-center justify-center text-white font-bold text-sm sm:text-lg">
+                                    {userName?.charAt(0)?.toUpperCase() || '?'}
+                                </div>
+                            )}
+                        </button>
+
+                        {showProfileMenu && (
+                            <div className="absolute right-0 top-full mt-2 w-64 rounded-xl shadow-2xl p-4 z-50 border border-[#c4dbf6]" style={{ backgroundColor: 'aliceblue' }}>
+                                <div className="flex flex-col items-center justify-center mb-4 text-[#02082c]">
+                                    {userPicture ? (
+                                        <img src={userPicture} alt="User" className="w-16 h-16 rounded-full mb-2 object-cover border-2 border-white shadow-sm" referrerPolicy="no-referrer" />
+                                    ) : (
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#ff2ea6] to-[#2d4fc2] flex items-center justify-center text-white font-bold text-2xl mb-2">
+                                            {userName?.charAt(0)?.toUpperCase() || '?'}
+                                        </div>
+                                    )}
+                                    <div className="font-bold text-lg">{userName || 'User'}</div>
+                                    <div className="text-sm text-slate-500 break-all">{userEmail || 'No email provided'}</div>
+                                </div>
+                                <div className="w-full h-px bg-slate-200 mb-3"></div>
+                                <button 
+                                    onClick={() => {
+                                        setShowProfileMenu(false);
+                                        onLogout();
+                                    }}
+                                    className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white hover:bg-slate-50 text-red-500 rounded-lg border border-slate-200 transition-colors font-medium shadow-sm"
+                                >
+                                    <LogOut size={18} />
+                                    <span>Logout</span>
+                                </button>
                             </div>
                         )}
-                    </button>
+                    </div>
                 )}
             </div>
         </nav>
