@@ -198,7 +198,7 @@ function HomeComponent() {
                 {/* Left side actions (Google Meet style) */}
                 <div className="flex-1 w-full max-w-2xl lg:pr-8 text-left">
                     <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-                        Elevate your meetings with seamless video collaboration
+                        Meet, collaborate, and move forward
                     </h1>
                     
                     <p className="text-lg text-white/70 mb-12 max-w-xl leading-relaxed">
