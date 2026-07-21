@@ -58,12 +58,12 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
                 </div>
             </div>
             
-            {/* Desktop View */}
-            <div className="hidden sm:flex items-center gap-6">
-                <div className="flex items-center gap-2 text-slate-500 font-medium text-lg">
+            {/* Right side: Time and Profile */}
+            <div className="flex items-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-1 sm:gap-2 text-slate-500 font-medium text-sm sm:text-lg">
                     <span>{timeString}</span>
-                    <span className="text-slate-300">•</span>
-                    <span>{dateString}</span>
+                    <span className="hidden sm:inline text-slate-300">•</span>
+                    <span className="hidden sm:inline">{dateString}</span>
                 </div>
                 {onLogout && (
                     <button 
@@ -77,46 +77,15 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
                             <img 
                                 src={userPicture} 
                                 alt="User account" 
-                                className="w-10 h-10 object-cover rounded-full"
+                                className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-full"
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff2ea6] via-[#7b61ff] to-[#2d4fc2] flex items-center justify-center text-white font-bold text-lg">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#ff2ea6] via-[#7b61ff] to-[#2d4fc2] flex items-center justify-center text-white font-bold text-sm sm:text-lg">
                                 {userName?.charAt(0)?.toUpperCase() || '?'}
                             </div>
                         )}
                     </button>
-                )}
-            </div>
-
-            {/* Mobile View */}
-            <div className="sm:hidden relative" ref={menuRef}>
-                <button 
-                    onClick={() => setShowMobileMenu(!showMobileMenu)}
-                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-full transition-colors"
-                >
-                    <MoreVertical size={24} />
-                </button>
-
-                {showMobileMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-[#202124] border border-slate-700 rounded-lg shadow-xl overflow-hidden py-2 z-50">
-                        <div className="px-4 py-3 border-b border-slate-700">
-                            <div className="text-white font-medium">{timeString}</div>
-                            <div className="text-slate-400 text-sm">{dateString}</div>
-                        </div>
-                        {onLogout && (
-                            <button 
-                                onClick={() => {
-                                    setShowMobileMenu(false);
-                                    onLogout();
-                                }}
-                                className="w-full text-left px-4 py-3 text-red-400 hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
-                            >
-                                <LogOut size={16} />
-                                <span>Logout</span>
-                            </button>
-                        )}
-                    </div>
                 )}
             </div>
         </nav>
