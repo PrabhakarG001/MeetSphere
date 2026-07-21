@@ -205,7 +205,7 @@ export default function Video() {
                         />
 
                         {joinRequests.length > 0 && (
-                            <div className="hidden sm:flex absolute top-16 right-6 z-50 flex-col gap-3 w-[320px]">
+                            <div className="absolute top-16 right-4 sm:right-6 z-50 flex flex-col gap-3 w-[320px] max-w-[calc(100vw-32px)]">
                                 {joinRequests.map(req => (
                                     <div key={req.socketId} className="bg-white dark:bg-[#202124] rounded-lg shadow-2xl p-4 flex flex-col gap-3 border border-gray-200 dark:border-[#5f6368] animate-slide-up">
                                         <div className="flex items-center gap-3">
