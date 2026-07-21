@@ -64,10 +64,11 @@ export default function PreJoin() {
                 // Fallback to local flag if backend is unreachable
             }
 
+            let s;
             if (isHostLocally) {
                 setMeetingIsValid(true);
                 setIsHost(true);
-                // Do not auto-navigate, let them set up camera/mic and click "Join now"
+                navigate(`/meeting/${url}`, { replace: true });
             } else {
                 setIsHost(false);
 
@@ -152,21 +153,6 @@ export default function PreJoin() {
             });
             setAudio(!audio);
         }
-    };
-
-    const handleJoinNow = () => {
-        if (!username.trim()) {
-            alert("Please enter your name");
-            return;
-        }
-        navigate(`/meeting/${url}`, { 
-            state: { 
-                username: usernameRef.current, 
-                video: videoRef.current, 
-                audio: audioRef.current,
-                picture: userData?.picture || null
-            } 
-        });
     };
 
     const handleAskToJoin = () => {
@@ -255,25 +241,23 @@ export default function PreJoin() {
                 <div className="flex flex-col items-center text-center px-4">
                     <h1 className="text-3xl font-normal text-white mb-8 tracking-tight">Ready to join?</h1>
                     
-                    {!userData?.token && (
-                        <div className="w-full max-w-sm mb-6">
-                            <input 
-                                type="text"
-                                placeholder="Enter your name"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-4 py-3 bg-transparent border border-[#5f6368] rounded-lg text-white placeholder-[#8ab4f8] focus:outline-none focus:border-[#8ab4f8] focus:ring-1 focus:ring-[#8ab4f8] transition-all"
-                            />
-                        </div>
-                    )}
+                    <div className="w-full max-w-sm mb-6">
+                        <input 
+                            type="text"
+                            placeholder="Enter your name"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full px-4 py-3 bg-transparent border border-[#5f6368] rounded-lg text-white placeholder-[#8ab4f8] focus:outline-none focus:border-[#8ab4f8] focus:ring-1 focus:ring-[#8ab4f8] transition-all"
+                        />
+                    </div>
 
                     {requestStatus === "idle" && (
                         <div className="w-full max-w-sm flex flex-col gap-3">
                             <button 
-                                onClick={isHost ? handleJoinNow : handleAskToJoin}
+                                onClick={handleAskToJoin}
                                 className="w-full py-3 px-6 rounded-full font-medium text-sm tracking-wide bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] hover:shadow-lg transition-all"
                             >
-                                {isHost ? "Join now" : "Ask to join"}
+                                Ask to join
                             </button>
                         </div>
                     )}
