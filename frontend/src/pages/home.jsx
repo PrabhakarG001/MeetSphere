@@ -180,6 +180,7 @@ function HomeComponent() {
                                 className="heroButton heroButtonPrimary flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto !min-h-[48px] !px-6" 
                                 onClick={() => setShowDropdown(!showDropdown)}
                                 type="button"
+                                style={{ borderRight: '3px solid #ff2ea6' }}
                             >
                                 <Video size={20} />
                                 <span>New meeting</span>

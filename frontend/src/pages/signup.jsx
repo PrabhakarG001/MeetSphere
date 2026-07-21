@@ -377,7 +377,7 @@ export default function Signup({ initialMode = 'signup' }) {
                             >
                                 Back
                             </button>
-                            <button className="authPrimaryButton" type="submit" disabled={loading} style={{ flex: 1 }}>
+                            <button className="authPrimaryButton" type="submit" disabled={loading} style={{ flex: 1, borderRight: '3px solid #ff2ea6' }}>
                                 {loading ? (
                                     <>
                                         <CircularProgress size={18} color="inherit" />
