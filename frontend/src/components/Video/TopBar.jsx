@@ -20,12 +20,13 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
                     type="button" 
                     onClick={() => router("/")} 
                     title="Back to Home"
+                    style={{ borderRight: '3px solid #ff2ea6' }}
                 >
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
+                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain" style={{ width: '1.25rem', height: '1.25rem' }} />
                     <span 
-                        className="font-bold text-lg sm:text-xl drop-shadow-sm" 
+                        className="font-bold drop-shadow-sm hidden sm:inline-block lobster-two-bold" 
                         style={{ 
-                            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
+                            fontSize: '1.5rem',
                             letterSpacing: '-0.5px',
                             background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                             WebkitBackgroundClip: 'text', 
@@ -38,22 +39,20 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
             </div>
 
             {/* Right side: User Profile (Google Meet Style) */}
-            {user && (
-                <div className="pointer-events-auto flex items-center">
-                    {user.picture ? (
-                        <img 
-                            src={user.picture} 
-                            alt={user.name} 
-                            className="w-9 h-9 rounded-full border border-white/20 shadow-md object-cover"
-                            referrerPolicy="no-referrer"
-                        />
-                    ) : (
-                        <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium border border-white/20 shadow-md">
-                            {getInitials(user.name)}
-                        </div>
-                    )}
-                </div>
-            )}
+            <div className="pointer-events-auto flex items-center">
+                {user?.picture ? (
+                    <img 
+                        src={user.picture} 
+                        alt={user?.name || username || "Guest"} 
+                        className="w-9 h-9 rounded-full border border-white/20 shadow-md object-cover"
+                        referrerPolicy="no-referrer"
+                    />
+                ) : (
+                    <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium border border-white/20 shadow-md">
+                        {getInitials(user?.name || username || "Guest")}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

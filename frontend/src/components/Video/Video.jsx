@@ -106,13 +106,14 @@ export default function Video() {
                     const stateName = location.state?.username || userData?.name || "Participant";
                     const stateVideo = location.state?.video !== undefined ? location.state.video : true;
                     const stateAudio = location.state?.audio !== undefined ? location.state.audio : true;
+                    const statePicture = userData?.picture || location.state?.picture || null;
                     
                     setUsername(stateName);
                     
                     // Auto-connect
                     if (!hasAutoConnected.current) {
                         hasAutoConnected.current = true;
-                        connect(stateName, stateAudio, stateVideo, userData?.picture);
+                        connect(stateName, stateAudio, stateVideo, statePicture);
                     }
                 } else {
                     setMeetingIsValid(false);
@@ -127,6 +128,15 @@ export default function Video() {
 
         validateMeeting();
     }, [userData, navigate, location]);
+
+    // Disconnect socket on unmount
+    useEffect(() => {
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+            }
+        };
+    }, []);
 
     // Listen for join requests if host
     useEffect(() => {
@@ -274,6 +284,7 @@ export default function Video() {
                         videos={videos}
                         handleMuteUser={handleMuteUser}
                         handleRemoveUser={handleRemoveUser}
+                        localPicture={userData?.picture}
                     />
                 </div>
             )}

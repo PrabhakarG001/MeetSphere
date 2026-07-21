@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { addToActivity, getAllActivity, login, register, deleteActivity } from "../user.controller.js";
+import { addToActivity, getAllActivity, login, register, deleteActivity, googleLogin } from "../user.controller.js";
 
 const router = Router();
 
 router.route("/login").post(login)
+router.route("/google-login").post(googleLogin)
 router.route("/register").post(register)
 router.route("/add_to_activity").post(addToActivity)
 router.route("/get_all_activity").get(getAllActivity)

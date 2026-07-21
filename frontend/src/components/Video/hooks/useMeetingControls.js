@@ -18,6 +18,9 @@ export const useMeetingControls = (socketRef) => {
         } catch (e) {
             console.log(e);
         }
+        if (socketRef && socketRef.current) {
+            socketRef.current.disconnect();
+        }
         window.location.href = "/";
     };
 

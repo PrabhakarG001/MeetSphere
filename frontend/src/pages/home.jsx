@@ -138,6 +138,44 @@ function HomeComponent() {
         }
     }, [userData, navigate]);
 
+    const handleScheduleMeeting = useCallback(async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token || !userData) {
+                alert("Please login to schedule a meeting.");
+                navigate('/login');
+                return;
+            }
+
+            const response = await fetch(`${server}/api/v1/meetings/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId: userData.username || userData.name || "Host" })
+            });
+            const data = await response.json();
+            
+            if (response.ok && data.meetingCode) {
+                localStorage.setItem(`host_${data.meetingCode}`, "true");
+                const meetingUrl = `${window.location.origin}/join/${data.meetingCode}`;
+                
+                const calUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
+                calUrl.searchParams.append('text', 'MeetSphere Video Meeting');
+                calUrl.searchParams.append('details', `Join my MeetSphere video meeting here:\n${meetingUrl}`);
+                calUrl.searchParams.append('location', meetingUrl);
+                
+                window.open(calUrl.toString(), '_blank');
+            } else {
+                alert(data.message || "Failed to create meeting");
+            }
+        } catch (error) {
+            console.error("Error creating scheduled meeting:", error);
+            alert("Could not connect to server");
+        }
+    }, [userData, navigate]);
+
     const copyToClipboard = async () => {
         try {
             await navigator.clipboard.writeText(generatedLink);
@@ -154,93 +192,107 @@ function HomeComponent() {
     }, [navigate]);
 
     return (
-        <div className="min-h-screen bg-white font-sans flex flex-col">
-            <DashboardNav onHistory={() => navigate("/history")} onLogout={handleLogout} />
+        <div className="min-h-screen landingPageContainer font-sans flex flex-col">
+            <DashboardNav onHistory={() => navigate("/history")} onLogout={handleLogout} userPicture={userData?.picture} userName={userData?.name} />
             
             <main className="flex-1 max-w-7xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col md:flex-row items-center justify-between gap-12">
                 
                 {/* Left side actions (Google Meet style) */}
-                <div className="flex-1 w-full max-w-2xl">
-                    <h1 className="text-4xl md:text-5xl font-normal text-slate-900 mb-2 tracking-tight">
+                <div className="flex-1 w-full max-w-2xl lg:pr-8">
+                    <h1 className="text-5xl md:text-6xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">
                         Premium video meetings.
                     </h1>
-                    <h2 className="text-3xl md:text-4xl font-normal text-slate-600 mb-10 tracking-tight">
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-700 mb-6 tracking-tight">
                         Now free for everyone.
                     </h2>
                     
-                    <p className="text-lg text-slate-500 mb-10 max-w-xl">
+                    <p className="text-lg text-slate-500/90 mb-12 max-w-xl leading-relaxed">
                         Connect, collaborate, and celebrate from anywhere with MeetSphere. Crystal-clear video calls tailored for modern teams.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-center justify-center sm:justify-start w-full mt-4">
-                        
-                        {/* New Meeting Button with Dropdown */}
-                        <div className="relative w-full sm:w-auto" ref={dropdownRef}>
-                            <button 
-                                className="heroButton heroButtonPrimary flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto !min-h-[48px] !px-6" 
-                                onClick={() => setShowDropdown(!showDropdown)}
-                                type="button"
-                                style={{ borderRight: '3px solid #ff2ea6' }}
-                            >
-                                <Video size={20} />
-                                <span>New meeting</span>
-                            </button>
+                    {/* Quick Actions Panel */}
+                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col gap-6 w-full max-w-xl relative overflow-hidden">
+                        {/* Decorative background element */}
+                        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-                            {/* Dropdown Menu */}
-                            {showDropdown && (
-                                <div className="absolute top-full left-0 mt-2 w-full sm:w-64 bg-white rounded-md shadow-[0_4px_20px_rgb(0,0,0,0.08)] border border-gray-100 py-1 z-50">
-                                    <button
-                                        onClick={handleCreateForLater}
-                                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-slate-700 transition-colors"
+                        <div className="relative z-10">
+                            <h3 className="text-sm font-bold tracking-wider text-slate-400 uppercase mb-4">Quick Actions</h3>
+                            
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                {/* New Meeting Button with Dropdown */}
+                                <div className="relative w-full sm:w-1/2" ref={dropdownRef}>
+                                    <button 
+                                        className="heroButton heroButtonPrimary flex items-center justify-center gap-2 w-full h-[52px] font-medium shadow-sm transition-all hover:shadow-md" 
+                                        onClick={() => setShowDropdown(!showDropdown)}
+                                        type="button"
+                                        style={{ borderRight: '3px solid #ff2ea6' }}
                                     >
-                                        <Link size={18} className="text-slate-500" />
-                                        <span className="font-medium text-sm">Create a meeting for later</span>
+                                        <Video size={20} />
+                                        <span>New meeting</span>
                                     </button>
-                                    <button
-                                        onClick={handleNewMeeting}
-                                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-slate-700 transition-colors"
-                                    >
-                                        <Plus size={18} className="text-slate-500" />
-                                        <span className="font-medium text-sm">Start an instant meeting</span>
-                                    </button>
+
+                                    {/* Dropdown Menu */}
+                                    {showDropdown && (
+                                        <div className="absolute top-full left-0 mt-2 w-full sm:w-64 bg-white rounded-md shadow-[0_4px_20px_rgb(0,0,0,0.08)] border border-gray-100 py-1 z-50">
+                                            <button
+                                                onClick={handleCreateForLater}
+                                                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-slate-700 transition-colors"
+                                            >
+                                                <Link size={18} className="text-slate-500" />
+                                                <span className="font-medium text-sm">Create a meeting for later</span>
+                                            </button>
+                                            <button
+                                                onClick={handleNewMeeting}
+                                                className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-slate-700 transition-colors"
+                                            >
+                                                <Plus size={18} className="text-slate-500" />
+                                                <span className="font-medium text-sm">Start an instant meeting</span>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                        
-                        <div className="relative flex items-center w-full sm:w-auto mt-2 sm:mt-0">
-                            <div className="absolute left-4 text-slate-400">
-                                <Keyboard size={20} />
+                                
+                                <button
+                                    onClick={handleScheduleMeeting}
+                                    className="flex items-center justify-center gap-2 w-full sm:w-1/2 h-[52px] font-medium text-[#0b5cff] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors border border-blue-100 shadow-sm"
+                                >
+                                    <Calendar size={20} />
+                                    <span>Schedule</span>
+                                </button>
                             </div>
-                            <input
-                                className="w-full sm:w-64 pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:border-[#7b61ff] focus:ring-1 focus:ring-[#7b61ff] transition-all"
-                                type="text"
-                                placeholder="Enter a code or link"
-                                value={meetingCode}
-                                onChange={e => setMeetingCode(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleJoinVideoCall()}
-                            />
+
+                            <div className="flex flex-col sm:flex-row gap-3 mt-3">
+                                <div className="relative flex-1">
+                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                        <Keyboard size={20} />
+                                    </div>
+                                    <input
+                                        className="w-full h-[52px] pl-12 pr-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#7b61ff] focus:ring-1 focus:ring-[#7b61ff] focus:bg-white transition-all"
+                                        type="text"
+                                        placeholder="Enter a code or link"
+                                        value={meetingCode}
+                                        onChange={e => setMeetingCode(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && handleJoinVideoCall()}
+                                    />
+                                </div>
+                                <button 
+                                    onClick={handleJoinVideoCall}
+                                    disabled={meetingCode.trim().length === 0}
+                                    className={`h-[52px] px-8 font-semibold rounded-lg transition-all ${meetingCode.trim().length > 0 ? 'bg-[#7b61ff] text-white hover:bg-[#694ce6] shadow-md hover:shadow-lg' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
+                                >
+                                    Join
+                                </button>
+                            </div>
                         </div>
-
-                        {meetingCode.trim().length > 0 && (
-                            <button 
-                                onClick={handleJoinVideoCall}
-                                className="w-full sm:w-auto px-6 py-3 text-[#7b61ff] font-semibold hover:bg-purple-50 rounded-lg transition-colors mt-2 sm:mt-0"
-                            >
-                                Join
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Removed Schedule and Share Screen buttons per user request */}
-                    <div className="mt-8 pt-8 border-t border-gray-100 flex flex-wrap gap-4">
                     </div>
                 </div>
 
                 {/* Right side visual elements (Graphic and Time) */}
-                <div className="flex flex-col items-center justify-center w-full max-w-md mt-16 md:mt-0">
+                <div className="flex flex-col items-center justify-center w-full max-w-lg mt-16 md:mt-0">
                     
                     {/* Feature Showcase (Google Meet Style Carousel) */}
-                    <div className="w-full max-w-md flex flex-col items-center justify-center text-center mb-12 min-h-[360px]">
+                    <div className="w-full bg-slate-50/50 p-8 sm:p-10 rounded-3xl border border-slate-100 shadow-[0_8px_40px_rgb(0,0,0,0.03)] flex flex-col items-center justify-center text-center min-h-[420px] relative overflow-hidden group">
                         
                         {/* Image with side arrows */}
                         <div className="flex items-center justify-center gap-2 sm:gap-8 mb-6 w-full">

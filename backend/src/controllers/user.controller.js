@@ -152,4 +152,21 @@ const deleteActivity = async (req, res) => {
     }
 };
 
-export { login, register, addToActivity, getAllActivity, deleteActivity };
+const googleLogin = async (req, res) => {
+    const { username, name, picture } = req.body;
+    try {
+        let user = await User.findOne({ username });
+        if (!user) {
+            user = new User({ username, name, picture });
+        } else {
+            user.picture = picture;
+        }
+        user.token = crypto.randomBytes(20).toString("hex");
+        await user.save();
+        return res.status(httpStatus.OK).json({ token: user.token, user });
+    } catch (error) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: `Something went wrong ${error}` });
+    }
+};
+
+export { login, register, addToActivity, getAllActivity, deleteActivity, googleLogin };

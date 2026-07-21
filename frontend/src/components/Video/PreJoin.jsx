@@ -55,7 +55,8 @@ export default function PreJoin() {
                     state: { 
                         username: usernameRef.current, 
                         video: videoRef.current, 
-                        audio: audioRef.current 
+                        audio: audioRef.current,
+                        picture: userData?.picture || null
                     } 
                 });
             });
@@ -174,11 +175,12 @@ export default function PreJoin() {
                                 autoPlay 
                                 playsInline 
                                 muted 
-                                className="w-full h-full object-cover transform scale-x-[-1]"
+                                className="w-full h-full object-cover"
+                                style={{ transform: 'scaleX(-1)' }}
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
-                                <Avatar name={username || "You"} size={96} />
+                                <Avatar name={username || "You"} picture={userData?.picture} size={96} />
                             </div>
                         )}
                         

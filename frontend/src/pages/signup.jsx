@@ -10,6 +10,7 @@ import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
+import GoogleAuth from '../components/Auth/GoogleAuth';
 import '../App.css';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,7 +57,7 @@ export default function Signup({ initialMode = 'signup' }) {
     const [submitted, setSubmitted] = React.useState(false);
     const [touched, setTouched] = React.useState({});
 
-    const { handleRegister, handleLogin } = React.useContext(AuthContext);
+    const { handleRegister, handleLogin, handleGoogleLogin } = React.useContext(AuthContext);
     const isSignup = true;
     const passwordStrength = React.useMemo(() => getPasswordStrength(password), [password]);
 
@@ -153,13 +154,13 @@ export default function Signup({ initialMode = 'signup' }) {
 
             {/* Visual Panel (Left Side) */}
             <section className="authVisualPanel" aria-label="MeetSphere product preview">
-                <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                    <img src="/logo-navbar.png" alt="MeetSphere Logo" className="transition-transform hover:scale-105" style={{ width: '1.8em', height: '1.8em', objectFit: 'contain' }} />
-                    <span style={{ 
+                <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', borderRight: '3px solid #ff2ea6', paddingRight: '12px' }}>
+                    <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '2rem', height: '2rem' }} />
+                    <span className="lobster-two-bold" style={{ 
+                        fontSize: '2.5rem',
                         background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                         WebkitBackgroundClip: 'text', 
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: '800'
+                        WebkitTextFillColor: 'transparent'
                     }}>
                         MeetSphere
                     </span>
@@ -168,7 +169,7 @@ export default function Signup({ initialMode = 'signup' }) {
                 <div className="authHeroCopy">
                     {/* Enhanced Quote Typography */}
                     <h1 className="authHeroQuote">
-                        Ã¢â‚¬Å“Connect with anyone, anywhere. Secure video calls start here.Ã¢â‚¬Â
+                        "Connect with anyone, anywhere. Secure video calls start here." 
                     </h1>
                     
                     {/* Vector Illustration directly below the quote */}
@@ -185,13 +186,13 @@ export default function Signup({ initialMode = 'signup' }) {
             {/* Form Section (Right Side) */}
             <section className="authFormPanel" aria-label={isSignup ? 'Create account' : 'Login'}>
                 <div className="authCard">
-                    <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
-                        <img src="/logo-navbar.png" alt="MeetSphere Logo" className="transition-transform hover:scale-105" style={{ width: '1.8em', height: '1.8em', objectFit: 'contain' }} />
-                        <span style={{ 
+                    <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '8px', textDecoration: 'none', borderRight: '3px solid #ff2ea6', paddingRight: '10px' }}>
+                        <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '1.5rem', height: '1.5rem' }} />
+                        <span className="lobster-two-bold" style={{ 
+                            fontSize: '2rem',
                             background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                             WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent',
-                            fontWeight: '800'
+                            WebkitTextFillColor: 'transparent'
                         }}>
                             MeetSphere
                         </span>
@@ -213,7 +214,20 @@ export default function Signup({ initialMode = 'signup' }) {
                         </p>
                     </div>
 
-                    
+                    </div>
+
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <GoogleAuth 
+                            onSuccess={handleGoogleLogin} 
+                            onError={(err) => setError("Google Sign-In failed: " + err)}
+                            buttonText="Sign up with Google"
+                        />
+                        <div style={{ display: 'flex', alignItems: 'center', margin: '1.5rem 0' }}>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                            <span style={{ padding: '0 10px', color: 'aliceblue', fontSize: '0.875rem' }}>or sign up with email</span>
+                            <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
+                        </div>
+                    </div>
 
                     <form className="authForm" onSubmit={handleAuth} noValidate>
                         {isSignup && (

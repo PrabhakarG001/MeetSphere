@@ -1,18 +1,26 @@
 import '../../styles/RemoteVideo.css';
+import { memo, useRef, useEffect } from 'react';
 import { MicOff, Hand } from 'lucide-react';
 import Avatar from './Avatar';
 
-export default function RemoteVideo({ video }) {
+const RemoteVideo = memo(function RemoteVideo({ video }) {
+    const videoElRef = useRef(null);
+
+    // Only update srcObject when stream actually changes
+    useEffect(() => {
+        if (videoElRef.current && video.stream) {
+            if (videoElRef.current.srcObject !== video.stream) {
+                videoElRef.current.srcObject = video.stream;
+            }
+        }
+    }, [video.stream]);
+
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video
                 className={`w-full h-full object-cover ${video.isVideoEnabled === false ? 'opacity-0' : 'opacity-100'}`}
                 data-socket={video.socketId}
-                ref={ref => {
-                    if (ref && video.stream) {
-                        ref.srcObject = video.stream;
-                    }
-                }}
+                ref={videoElRef}
                 autoPlay
                 playsInline
             ></video>
@@ -41,4 +49,6 @@ export default function RemoteVideo({ video }) {
             )}
         </div>
     );
-}
+});
+
+export default RemoteVideo;

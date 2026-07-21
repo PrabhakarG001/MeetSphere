@@ -1,12 +1,14 @@
 import '../../styles/LocalVideo.css';
+import { memo, useRef, useEffect } from 'react';
 import { MicOff, Hand } from 'lucide-react';
 import Avatar from './Avatar';
 
-export default function LocalVideo({ setLocalVideoElement, video, audio, username, isRaisedHand, picture }) {
+const LocalVideo = memo(function LocalVideo({ setLocalVideoElement, video, audio, username, isRaisedHand, picture }) {
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video 
-                className={`w-full h-full object-cover scale-x-[-1] ${!video ? 'opacity-0' : 'opacity-100'}`} 
+                className={`w-full h-full object-cover ${!video ? 'opacity-0' : 'opacity-100'}`} 
+                style={{ transform: 'scaleX(-1)' }}
                 ref={setLocalVideoElement} 
                 autoPlay 
                 muted 
@@ -39,4 +41,6 @@ export default function LocalVideo({ setLocalVideoElement, video, audio, usernam
             )}
         </div>
     );
-}
+});
+
+export default LocalVideo;

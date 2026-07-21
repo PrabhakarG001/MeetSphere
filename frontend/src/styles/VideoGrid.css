@@ -86,7 +86,7 @@
     aspect-ratio: 16 / 10;
     background: #020617;
     object-fit: cover;
-    transform: scaleX(-1);
+
 }
 
 .localTile span {

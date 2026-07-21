@@ -2,7 +2,7 @@ import '../../styles/DashboardNav.css';
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, Clock, LogOut, MoreVertical } from 'lucide-react';
 
-export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) {
+export default function DashboardNav({ showBack, onBack, onHistory, onLogout, userPicture, userName }) {
     const [scrolled, setScrolled] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -47,19 +47,20 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) 
                         onClick={onBack} 
                         type="button" 
                         aria-label="Go back"
+                        style={{ borderRight: '3px solid #ff2ea6' }}
                     >
                         <ChevronLeft size={20} />
                     </button>
                 )}
                 <div className="flex items-center gap-2">
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-transform hover:scale-105" style={{ width: '2.5em', height: '2.5em' }} />
+                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-transform hover:scale-105" style={{ width: '1.5rem', height: '1.5rem' }} />
                     <h2 
-                        className="text-xl sm:text-2xl tracking-tight transition-transform hover:scale-105" 
+                        className="tracking-tight transition-transform hover:scale-105 lobster-two-bold" 
                         style={{ 
+                            fontSize: '2rem',
                             background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                             WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent',
-                            fontWeight: '800'
+                            WebkitTextFillColor: 'transparent'
                         }}
                     >
                         MeetSphere
@@ -82,11 +83,18 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) 
                         title="Click to logout"
                         aria-label="Log out"
                     >
-                        <img 
-                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=MeetSphereUser&backgroundColor=e2e8f0" 
-                            alt="User account" 
-                            className="w-10 h-10 object-cover"
-                        />
+                        {userPicture ? (
+                            <img 
+                                src={userPicture} 
+                                alt="User account" 
+                                className="w-10 h-10 object-cover rounded-full"
+                                referrerPolicy="no-referrer"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff2ea6] via-[#7b61ff] to-[#2d4fc2] flex items-center justify-center text-white font-bold text-lg">
+                                {userName?.charAt(0)?.toUpperCase() || '?'}
+                            </div>
+                        )}
                     </button>
                 )}
             </div>

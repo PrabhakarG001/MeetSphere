@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo, useMemo } from 'react';
 import '../../styles/VideoGrid.css';
 import LocalVideo from './LocalVideo';
 import RemoteVideo from './RemoteVideo';
 
-export default function VideoGrid({ videos, setLocalVideoElement, video, audio, username, isRaisedHand, userData }) {
+const VideoGrid = memo(function VideoGrid({ videos, setLocalVideoElement, video, audio, username, isRaisedHand, userData }) {
     const totalParticipants = videos.length + 1; // including local
     const [reactions, setReactions] = useState([]);
 
@@ -11,16 +11,14 @@ export default function VideoGrid({ videos, setLocalVideoElement, video, audio, 
         const handleReaction = (e) => {
             const { id, emoji } = e.detail;
             
-            // Create a unique reaction object
             const newReaction = {
                 id: Date.now() + Math.random(),
-                socketId: id, // The socket ID of the sender
+                socketId: id,
                 emoji: emoji
             };
             
             setReactions(prev => [...prev, newReaction]);
             
-            // Remove it after animation ends (e.g., 2 seconds)
             setTimeout(() => {
                 setReactions(prev => prev.filter(r => r.id !== newReaction.id));
             }, 2500);
@@ -31,11 +29,13 @@ export default function VideoGrid({ videos, setLocalVideoElement, video, audio, 
     }, []);
 
     // Zoom-like dynamic grid columns
-    let gridClass = "grid-cols-1";
-    if (totalParticipants === 2) gridClass = "grid-cols-1 md:grid-cols-2";
-    else if (totalParticipants >= 3 && totalParticipants <= 4) gridClass = "grid-cols-2";
-    else if (totalParticipants >= 5 && totalParticipants <= 9) gridClass = "grid-cols-2 md:grid-cols-3";
-    else if (totalParticipants >= 10) gridClass = "grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+    const gridClass = useMemo(() => {
+        if (totalParticipants === 2) return "grid-cols-1 md:grid-cols-2";
+        if (totalParticipants >= 3 && totalParticipants <= 4) return "grid-cols-2";
+        if (totalParticipants >= 5 && totalParticipants <= 9) return "grid-cols-2 md:grid-cols-3";
+        if (totalParticipants >= 10) return "grid-cols-3 md:grid-cols-4 lg:grid-cols-5";
+        return "grid-cols-1";
+    }, [totalParticipants]);
 
     return (
         <div className="flex-1 w-full h-full p-4 flex items-center justify-center overflow-hidden bg-transparent">
@@ -50,7 +50,7 @@ export default function VideoGrid({ videos, setLocalVideoElement, video, audio, 
                         <LocalVideo setLocalVideoElement={setLocalVideoElement} video={video} audio={audio} username={username} isRaisedHand={isRaisedHand} picture={userData?.picture} />
                     </div>
                     
-                    {/* Render local reactions (where socketId matches a special local token or just self) */}
+                    {/* Render local reactions */}
                     {reactions.filter(r => r.socketId === 'local').map(r => (
                         <div key={r.id} className="absolute bottom-10 left-1/2 -translate-x-1/2 text-4xl animate-float-up pointer-events-none z-50">
                             {r.emoji}
@@ -80,4 +80,6 @@ export default function VideoGrid({ videos, setLocalVideoElement, video, audio, 
             </div>
         </div>
     );
-}
+});
+
+export default VideoGrid;

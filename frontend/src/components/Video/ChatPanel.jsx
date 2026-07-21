@@ -1,6 +1,7 @@
 import '../../styles/ChatPanel.css';
 import { useRef, useEffect } from "react";
 import { Send, X, MessageSquare, Users } from 'lucide-react';
+import Avatar from './Avatar';
 
 export default function ChatPanel({
     showModal,
@@ -14,7 +15,8 @@ export default function ChatPanel({
     setActiveTab,
     videos,
     handleMuteUser,
-    handleRemoveUser
+    handleRemoveUser,
+    localPicture
 }) {
     const messagesEndRef = useRef(null);
 
@@ -74,8 +76,7 @@ export default function ChatPanel({
                                     <span className="text-[11px] font-medium text-slate-500 mb-1 px-1">
                                         {isMe ? 'You' : item.sender}
                                     </span>
-                                    <div className={`max-w-[85%] px-3 py-2 rounded-lg text-[13px] leading-relaxed shadow-sm ${isMe ? 'text-white rounded-tr-sm' : 'bg-white dark:bg-[#3c4043] text-slate-900 dark:text-slate-100 rounded-tl-sm border border-slate-200 dark:border-transparent'}`}
-                                        style={isMe ? { backgroundImage: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)' } : {}}
+                                    <div className={`max-w-[85%] px-3 py-2 rounded-lg text-[13px] leading-relaxed shadow-sm ${isMe ? 'bg-[#8ab4f8] text-[#202124] rounded-tr-sm font-medium' : 'bg-[#8ab4f8]/20 text-slate-900 dark:text-slate-100 rounded-tl-sm border border-[#8ab4f8]/30'}`}
                                     >
                                         <p className="m-0 break-words">{item.data}</p>
                                     </div>
@@ -123,9 +124,7 @@ export default function ChatPanel({
                     <div className="flex flex-col gap-2">
                         {/* Local User */}
                         <div className="flex items-center gap-2 p-2 mx-4 mt-2 bg-gray-100 dark:bg-[#3c4043] rounded-lg">
-                            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
-                                {username?.charAt(0)?.toUpperCase() || 'Y'}
-                            </div>
+                            <Avatar name={username || "You"} picture={localPicture} size={32} />
                             <div className="flex-1">
                                 <p className="text-sm font-medium text-slate-900 dark:text-slate-100 m-0">
                                     {username || 'You'} <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">(You)</span>
@@ -136,12 +135,11 @@ export default function ChatPanel({
                         {/* Remote Participants */}
                         {videos && videos.length > 0 ? videos.map((v, index) => (
                             <div key={v.socketId || index} className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-[#3c4043] border border-gray-200 dark:border-transparent shadow-sm group">
-                                <div className="w-8 h-8 rounded-full bg-slate-300 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-300 font-semibold text-sm">
-                                    <Users size={16} />
-                                </div>
+                                <Avatar name={v.username || `Participant ${index + 1}`} picture={v.picture} size={32} />
                                 <div className="flex-1">
                                     <p className="text-sm font-medium text-slate-900 dark:text-slate-100 m-0">
                                         {v.username || `Participant ${index + 1}`}
+                                        {v.isHost && <span className="ml-2 text-[10px] bg-blue-600/80 text-white px-1.5 py-0.5 rounded font-semibold">Host</span>}
                                     </p>
                                 </div>
                                 

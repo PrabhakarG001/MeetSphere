@@ -10,13 +10,13 @@ const EMOJIS = ['\u2764\uFE0F', '\uD83D\uDC4D', '\uD83C\uDF89', '\uD83D\uDC4F', 
 
 const ControlButton = ({ onClick, isActive, title, children, isDanger, isPrimary, badge, className = "", noTooltip = false }) => {
     let bgClass = isActive 
-        ? 'bg-[#8ab4f8] text-[#202124] hover:bg-[#aecbfa]' 
+        ? 'bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0]' 
         : 'bg-gray-100 dark:bg-[#3c4043] text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-[#4a4d51]';
 
     if (isDanger) {
         bgClass = 'bg-[#ea4335] text-white hover:bg-[#d93025]';
     } else if (isPrimary) {
-        bgClass = 'bg-[#8ab4f8] text-[#202124] hover:bg-[#aecbfa]';
+        bgClass = 'bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0]';
     }
 
     return (
