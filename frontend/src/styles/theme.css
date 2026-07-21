@@ -34,12 +34,15 @@
 }
 
 .logo-text {
+    font-family: "Playwrite ID", cursive;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
     font-size: 1em; /* Inherits from container */
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 1.1; /* Perfect vertical center alignment */
-    padding-bottom: 0.05em; /* Optical alignment for Lobster Two */
 }
 
 .logo-icon {
