@@ -305,9 +305,9 @@ function HomeComponent() {
                                     const IconComponent = carouselItems[currentSlide].icon;
                                     return IconComponent ? (
                                         <IconComponent 
-                                            size={280} 
+                                            size={180} 
                                             className="text-white transition-opacity duration-500 drop-shadow-[0_8px_24px_rgba(255,255,255,0.2)]" 
-                                            strokeWidth={1} 
+                                            strokeWidth={1.2} 
                                         />
                                     ) : null;
                                 })()}
