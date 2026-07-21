@@ -13,5 +13,36 @@
     --gradient-primary: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
     --accent-color: #ff2ea6;
     --accent-border: 3px solid var(--accent-color);
-  }
+}
+
+/* Logo Standardization */
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em; /* Consistent spacing relative to font size */
+    font-size: clamp(1.5rem, 5vw, 2.5rem); /* Responsive base size */
+    text-decoration: none;
+    cursor: pointer;
+}
+
+@media (max-width: 640px) {
+    .logo-container {
+        font-size: clamp(1.25rem, 4vw, 1.75rem);
+    }
+}
+
+.logo-text {
+    font-size: 1em; /* Inherits from container */
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1; /* Perfect vertical center alignment */
+    padding-bottom: 0.05em; /* Optical alignment for Lobster Two */
+}
+
+.logo-icon {
+    width: 0.9em; /* Visually balanced to match text cap height exactly */
+    height: 0.9em;
+    object-fit: contain;
 }

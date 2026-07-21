@@ -14,6 +14,7 @@ import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import GoogleAuth from '../components/Auth/GoogleAuth';
+import Logo from '../components/common/Logo';
 import '../App.css';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -157,17 +158,7 @@ export default function Authentication({ initialMode = 'login' }) {
 
             {/* Visual Panel (Left Side) */}
             <section className="authVisualPanel" aria-label="MeetSphere product preview">
-                  <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none', paddingRight: '12px' }}>
-                      <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '2.5rem', height: '2.5rem' }} />
-                      <span className="lobster-two-bold" style={{ 
-                          fontSize: '2.5rem',
-                          background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
-                          WebkitBackgroundClip: 'text', 
-                          WebkitTextFillColor: 'transparent'
-                      }}>
-                          MeetSphere
-                      </span>
-                  </RouterLink>
+                  <Logo className="authBrand" />
 
                 <div className="authHeroCopy">
                     {/* Enhanced Quote Typography */}
@@ -189,17 +180,7 @@ export default function Authentication({ initialMode = 'login' }) {
             {/* Form Section (Right Side) */}
             <section className="authFormPanel" aria-label={isSignup ? 'Create account' : 'Login'}>
                 <div className="authCard">
-                      <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '10px', textDecoration: 'none', paddingRight: '10px' }}>
-                          <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '1.5rem', height: '1.5rem' }} />
-                          <span className="lobster-two-bold" style={{ 
-                              fontSize: '1.5rem',
-                              background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
-                              WebkitBackgroundClip: 'text', 
-                              WebkitTextFillColor: 'transparent'
-                          }}>
-                              MeetSphere
-                          </span>
-                      </RouterLink>
+                      <Logo className="authMobileBrand" />
 
                                         <div className="signupMobileVisual">
                         <img src="/Vector.png" alt="Illustration" style={{ width: '100%', maxWidth: '280px', margin: '0 auto' }} />

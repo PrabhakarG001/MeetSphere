@@ -1,6 +1,7 @@
 import '../../styles/TopBar.css';
 import { Copy, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../common/Logo';
 
 export default function TopBar({ user, username, handleCopyInviteLink, inviteCopied }) {
     const router = useNavigate();
@@ -15,27 +16,9 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
         <div className="absolute top-0 left-0 right-0 w-full p-4 z-30 pointer-events-none flex items-center justify-between">
             {/* Left side: MeetSphere Logo */}
             <div className="flex items-center">
-                <button 
-                    className="pointer-events-auto flex items-center gap-2" 
-                    type="button" 
-                    onClick={() => router("/")} 
-                    title="Back to Home"
-                    title="Back to Home"
-                >
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain" style={{ width: '1.5rem', height: '1.5rem' }} />
-                    <span 
-                        className="font-bold drop-shadow-sm hidden sm:inline-block lobster-two-bold" 
-                        style={{ 
-                            fontSize: '1.5rem',
-                            letterSpacing: '-0.5px',
-                            background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
-                            WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent'
-                        }}
-                    >
-                        MeetSphere
-                    </span>
-                </button>
+                <div className="pointer-events-auto">
+                    <Logo />
+                </div>
             </div>
 
             {/* Right side: User Profile (Google Meet Style) */}

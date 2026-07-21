@@ -8,6 +8,7 @@ import img2 from "../assets/img2.png";
 import img3 from "../assets/img3.png";
 import img4 from "../assets/img4.png";
 import img5 from "../assets/img5.png";
+import Logo from "../components/common/Logo";
 
 const landingCards = [
     { image: img1 },
@@ -59,21 +60,7 @@ export default function LandingPage() {
     const renderNavContent = (isScrolled) => (
         <>
             <div className='navHeader shrink-0'>
-                <div className="landingLogo cursor-pointer flex items-center gap-2 sm:gap-3 flex-nowrap whitespace-nowrap pr-3" onClick={() => router("/")}>
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-all duration-300" style={{ width: 'clamp(1.5rem, 6vw, 2.5rem)', height: 'clamp(1.5rem, 6vw, 2.5rem)' }} />
-                    <span 
-                        className="lobster-two-bold"
-                        style={{ 
-                            fontSize: 'clamp(1.5rem, 6vw, 2.5rem)', 
-                            background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
-                            WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent',
-                            display: 'inline-block'
-                        }}
-                    >
-                        MeetSphere
-                    </span>
-                </div>
+                <Logo />
             </div>
 
             <div className={`navlist landingNavActions flex gap-2 sm:gap-4 flex-nowrap items-center justify-end shrink-0`}>
@@ -118,7 +105,9 @@ export default function LandingPage() {
             <footer className="landingFooter">
                 <div className="footerInner">
                     <div className="footerCol footerProject">
-                        <h3 className="footerHeading">MeetSphere</h3>
+                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-start' }}>
+                            <Logo asLink={false} style={{ fontSize: '1.75rem' }} />
+                        </div>
                         <p>A real-time communication platform built for seamless, low-latency video interaction. Crystal-clear calls, instant connections, zero compromise.</p>
                     </div>
 

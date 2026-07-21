@@ -2,6 +2,7 @@ import '../../styles/DashboardNav.css';
 import '../../styles/theme.css';
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, Clock, LogOut, MoreVertical } from 'lucide-react';
+import Logo from '../common/Logo';
 
 export default function DashboardNav({ showBack, onBack, onHistory, onLogout, userPicture, userName }) {
     const [scrolled, setScrolled] = useState(false);
@@ -53,18 +54,7 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
                     </button>
                 )}
                 <div className="flex items-center gap-2">
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-transform hover:scale-105" style={{ width: 'clamp(1.25rem, 5vw, 2rem)', height: 'clamp(1.25rem, 5vw, 2rem)' }} />
-                    <h2 
-                        className="tracking-tight transition-transform hover:scale-105 lobster-two-bold" 
-                        style={{ 
-                            fontSize: 'clamp(1.25rem, 5vw, 2rem)',
-                            background: 'var(--gradient-primary)', 
-                            WebkitBackgroundClip: 'text', 
-                            WebkitTextFillColor: 'transparent'
-                        }}
-                    >
-                        MeetSphere
-                    </h2>
+                    <Logo asLink={false} />
                 </div>
             </div>
             
