@@ -64,11 +64,10 @@ export default function PreJoin() {
                 // Fallback to local flag if backend is unreachable
             }
 
-            let s;
             if (isHostLocally) {
                 setMeetingIsValid(true);
                 setIsHost(true);
-                navigate(`/meeting/${url}`, { replace: true });
+                // Do not auto-navigate, let them set up camera/mic and click "Join now"
             } else {
                 setIsHost(false);
 
@@ -153,6 +152,21 @@ export default function PreJoin() {
             });
             setAudio(!audio);
         }
+    };
+
+    const handleJoinNow = () => {
+        if (!username.trim()) {
+            alert("Please enter your name");
+            return;
+        }
+        navigate(`/meeting/${url}`, { 
+            state: { 
+                username: usernameRef.current, 
+                video: videoRef.current, 
+                audio: audioRef.current,
+                picture: userData?.picture || null
+            } 
+        });
     };
 
     const handleAskToJoin = () => {
@@ -256,10 +270,10 @@ export default function PreJoin() {
                     {requestStatus === "idle" && (
                         <div className="w-full max-w-sm flex flex-col gap-3">
                             <button 
-                                onClick={handleAskToJoin}
+                                onClick={isHost ? handleJoinNow : handleAskToJoin}
                                 className="w-full py-3 px-6 rounded-full font-medium text-sm tracking-wide bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] hover:shadow-lg transition-all"
                             >
-                                Ask to join
+                                {isHost ? "Join now" : "Ask to join"}
                             </button>
                         </div>
                     )}
