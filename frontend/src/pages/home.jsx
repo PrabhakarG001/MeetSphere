@@ -198,7 +198,8 @@ function HomeComponent() {
                 {/* Left side actions (Google Meet style) */}
                 <div className="flex-1 w-full max-w-2xl lg:pr-8">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-                        Premium video meetings, now entirely free for everyone.
+                        <span className="block mb-2">Premium video meetings, redefined.</span>
+                        <span className="block text-white/90 text-3xl md:text-4xl lg:text-5xl">Now entirely free for everyone.</span>
                     </h1>
                     
                     <p className="text-lg text-white/70 mb-12 max-w-xl leading-relaxed">
