@@ -609,9 +609,9 @@ h1, h2, h3, h4, h5, h6, button {
   }
 
   .landingProductCard {
-    flex-basis: 270px;
-        height: 300px;
-        border-radius: 20px;
+    flex-basis: 220px;
+    height: 240px;
+    border-radius: 16px;
   }
 
   .landingFooter {
