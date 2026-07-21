@@ -193,7 +193,7 @@ function HomeComponent() {
         <div className="min-h-screen dash-page home-page-bg font-sans flex flex-col">
             <DashboardNav onHistory={() => navigate("/history")} onLogout={handleLogout} userPicture={userData?.picture} userName={userData?.name} />
             
-            <main className="flex-1 max-w-7xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col md:flex-row items-center justify-between gap-12">
+            <main className="flex-1 max-w-7xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col md:flex-row items-center justify-between gap-12 lg:gap-24">
                 
                 {/* Left side actions (Google Meet style) */}
                 <div className="flex-1 w-full max-w-2xl lg:pr-8 text-left">
@@ -282,7 +282,7 @@ function HomeComponent() {
                 </div>
 
                 {/* Right side visual elements (Graphic and Time) */}
-                <div className="flex flex-col items-center justify-center w-full max-w-lg mt-16 md:mt-0">
+                <div className="flex flex-col items-center justify-center w-full max-w-lg mt-16 md:mt-0 md:ml-auto">
                     
                     {/* Feature Showcase (Google Meet Style Carousel) */}
                     <div className="w-full flex flex-col items-center justify-center text-center min-h-[420px] group text-white">
