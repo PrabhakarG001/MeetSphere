@@ -18,6 +18,11 @@ const carouselItems = [
         icon: ShieldCheck,
         title: "Your meeting is safe",
         text: "No one can join a meeting unless invited or admitted by the host",
+    },
+    {
+        icon: Calendar,
+        title: "Plan ahead with ease",
+        text: "Schedule meetings in advance and add them straight to your Google Calendar.",
     }
 ];
 
