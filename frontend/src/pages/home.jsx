@@ -196,7 +196,7 @@ function HomeComponent() {
             <main className="flex-1 max-w-7xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col md:flex-row items-center justify-between gap-12">
                 
                 {/* Left side actions (Google Meet style) */}
-                <div className="flex-1 w-full max-w-2xl lg:pr-8">
+                <div className="flex-1 w-full max-w-2xl lg:pr-8 text-left">
                     <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
                         Elevate your meetings with seamless video collaboration
                     </h1>
@@ -282,13 +282,13 @@ function HomeComponent() {
                 </div>
 
                 {/* Right side visual elements (Graphic and Time) */}
-                <div className="flex flex-col items-center justify-center w-full max-w-lg mt-16 md:mt-0">
+                <div className="flex flex-col items-end justify-center w-full max-w-lg mt-16 md:mt-0">
                     
                     {/* Feature Showcase (Google Meet Style Carousel) */}
-                    <div className="w-full flex flex-col items-center justify-center text-center min-h-[420px] group text-white">
+                    <div className="w-full flex flex-col items-end justify-center text-right min-h-[420px] group text-white">
                         
                         {/* Image with side arrows */}
-                        <div className="flex items-center justify-center gap-2 sm:gap-8 mb-2 w-full">
+                        <div className="flex items-center justify-end gap-2 sm:gap-8 mb-2 w-full">
                             <button 
                                 onClick={() => setCurrentSlide(prev => (prev - 1 + carouselItems.length) % carouselItems.length)}
                                 className="p-1 sm:p-2 text-white/50 hover:text-white transition-colors flex-shrink-0"
@@ -327,7 +327,7 @@ function HomeComponent() {
                         </p>
                         
                         {/* Carousel Dots */}
-                        <div className="flex gap-2 mt-8">
+                        <div className="flex justify-end gap-2 mt-8 w-full">
                             {carouselItems.map((_, idx) => (
                                 <button
                                     key={idx}
