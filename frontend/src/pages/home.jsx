@@ -197,12 +197,9 @@ function HomeComponent() {
                 
                 {/* Left side actions (Google Meet style) */}
                 <div className="flex-1 w-full max-w-2xl lg:pr-8">
-                    <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-                        Premium video meetings.
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+                        Premium video meetings, now entirely free for everyone.
                     </h1>
-                    <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-6 tracking-tight">
-                        Now free for everyone.
-                    </h2>
                     
                     <p className="text-lg text-white/70 mb-12 max-w-xl leading-relaxed">
                         Connect, collaborate, and celebrate from anywhere with MeetSphere. Crystal-clear video calls tailored for modern teams.
