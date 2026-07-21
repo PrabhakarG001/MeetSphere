@@ -52,7 +52,8 @@ export default function Video() {
     const {
         video, audio, setAudio,
         mediaError, setMediaError,
-        setLocalVideoElement, getUserMedia, handleVideo, attachLocalStream
+        setLocalVideoElement, getUserMedia, handleVideo, attachLocalStream,
+        switchCamera, camerasCount
     } = useMediaDevices(socketRef, socketIdRef, connectionsRef, askForUsername, joinedWithExistingStreamRef, localVideoref, localStreamRef);
 
     const { handleAudio } = useAudio(audio, setAudio, localStreamRef, getUserMedia, video, socketRef);
@@ -75,6 +76,7 @@ export default function Video() {
     const [meetingIsValid, setMeetingIsValid] = useState(null); // null = loading, true = valid, false = invalid
     const [meetingError, setMeetingError] = useState("");
     const [joinRequests, setJoinRequests] = useState([]);
+    const [isHost, setIsHost] = useState(false);
 
     useEffect(() => {
         const validateMeeting = async () => {
@@ -101,6 +103,7 @@ export default function Video() {
                     }
 
                     setMeetingIsValid(true);
+                    setIsHost(!!data.isHost);
                     
                     // Determine initial states from location state (set in PreJoin)
                     const stateName = location.state?.username || userData?.name || "Participant";
@@ -202,7 +205,7 @@ export default function Video() {
                         />
 
                         {joinRequests.length > 0 && (
-                            <div className="absolute top-16 right-4 sm:right-6 z-50 flex flex-col gap-3 w-[320px] max-w-[calc(100vw-32px)]">
+                            <div className="hidden sm:flex absolute top-16 right-6 z-50 flex-col gap-3 w-[320px]">
                                 {joinRequests.map(req => (
                                     <div key={req.socketId} className="bg-white dark:bg-[#202124] rounded-lg shadow-2xl p-4 flex flex-col gap-3 border border-gray-200 dark:border-[#5f6368] animate-slide-up">
                                         <div className="flex items-center gap-3">
@@ -239,6 +242,8 @@ export default function Video() {
                             username={username}
                             isRaisedHand={isRaisedHand}
                             userData={userData}
+                            isHost={isHost}
+                            screen={screen}
                         />
 
                         <ControlBar
@@ -262,6 +267,8 @@ export default function Video() {
                             isRecording={isRecording}
                             toggleRecording={toggleRecording}
                             openSettings={() => setShowSettingsModal(true)}
+                            switchCamera={switchCamera}
+                            camerasCount={camerasCount}
                         />
                         
                         {showSettingsModal && (
@@ -285,6 +292,9 @@ export default function Video() {
                         handleMuteUser={handleMuteUser}
                         handleRemoveUser={handleRemoveUser}
                         localPicture={userData?.picture}
+                        joinRequests={joinRequests}
+                        handleAdmit={handleAdmit}
+                        handleReject={handleReject}
                     />
                 </div>
             )}

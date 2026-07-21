@@ -23,14 +23,25 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
 
     const getDislayMediaSuccess = (stream) => {
         try {
-            localStreamRef.current?.getTracks().forEach(track => track.stop());
+            // Stop ONLY the video tracks to free camera, keep audio tracks running
+            localStreamRef.current?.getVideoTracks().forEach(track => track.stop());
         } catch (e) {
             console.error(e);
         }
 
-        localStreamRef.current = stream;
-        window.localStream = stream;
-        attachLocalStream(stream);
+        // Keep the existing microphone track
+        const existingAudioTrack = localStreamRef.current?.getAudioTracks()[0];
+        
+        // Create a new composite stream with screen video and mic audio
+        const screenVideoTrack = stream.getVideoTracks()[0];
+        const compositeStream = new MediaStream([screenVideoTrack]);
+        if (existingAudioTrack) {
+            compositeStream.addTrack(existingAudioTrack);
+        }
+
+        localStreamRef.current = compositeStream;
+        window.localStream = compositeStream;
+        attachLocalStream(compositeStream);
 
         for (let id in connections.current) {
             if (id === socketIdRef.current) continue;
@@ -38,8 +49,8 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
             const pc = connections.current[id];
             const senders = pc.getSenders();
             
-            const newVideoTrack = localStreamRef.current.getVideoTracks()[0];
-            const newAudioTrack = localStreamRef.current.getAudioTracks()[0];
+            const newVideoTrack = screenVideoTrack;
+            const newAudioTrack = existingAudioTrack;
 
             if (senders.length > 0) {
                 const videoSender = senders.find(s => s.track && s.track.kind === 'video');
@@ -59,8 +70,7 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
             }
         }
 
-        stream.getTracks().forEach(track => {
-            track.onended = () => {
+        stream.getVideoTracks()[0].onended = () => {
                 setScreen(false);
 
                 try {

@@ -11,6 +11,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
 
     const selectedVideoDeviceIdRef = useRef(null);
     const camerasRef = useRef([]);
+    const [isRearCamera, setIsRearCamera] = useState(false);
 
     const attachLocalStream = (stream) => {
         localStreamRef.current = stream;
@@ -46,6 +47,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             const microphones = devices.filter(device => device.kind === "audioinput");
             const selectedCamera = cameras[0];
 
+            camerasRef.current = cameras;
             selectedVideoDeviceIdRef.current = selectedCamera?.deviceId || null;
             setVideoAvailable(cameras.length > 0);
             setAudioAvailable(microphones.length > 0);
@@ -280,6 +282,20 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         });
     };
 
+    const switchCamera = async () => {
+        if (camerasRef.current.length < 2) return;
+        
+        const currentIndex = camerasRef.current.findIndex(c => c.deviceId === selectedVideoDeviceIdRef.current);
+        const nextIndex = (currentIndex + 1) % camerasRef.current.length;
+        const nextCamera = camerasRef.current[nextIndex];
+        
+        if (nextCamera) {
+            selectedVideoDeviceIdRef.current = nextCamera.deviceId;
+            setIsRearCamera(!isRearCamera);
+            await getUserMedia({ forceVideo: true });
+        }
+    };
+
     return {
         videoAvailable,
         audioAvailable,
@@ -292,6 +308,9 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         setLocalVideoElement,
         getUserMedia,
         handleVideo,
-        attachLocalStream
+        attachLocalStream,
+        switchCamera,
+        isRearCamera,
+        camerasCount: camerasRef.current?.length || 0
     };
 };

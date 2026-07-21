@@ -3,7 +3,7 @@ import '../../styles/ControlBar.css';
 import { 
     Video, VideoOff, Mic, MicOff, 
     MonitorUp, MonitorOff, MessageSquare, Users,
-    Heart, Hand, MoreVertical, Settings
+    Heart, Hand, MoreVertical, Settings, SwitchCamera
 } from 'lucide-react';
 
 const EMOJIS = ['\u2764\uFE0F', '\uD83D\uDC4D', '\uD83C\uDF89', '\uD83D\uDC4F', '\uD83D\uDE02', '\uD83D\uDE2E', '\uD83D\uDE22', '\uD83E\uDD14', '\uD83D\uDC4E'];
@@ -50,7 +50,7 @@ export default function ControlBar({
     activeTab, setActiveTab,
     handleEndCall,
     isRaisedHand, toggleRaiseHand, sendReaction,
-    openSettings
+    openSettings, switchCamera, camerasCount
 }) {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
@@ -242,22 +242,11 @@ export default function ControlBar({
             >
                 <Users size={20} />
             </ControlButton>
-
-            {/* Settings */}
-            <ControlButton
-                onClick={() => { if(openSettings) openSettings(); setShowMoreMenu(false); }}
-                isActive={false}
-                title="Settings"
-                className="w-12 h-12"
-                noTooltip
-            >
-                <Settings size={20} />
-            </ControlButton>
         </div>
     );
 
     return (
-        <div ref={moreMenuRef} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full px-4 sm:px-0 pointer-events-none flex justify-center">
+        <div ref={moreMenuRef} className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[60] w-full px-4 sm:px-0 pointer-events-none flex justify-center">
             {/* Desktop Layout (hidden on mobile) */}
             <div className="hidden sm:flex items-center justify-center gap-3 bg-white dark:bg-[#202124] px-4 py-3 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700/50 pointer-events-auto w-max transition-all duration-300">
                 <ControlButton
@@ -322,6 +311,19 @@ export default function ControlBar({
                 >
                     {video ? <Video size={18} /> : <VideoOff size={18} />}
                 </ControlButton>
+
+                {/* Mobile camera switch */}
+                {camerasCount > 1 && (
+                    <ControlButton
+                        onClick={switchCamera}
+                        isActive={false}
+                        title="Switch Camera"
+                        className="w-10 h-10"
+                        noTooltip
+                    >
+                        <SwitchCamera size={18} />
+                    </ControlButton>
+                )}
 
                 {/* Mobile chat toggle (TEXT ICON) */}
                 <ControlButton

@@ -16,7 +16,10 @@ export default function ChatPanel({
     videos,
     handleMuteUser,
     handleRemoveUser,
-    localPicture
+    localPicture,
+    joinRequests = [],
+    handleAdmit,
+    handleReject
 }) {
     const messagesEndRef = useRef(null);
 
@@ -63,6 +66,36 @@ export default function ChatPanel({
                     </button>
                 </div>
             </div>
+
+            {/* Join Requests Area */}
+            {joinRequests.length > 0 && (
+                <div className="flex flex-col gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800/30">
+                    <h3 className="text-xs font-semibold text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-1">Waiting to join</h3>
+                    {joinRequests.map(req => (
+                        <div key={req.socketId} className="bg-white dark:bg-[#3c4043] rounded-md p-2 flex items-center justify-between shadow-sm border border-gray-200 dark:border-transparent">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <Avatar name={req.username} size={28} />
+                                <span className="text-sm text-gray-900 dark:text-white font-medium truncate">{req.username}</span>
+                            </div>
+                            <div className="flex gap-1">
+                                <button 
+                                    onClick={() => handleReject && handleReject(req.socketId, req.path)}
+                                    className="p-1 text-[#ea4335] hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors"
+                                    title="Deny"
+                                >
+                                    <X size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => handleAdmit && handleAdmit(req.socketId, req.username, req.path)}
+                                    className="px-3 py-1 rounded bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] font-medium transition-colors text-xs"
+                                >
+                                    Admit
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Content Area */}
             {activeTab === 'chat' ? (

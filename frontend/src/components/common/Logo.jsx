@@ -10,9 +10,6 @@ export default function Logo({ asLink = true, className = "", style = {}, onClic
                 alt="MeetSphere Icon" 
                 className="logo-icon transition-transform hover:scale-105" 
             />
-            <span className="logo-text tracking-tight transition-transform hover:scale-105">
-                MeetSphere
-            </span>
         </div>
     );
 

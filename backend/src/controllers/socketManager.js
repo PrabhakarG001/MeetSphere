@@ -67,11 +67,15 @@ export const connectToSocket = (server) => {
               }
           }
   
-          if (token && !isHost) {
+          if (token) {
               const user = await User.findOne({ token });
               if (user && meeting && meeting.user_id && meeting.user_id.toString() === user._id.toString()) {
                   isHost = true;
+              } else {
+                  isHost = false;
               }
+          } else {
+              isHost = false;
           }
         } catch (err) {
           console.error("Socket meeting validation error:", err);

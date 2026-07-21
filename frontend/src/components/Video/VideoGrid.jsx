@@ -3,7 +3,7 @@ import '../../styles/VideoGrid.css';
 import LocalVideo from './LocalVideo';
 import RemoteVideo from './RemoteVideo';
 
-const VideoGrid = memo(function VideoGrid({ videos, setLocalVideoElement, video, audio, username, isRaisedHand, userData }) {
+const VideoGrid = memo(function VideoGrid({ videos, setLocalVideoElement, video, audio, username, isRaisedHand, userData, isHost, screen }) {
     const totalParticipants = videos.length + 1; // including local
     const [reactions, setReactions] = useState([]);
 
@@ -47,7 +47,7 @@ const VideoGrid = memo(function VideoGrid({ videos, setLocalVideoElement, video,
                     style={isRaisedHand ? { backgroundImage: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)' } : {}}
                 >
                     <div className="w-full h-full rounded-[10px] overflow-hidden relative">
-                        <LocalVideo setLocalVideoElement={setLocalVideoElement} video={video} audio={audio} username={username} isRaisedHand={isRaisedHand} picture={userData?.picture} />
+                        <LocalVideo setLocalVideoElement={setLocalVideoElement} video={video} audio={audio} username={username} isRaisedHand={isRaisedHand} picture={userData?.picture} isHost={isHost} isScreenSharing={screen} />
                     </div>
                     
                     {/* Render local reactions */}
