@@ -211,12 +211,8 @@ function HomeComponent() {
                     </p>
 
                     {/* Quick Actions Panel */}
-                    <div className="bg-white/5 backdrop-blur-xl p-6 sm:p-8 rounded-2xl shadow-2xl border border-white/10 flex flex-col gap-6 w-full max-w-xl relative overflow-hidden text-white">
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
-                        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 bg-blue-500 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
-
-                        <div className="relative z-10">
+                    <div className="flex flex-col gap-6 w-full max-w-xl text-white mt-4">
+                        <div>
                             <h3 className="text-sm font-bold tracking-wider text-[#ff6ec7] uppercase mb-4">Quick Actions</h3>
                             
                             <div className="flex flex-col sm:flex-row gap-3">
@@ -292,7 +288,7 @@ function HomeComponent() {
                 <div className="flex flex-col items-center justify-center w-full max-w-lg mt-16 md:mt-0">
                     
                     {/* Feature Showcase (Google Meet Style Carousel) */}
-                    <div className="w-full bg-white/5 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-white/10 shadow-2xl flex flex-col items-center justify-center text-center min-h-[420px] relative overflow-hidden group text-white">
+                    <div className="w-full flex flex-col items-center justify-center text-center min-h-[420px] group text-white">
                         
                         {/* Image with side arrows */}
                         <div className="flex items-center justify-center gap-2 sm:gap-8 mb-6 w-full">
