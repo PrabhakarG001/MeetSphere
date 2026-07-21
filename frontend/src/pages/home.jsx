@@ -327,7 +327,7 @@ function HomeComponent() {
                         </p>
                         
                         {/* Carousel Dots */}
-                        <div className="flex justify-end gap-2 mt-8 w-full">
+                        <div className="flex justify-center gap-2 mt-8 w-full">
                             {carouselItems.map((_, idx) => (
                                 <button
                                     key={idx}
