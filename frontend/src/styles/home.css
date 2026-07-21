@@ -9,10 +9,12 @@
   min-height: 100vh;
   font-family: 'Almaden Sans', 'DM Sans', sans-serif;
   overflow-x: hidden;
-  /* Premium, subtle SaaS blue gradient (Zoom-inspired) */
-  background: linear-gradient(180deg, #020b1f 0%, #081836 50%, #0f2754 100%);
+  /* Premium, SaaS-style blue gradient (Zoom-inspired) */
+  background: linear-gradient(180deg, #0B1C3F 0%, #1E3A8A 50%, #3B82F6 100%);
   background-attachment: fixed;
-  color: #f8fafc;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: #ffffff;
 }
 
 .dash-content {
