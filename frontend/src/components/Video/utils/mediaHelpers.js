@@ -27,10 +27,16 @@ export const getMediaErrorMessage = (error, mediaType = "camera", isSecure) => {
     }
 };
 
-export const getPreferredMediaConstraints = (selectedVideoDeviceId, useVideo = true, useAudio = true) => {
-    const videoConstraints = selectedVideoDeviceId
-        ? { deviceId: { exact: selectedVideoDeviceId } }
-        : true;
+export const getPreferredMediaConstraints = (selectedVideoDeviceId, useVideo = true, useAudio = true, facingMode = null) => {
+    let videoConstraints = true;
+    
+    if (facingMode) {
+        // Mobile-friendly camera toggle
+        videoConstraints = { facingMode: { ideal: facingMode } };
+    } else if (selectedVideoDeviceId) {
+        // Desktop exact device fallback
+        videoConstraints = { deviceId: { exact: selectedVideoDeviceId } };
+    }
 
     return {
         video: useVideo ? videoConstraints : false,

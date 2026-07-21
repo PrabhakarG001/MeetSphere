@@ -148,6 +148,11 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             return null;
         }
 
+    const getUserMedia = async (options = {}) => {
+        const forceVideo = options.forceVideo || false;
+        const forceAudio = options.forceAudio || false;
+        const requestedFacingMode = options.facingMode || null;
+
         const currentStream = localStreamRef.current || window.localStream;
         const needsVideo = video && (videoAvailable || forceVideo);
         const needsAudio = audio && (audioAvailable || forceAudio);
@@ -161,11 +166,14 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
 
         if (!needsVideo && !needsAudio) {
             stopStream(localStreamRef.current || localVideoref.current?.srcObject);
+            setMediaError("");
             return null;
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, needsVideo, needsAudio));
+            const stream = await navigator.mediaDevices.getUserMedia(
+                getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, needsVideo, needsAudio, requestedFacingMode)
+            );
             getUserMediaSuccess(stream);
             return stream;
         } catch (e) {
@@ -285,66 +293,25 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
     const switchCamera = async () => {
         if (camerasRef.current.length < 2) return;
         
-        const currentIndex = camerasRef.current.findIndex(c => c.deviceId === selectedVideoDeviceIdRef.current);
-        const nextIndex = (currentIndex + 1) % camerasRef.current.length;
-        const nextCamera = camerasRef.current[nextIndex];
+        const nextIsRear = !isRearCamera;
         
-        if (nextCamera) {
-            // Keep the current audio track to preserve it
-            const existingAudioTrack = localStreamRef.current?.getAudioTracks()[0];
-            
-            // Stop ONLY the video tracks
-            localStreamRef.current?.getVideoTracks().forEach(track => {
-                track.onended = null;
-                track.stop();
-            });
-            
-            // Wait 300ms for mobile hardware to fully release the camera
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            selectedVideoDeviceIdRef.current = nextCamera.deviceId;
-            setIsRearCamera(!isRearCamera);
-            
-            try {
-                // Request ONLY the new video track
-                const newVideoStream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: nextCamera.deviceId } },
-                    audio: false
-                });
-                
-                const newVideoTrack = newVideoStream.getVideoTracks()[0];
-                newVideoTrack.enabled = video; // Match current video mute state
-                
-                // Attach the new onended listener
-                newVideoTrack.onended = () => {
-                    setVideo(false);
-                };
-                
-                // Create a composite stream
-                const compositeStream = new MediaStream([newVideoTrack]);
-                if (existingAudioTrack) {
-                    compositeStream.addTrack(existingAudioTrack);
-                }
-                
-                localStreamRef.current = compositeStream;
-                window.localStream = compositeStream;
-                attachLocalStream(compositeStream);
-                
-                // Update peers with the new video track
-                for (let id in connectionsRef.current) {
-                    if (id === socketIdRef.current) continue;
-                    const pc = connectionsRef.current[id];
-                    const senders = pc.getSenders();
-                    
-                    const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                    if (videoSender) {
-                        videoSender.replaceTrack(newVideoTrack);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to switch camera video track:", err);
-                await getUserMedia({ forceVideo: true });
-            }
+        // Fully stop all current tracks
+        stopStream(localStreamRef.current);
+        
+        // Wait 500ms to ensure hardware fully releases
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        setIsRearCamera(nextIsRear);
+        
+        // Clear device ID to force facingMode instead
+        selectedVideoDeviceIdRef.current = null;
+        
+        try {
+            await getUserMedia({ forceVideo: true, facingMode: nextIsRear ? "environment" : "user" });
+        } catch (err) {
+            console.error("Camera switch failed via facingMode:", err);
+            // Complete fallback to default device
+            await getUserMedia();
         }
     };
 
