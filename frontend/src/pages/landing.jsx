@@ -58,10 +58,22 @@ export default function LandingPage() {
     const renderNavContent = (isScrolled) => (
         <>
             <div className='navHeader shrink-0'>
-                <button className="landingLogo flex items-center gap-1 sm:gap-2 flex-nowrap whitespace-nowrap" type="button" onClick={() => router("/")}>
+                <div className="landingLogo cursor-pointer flex items-center gap-1 sm:gap-2 flex-nowrap whitespace-nowrap" onClick={() => router("/")}>
                     <img src="/logo-navbar.png" alt="MeetSphere" style={{ width: isScrolled ? '1.5em' : '1.8em', height: isScrolled ? '1.5em' : '1.8em', objectFit: 'contain', transition: 'all 0.3s ease' }} />
-                    <span className="inline-block font-bold text-white text-[20px] sm:text-[36px]" style={{ transition: 'all 0.3s ease', fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-1px' }}>MeetSphere</span>
-                </button>
+                    <span 
+                        className="inline-block font-bold text-[20px] sm:text-[36px]" 
+                        style={{ 
+                            transition: 'all 0.3s ease', 
+                            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
+                            letterSpacing: '-1px',
+                            background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
+                            WebkitBackgroundClip: 'text', 
+                            WebkitTextFillColor: 'transparent'
+                        }}
+                    >
+                        MeetSphere
+                    </span>
+                </div>
             </div>
 
             <div className={`navlist landingNavActions flex gap-2 sm:gap-4 flex-nowrap items-center justify-end shrink-0`}>
