@@ -35,19 +35,45 @@ export default function PreJoin() {
     useEffect(() => { audioRef.current = audio; }, [audio]);
 
     useEffect(() => {
-        const isHostLocally = sessionStorage.getItem(`host_${url}`);
-        let s;
+        const validateMeeting = async () => {
+            let isHostLocally = sessionStorage.getItem(`host_${url}`);
+            
+            try {
+                // Call backend to validate and verify host via token
+                const token = localStorage.getItem("token");
+                const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+                
+                const response = await fetch(`${server}/api/v1/meetings/validate/${url}`, { headers });
+                const data = await response.json();
+                
+                if (response.ok && data.valid) {
+                    setMeetingIsValid(true);
+                    
+                    // If backend says we are host, update local storage
+                    if (data.isHost) {
+                        isHostLocally = true;
+                        sessionStorage.setItem(`host_${url}`, "true");
+                    }
+                } else {
+                    setMeetingIsValid(false);
+                    setMeetingError(data.message || "Invalid meeting link");
+                    return; // Stop here if invalid
+                }
+            } catch (err) {
+                console.error("Validation error:", err);
+                // Fallback to local flag if backend is unreachable
+            }
 
-        if (isHostLocally) {
-            setMeetingIsValid(true);
-            setIsHost(true);
-            navigate(`/meeting/${url}`, { replace: true });
-        } else {
-            setMeetingIsValid(true);
-            setIsHost(false);
+            let s;
+            if (isHostLocally) {
+                setMeetingIsValid(true);
+                setIsHost(true);
+                navigate(`/meeting/${url}`, { replace: true });
+            } else {
+                setIsHost(false);
 
-            s = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
-            socketRef.current = s;
+                s = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
+                socketRef.current = s;
 
             s.on("join-approved", () => {
                 sessionStorage.setItem(`approved_${url}`, "true");
@@ -71,9 +97,13 @@ export default function PreJoin() {
             });
         }
 
+        };
+        
+        validateMeeting();
+
         return () => {
-            if (s) {
-                s.disconnect();
+            if (socketRef.current) {
+                socketRef.current.disconnect();
             }
         };
     }, [url, navigate]);
