@@ -46,6 +46,10 @@
   pointer-events: auto;
   transform: translateY(0);
   
+  min-height: 70px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   background: rgba(2, 8, 44, 0.45);
