@@ -34,9 +34,8 @@
 }
 
 .logo-text {
-    font-family: "Playwrite ID", cursive;
-    font-optical-sizing: auto;
-    font-weight: 400;
+    font-family: "Cinzel Decorative", serif;
+    font-weight: 700;
     font-style: normal;
     font-size: 1em; /* Inherits from container */
     background: var(--gradient-primary);
