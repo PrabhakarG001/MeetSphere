@@ -157,8 +157,8 @@ export default function Authentication({ initialMode = 'login' }) {
 
             {/* Visual Panel (Left Side) */}
             <section className="authVisualPanel" aria-label="MeetSphere product preview">
-                  <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none', borderRight: '3px solid #ff2ea6', paddingRight: '12px' }}>
-                      <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '2rem', height: '2rem' }} />
+                  <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px', textDecoration: 'none', paddingRight: '12px' }}>
+                      <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '2.5rem', height: '2.5rem' }} />
                       <span className="lobster-two-bold" style={{ 
                           fontSize: '2.5rem',
                           background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
@@ -189,10 +189,10 @@ export default function Authentication({ initialMode = 'login' }) {
             {/* Form Section (Right Side) */}
             <section className="authFormPanel" aria-label={isSignup ? 'Create account' : 'Login'}>
                 <div className="authCard">
-                      <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '10px', textDecoration: 'none', borderRight: '3px solid #ff2ea6', paddingRight: '10px' }}>
+                      <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '10px', textDecoration: 'none', paddingRight: '10px' }}>
                           <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '1.5rem', height: '1.5rem' }} />
                           <span className="lobster-two-bold" style={{ 
-                              fontSize: '2rem',
+                              fontSize: '1.5rem',
                               background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                               WebkitBackgroundClip: 'text', 
                               WebkitTextFillColor: 'transparent'
@@ -236,7 +236,7 @@ export default function Authentication({ initialMode = 'login' }) {
 
                             <button 
                                 type="button"
-                                className="authPrimaryButton" 
+                                className="authPrimaryButton accent-border" 
                                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', borderRight: '3px solid #ff2ea6' }}
                                 onClick={() => setShowLoginForm(true)}
                             >
@@ -318,7 +318,7 @@ export default function Authentication({ initialMode = 'login' }) {
 
                                 <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
                                     <button 
-                                        className="authPrimaryButton" 
+                                        className="authPrimaryButton accent-border" 
                                         type="button" 
                                         style={{ backgroundColor: 'rgba(255,255,255,0.1)', flex: 0.4, borderRight: '3px solid #ff2ea6' }}
                                         onClick={() => {
@@ -328,7 +328,7 @@ export default function Authentication({ initialMode = 'login' }) {
                                     >
                                         Back
                                     </button>
-                                    <button className="authPrimaryButton" type="submit" disabled={loading} style={{ flex: 1, borderRight: '3px solid #ff2ea6' }}>
+                                    <button className="authPrimaryButton accent-border" type="submit" disabled={loading} style={{ flex: 1, borderRight: '3px solid #ff2ea6' }}>
                                         {loading ? (
                                             <>
                                                 <CircularProgress size={18} color="inherit" />

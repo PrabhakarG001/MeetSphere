@@ -1,0 +1,17 @@
+/* src/styles/theme.css */
+:root {
+  --gradient-primary: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
+  --accent-color: #ff2ea6;
+  --accent-border: 3px solid var(--accent-color);
+  --button-bg: rgba(255,255,255,0.1);
+  --button-border: var(--accent-border);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gradient-primary: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
+    --accent-color: #ff2ea6;
+    --accent-border: 3px solid var(--accent-color);
+  }
+}

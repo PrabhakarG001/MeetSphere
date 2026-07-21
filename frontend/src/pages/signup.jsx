@@ -1,4 +1,5 @@
 import '../styles/authentication.css';
+import '../styles/theme.css';
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import Snackbar from '@mui/material/Snackbar';
@@ -154,8 +155,8 @@ export default function Signup({ initialMode = 'signup' }) {
 
             {/* Visual Panel (Left Side) */}
             <section className="authVisualPanel" aria-label="MeetSphere product preview">
-                <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', borderRight: '3px solid #ff2ea6', paddingRight: '12px' }}>
-                    <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '2rem', height: '2rem' }} />
+                <RouterLink className="authBrand" to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none', paddingRight: '12px' }}>
+                    <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '2.5rem', height: '2.5rem' }} />
                     <span className="lobster-two-bold" style={{ 
                         fontSize: '2.5rem',
                         background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
@@ -186,10 +187,10 @@ export default function Signup({ initialMode = 'signup' }) {
             {/* Form Section (Right Side) */}
             <section className="authFormPanel" aria-label={isSignup ? 'Create account' : 'Login'}>
                 <div className="authCard">
-                    <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '8px', textDecoration: 'none', borderRight: '3px solid #ff2ea6', paddingRight: '10px' }}>
+                    <RouterLink className="authMobileBrand" to="/" style={{ display: 'none', alignItems: 'center', gap: '8px', textDecoration: 'none', paddingRight: '10px' }}>
                         <img src="/logo-navbar.png" alt="MeetSphere Logo" className="object-contain transition-transform hover:scale-105" style={{ width: '1.5rem', height: '1.5rem' }} />
                         <span className="lobster-two-bold" style={{ 
-                            fontSize: '2rem',
+                            fontSize: '1.5rem',
                             background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                             WebkitBackgroundClip: 'text', 
                             WebkitTextFillColor: 'transparent'
@@ -214,7 +215,7 @@ export default function Signup({ initialMode = 'signup' }) {
                         </p>
                     </div>
 
-                    </div>
+                    
 
                     <div style={{ marginBottom: '1.5rem' }}>
                         <GoogleAuth 
@@ -386,7 +387,7 @@ export default function Signup({ initialMode = 'signup' }) {
                             <button 
                                 className="authPrimaryButton" 
                                 type="button" 
-                                style={{ backgroundColor: 'rgba(255,255,255,0.1)', flex: 0.4 }}
+                                style={{ backgroundColor: 'rgba(255,255,255,0.1)', flex: 0.4, borderRight: '3px solid #ff2ea6' }}
                                 onClick={() => navigate('/login')}
                             >
                                 Back
@@ -416,12 +417,7 @@ export default function Signup({ initialMode = 'signup' }) {
                 </div>
             </section>
 
-            <Snackbar
-                open={open}
-                autoHideDuration={4000}
-                onClose={() => setOpen(false)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
+            <Snackbar open={open} autoHideDuration={4000} onClose={() => setOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
                 <Alert severity="success" variant="filled" onClose={() => setOpen(false)}>
                     {message}
                 </Alert>

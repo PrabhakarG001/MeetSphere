@@ -9,3 +9,6 @@ node_modules/
 .vscode/
 .idea/
 .DS_Store
+
+# Firebase config (sensitive)
+firebase.js

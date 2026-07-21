@@ -1,4 +1,5 @@
 import '../styles/landing.css';
+import '../styles/theme.css';
 import { useState, useEffect } from "react";
 import "../App.css"
 import { useNavigate } from 'react-router-dom'
@@ -58,12 +59,12 @@ export default function LandingPage() {
     const renderNavContent = (isScrolled) => (
         <>
             <div className='navHeader shrink-0'>
-                <div className="landingLogo cursor-pointer flex items-center gap-2 sm:gap-3 flex-nowrap whitespace-nowrap pr-3" onClick={() => router("/")} style={{ borderRight: '3px solid #ff2ea6' }}>
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-all duration-300" style={{ width: '2rem', height: '2rem' }} />
+                <div className="landingLogo cursor-pointer flex items-center gap-2 sm:gap-3 flex-nowrap whitespace-nowrap pr-3" onClick={() => router("/")}>
+                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-all duration-300" style={{ width: 'clamp(1.5rem, 6vw, 2.5rem)', height: 'clamp(1.5rem, 6vw, 2.5rem)' }} />
                     <span 
                         className="lobster-two-bold"
                         style={{ 
-                            fontSize: '2.5rem', 
+                            fontSize: 'clamp(1.5rem, 6vw, 2.5rem)', 
                             background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                             WebkitBackgroundClip: 'text', 
                             WebkitTextFillColor: 'transparent',

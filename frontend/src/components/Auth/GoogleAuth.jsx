@@ -1,23 +1,11 @@
 import React, { useState } from 'react';
-import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../../firebase';
 import './GoogleAuth.css';
-
-// TODO: Replace these with your actual Firebase project credentials
-// You can find these in your Firebase Console under Project Settings > General
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// Initialize Google provider using shared auth instance
 const provider = new GoogleAuthProvider();
+// Request email scope
+provider.addScope('email');
 
 export default function GoogleAuth({ onSuccess, onError, buttonText = "Continue with Google" }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +14,7 @@ export default function GoogleAuth({ onSuccess, onError, buttonText = "Continue 
         setIsLoading(true);
         try {
             const result = await signInWithPopup(auth, provider);
+console.log('Google sign‑in result:', result);
             const user = result.user;
             
             // You can extract the token or user details here
@@ -41,6 +30,8 @@ export default function GoogleAuth({ onSuccess, onError, buttonText = "Continue 
             }
         } catch (error) {
             console.error("Google Sign-In Error:", error);
+if (onError) onError(error.message);
+
             if (onError) onError(error.message);
         } finally {
             setIsLoading(false);
@@ -50,7 +41,8 @@ export default function GoogleAuth({ onSuccess, onError, buttonText = "Continue 
     return (
         <button 
             type="button" 
-            className="google-auth-btn" 
+            className="authPrimaryButton" 
+            style={{ width: '100%', borderRight: '3px solid #ff2ea6' }}
             onClick={handleGoogleSignIn}
             disabled={isLoading}
         >

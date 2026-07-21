@@ -1,4 +1,5 @@
 import '../../styles/DashboardNav.css';
+import '../../styles/theme.css';
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, Clock, LogOut, MoreVertical } from 'lucide-react';
 
@@ -36,29 +37,28 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
 
     return (
         <nav 
-            className={`sticky top-0 z-50 flex items-center justify-between px-6 transition-all duration-300 ease-in-out ${scrolled ? 'py-4 bg-white/20 dark:bg-[#202124]/30 backdrop-blur-md' : 'py-5 bg-transparent'}`} 
+            className={`sticky top-0 z-50 flex items-center justify-between px-6 transition-all duration-300 ease-in-out ${scrolled ? 'py-4 bg-white/20 dark:bg-[#202124]/30 backdrop-blur-md' : 'py-5 bg-transparent'} landingNav`} 
             role="navigation" 
             aria-label="Dashboard navigation"
         >
             <div className="flex items-center gap-4">
                 {showBack && (
                     <button 
-                        className="p-2 text-textSecondary hover:text-text hover:bg-slate-700/50 rounded-full transition-colors" 
+                        className="p-2 text-textSecondary hover:text-text hover:bg-slate-700/50 rounded-full transition-colors border border-transparent hover:border-accent" 
                         onClick={onBack} 
                         type="button" 
                         aria-label="Go back"
-                        style={{ borderRight: '3px solid #ff2ea6' }}
                     >
                         <ChevronLeft size={20} />
                     </button>
                 )}
                 <div className="flex items-center gap-2">
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-transform hover:scale-105" style={{ width: '1.5rem', height: '1.5rem' }} />
+                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-transform hover:scale-105" style={{ width: 'clamp(1.25rem, 5vw, 2rem)', height: 'clamp(1.25rem, 5vw, 2rem)' }} />
                     <h2 
                         className="tracking-tight transition-transform hover:scale-105 lobster-two-bold" 
                         style={{ 
-                            fontSize: '2rem',
-                            background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
+                            fontSize: 'clamp(1.25rem, 5vw, 2rem)',
+                            background: 'var(--gradient-primary)', 
                             WebkitBackgroundClip: 'text', 
                             WebkitTextFillColor: 'transparent'
                         }}
@@ -77,7 +77,7 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
                 </div>
                 {onLogout && (
                     <button 
-                        className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-slate-300 transition-all overflow-hidden" 
+                        className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-accent transition-all overflow-hidden border border-transparent hover:border-accent" 
                         onClick={onLogout} 
                         type="button" 
                         title="Click to logout"

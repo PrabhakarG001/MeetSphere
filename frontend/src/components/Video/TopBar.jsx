@@ -20,9 +20,9 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
                     type="button" 
                     onClick={() => router("/")} 
                     title="Back to Home"
-                    style={{ borderRight: '3px solid #ff2ea6' }}
+                    title="Back to Home"
                 >
-                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain" style={{ width: '1.25rem', height: '1.25rem' }} />
+                    <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain" style={{ width: '1.5rem', height: '1.5rem' }} />
                     <span 
                         className="font-bold drop-shadow-sm hidden sm:inline-block lobster-two-bold" 
                         style={{ 
