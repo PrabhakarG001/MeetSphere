@@ -99,7 +99,9 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout, us
                                         </div>
                                     )}
                                     <div className="font-bold text-lg">{userName || 'User'}</div>
-                                    <div className="text-sm text-slate-500 break-all">{userEmail || 'No email provided'}</div>
+                                    <div className="text-sm text-slate-500 break-all">
+                                        {userEmail ? (userEmail.includes('@') ? userEmail : `${userEmail}@gmail.com`) : 'No email provided'}
+                                    </div>
                                 </div>
                                 <div className="w-full h-px bg-slate-200 mb-3"></div>
                                 <button 
