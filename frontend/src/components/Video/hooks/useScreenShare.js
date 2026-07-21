@@ -87,7 +87,6 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
 
                 getUserMedia();
             };
-        });
     };
 
     return {
