@@ -9,7 +9,9 @@
   min-height: 100vh;
   font-family: 'Almaden Sans', 'DM Sans', sans-serif;
   overflow-x: hidden;
-  /* Background gradient is managed globally via .auth-gradient-bg in App.css */
+  background: linear-gradient(180deg, #0b1426 0%, #112240 50%, #1a365d 100%);
+  background-attachment: fixed;
+  color: #f8fafc;
 }
 
 .dash-content {
