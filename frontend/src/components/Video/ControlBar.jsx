@@ -313,17 +313,15 @@ export default function ControlBar({
                 </ControlButton>
 
                 {/* Mobile screen share */}
-                {screenAvailable && (
-                    <ControlButton
-                        onClick={handleScreen}
-                        isActive={screen}
-                        title={screen ? "Stop sharing" : "Share screen"}
-                        className="w-10 h-10"
-                        noTooltip
-                    >
-                        {screen ? <MonitorOff size={18} /> : <MonitorUp size={18} />}
-                    </ControlButton>
-                )}
+                <ControlButton
+                    onClick={handleScreen}
+                    isActive={screen}
+                    title={screen ? "Stop sharing" : "Share screen"}
+                    className="w-10 h-10"
+                    noTooltip
+                >
+                    {screen ? <MonitorOff size={18} /> : <MonitorUp size={18} />}
+                </ControlButton>
 
                 {/* Mobile camera switch */}
                 {camerasCount > 1 && (

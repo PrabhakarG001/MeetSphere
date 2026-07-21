@@ -11,7 +11,13 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                 if (navigator.mediaDevices.getDisplayMedia) {
                     navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
                         .then(getDislayMediaSuccess)
-                        .catch((e) => console.error(e));
+                        .catch((e) => {
+                            console.error(e);
+                            setScreen(false); // Reset state if user cancels or fails
+                        });
+                } else {
+                    alert("Screen sharing is not supported by your current browser. Please try using a different browser like Chrome or Safari.");
+                    setScreen(false);
                 }
             }
         }
