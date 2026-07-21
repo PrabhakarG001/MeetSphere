@@ -85,7 +85,9 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
                 if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
             } else {
-                pc.addStream(window.localStream);
+                window.localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, window.localStream);
+                });
                 pc.createOffer().then((description) => {
                     pc.setLocalDescription(description)
                         .then(() => {
@@ -126,7 +128,9 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                         const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
                         if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
                     } else {
-                        pc.addStream(localStreamRef.current);
+                        localStreamRef.current.getTracks().forEach(track => {
+                            pc.addTrack(track, localStreamRef.current);
+                        });
                         pc.createOffer().then((description) => {
                             pc.setLocalDescription(description)
                                 .then(() => {

@@ -103,18 +103,22 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                             }
                         };
 
-                        connectionsRef.current[socketListId].onaddstream = (event) => {
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream, peerUsername, peerIsHost, peerPicture);
+                        connectionsRef.current[socketListId].ontrack = (event) => {
+                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.streams[0], peerUsername, peerIsHost, peerPicture);
                         };
 
                         const currentStream = localStreamRef.current || window.localStream;
                         if (currentStream !== undefined && currentStream !== null) {
-                            connectionsRef.current[socketListId].addStream(currentStream);
+                            currentStream.getTracks().forEach(track => {
+                                connectionsRef.current[socketListId].addTrack(track, currentStream);
+                            });
                         } else {
                             let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
                             localStreamRef.current = blackSilence();
                             window.localStream = localStreamRef.current;
-                            connectionsRef.current[socketListId].addStream(localStreamRef.current);
+                            localStreamRef.current.getTracks().forEach(track => {
+                                connectionsRef.current[socketListId].addTrack(track, localStreamRef.current);
+                            });
                         }
                     }
                 });
@@ -124,7 +128,10 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         if (id2 === socketIdRef.current) continue;
 
                         try {
-                            connectionsRef.current[id2].addStream(localStreamRef.current || window.localStream);
+                            const streamToAdd = localStreamRef.current || window.localStream;
+                            streamToAdd.getTracks().forEach(track => {
+                                connectionsRef.current[id2].addTrack(track, streamToAdd);
+                            });
                         } catch (e) { console.error(e); }
 
                         connectionsRef.current[id2].createOffer().then((description) => {
