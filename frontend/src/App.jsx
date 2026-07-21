@@ -8,6 +8,7 @@ import VideoMeetComponent from './components/Video/Video';
 import PreJoinComponent from './components/Video/PreJoin';
 import HomeComponent, { GuestHomeComponent } from './pages/home';
 import History from './pages/history';
+import AccountSelection from './pages/AccountSelection';
   
 
 
@@ -27,6 +28,7 @@ function App() {
             <Route path='/auth' element={<Authentication />} />
             <Route path='/login' element={<Authentication initialMode="login" />} />
             <Route path='/signup' element={<Signup />} />
+            <Route path='/account-select' element={<AccountSelection />} />
 
             <Route path='/home' element={<HomeComponent />} />
             <Route path='/join' element={<GuestHomeComponent />} />
