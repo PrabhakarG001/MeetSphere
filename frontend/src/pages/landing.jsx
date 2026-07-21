@@ -140,7 +140,7 @@ export default function LandingPage() {
                 </div>
 
                 <div className="footerBottom">
-                    <p>&copy; {new Date().getFullYear()} Design and Developed by Prabhakar Gupta</p>
+                    <p>&copy; {new Date().getFullYear()} Design and Developed with 🤍 by Prabhakar Gupta</p>
                 </div>
             </footer>
         </div>
