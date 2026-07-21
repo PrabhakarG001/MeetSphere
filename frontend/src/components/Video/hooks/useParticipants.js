@@ -30,7 +30,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         }
     };
 
-    const connectToSocketServer = (username) => {
+    const connectToSocketServer = (username, picture) => {
         socketRef.current = initializeSocket();
         socketRef.current.on('signal', gotMessageFromServer);
 
@@ -40,7 +40,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             const url = pathParts[pathParts.length - 1];
             const isHostLocally = !!localStorage.getItem(`host_${url}`);
             
-            socketRef.current.emit('join-call', window.location.pathname, username, token, isHostLocally);
+            socketRef.current.emit('join-call', window.location.pathname, username, token, isHostLocally, picture);
             socketIdRef.current = socketRef.current.id;
 
             socketRef.current.on('chat-message', addMessage);
@@ -92,6 +92,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     const socketListId = typeof clientInfo === 'string' ? clientInfo : clientInfo.socketId;
                     const peerUsername = typeof clientInfo === 'string' ? "Guest" : clientInfo.username;
                     const peerIsHost = typeof clientInfo === 'string' ? false : !!clientInfo.isHost;
+                    const peerPicture = typeof clientInfo === 'string' ? null : clientInfo.picture;
 
                     if (connectionsRef.current[socketListId] === undefined) {
                         connectionsRef.current[socketListId] = new RTCPeerConnection(PEER_CONFIG_CONNECTIONS);
@@ -103,7 +104,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         };
 
                         connectionsRef.current[socketListId].onaddstream = (event) => {
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream, peerUsername, peerIsHost);
+                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.stream, peerUsername, peerIsHost, peerPicture);
                         };
 
                         const currentStream = localStreamRef.current || window.localStream;

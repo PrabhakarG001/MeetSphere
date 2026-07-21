@@ -200,7 +200,7 @@ export default function Signup({ initialMode = 'signup' }) {
                     
                     <div className="signupMobileVisual">
                         <img src="/Sharelink.png" alt="Illustration" style={{ width: '100%', maxWidth: '280px', margin: '0 auto' }} />
-                        <p style={{ marginTop: '1rem', color: '#94a3b8', fontSize: '1rem' }}>Secure and seamless video meetings.</p>
+                        <p style={{ marginTop: '1rem', color: 'aliceblue', fontSize: '1rem' }}>Secure and seamless video meetings.</p>
                     </div>
 
                     <div className="authHeader">

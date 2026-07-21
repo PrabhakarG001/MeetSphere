@@ -148,3 +148,7 @@ background: linear-gradient(
   33% { transform: translate(-25px, 20px) scale(0.95); }
   66% { transform: translate(20px, -15px) scale(1.05); }
 }
+
+button {
+  border: 2px solid #ff2ea6 !important;
+}

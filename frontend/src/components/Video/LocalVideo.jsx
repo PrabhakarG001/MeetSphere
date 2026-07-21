@@ -2,7 +2,7 @@ import '../../styles/LocalVideo.css';
 import { MicOff, Hand } from 'lucide-react';
 import Avatar from './Avatar';
 
-export default function LocalVideo({ setLocalVideoElement, video, audio, username, isRaisedHand }) {
+export default function LocalVideo({ setLocalVideoElement, video, audio, username, isRaisedHand, picture }) {
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video 
@@ -15,7 +15,7 @@ export default function LocalVideo({ setLocalVideoElement, video, audio, usernam
             
             {!video && (
                 <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
-                    <Avatar name={username || "You"} size={96} />
+                    <Avatar name={username || "You"} picture={picture} size={96} />
                 </div>
             )}
             

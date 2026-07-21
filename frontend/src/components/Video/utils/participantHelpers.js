@@ -5,13 +5,13 @@ export const removeParticipant = (setVideos, videoRef, id) => {
         return updatedVideos;
     });
 };
-export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream, username = "Guest", isHost = false) => {
+export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream, username = "Guest", isHost = false, picture = null) => {
     let videoExists = videoRef.current.find(video => video.socketId === socketListId);
 
     if (videoExists) {
         setVideos(videos => {
             const updatedVideos = videos.map(video =>
-                video.socketId === socketListId ? { ...video, stream: stream, ...(username && {username}), isHost } : video
+                video.socketId === socketListId ? { ...video, stream: stream, ...(username && {username}), isHost, ...(picture && {picture}) } : video
             );
             videoRef.current = updatedVideos;
             return updatedVideos;
@@ -22,6 +22,7 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
             stream: stream,
             username: username,
             isHost: isHost,
+            picture: picture,
             autoplay: true,
             playsinline: true
         };

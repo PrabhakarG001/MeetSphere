@@ -54,7 +54,7 @@ export default function DashboardNav({ showBack, onBack, onHistory, onLogout }) 
                 <div className="flex items-center gap-2">
                     <img src="/logo-navbar.png" alt="MeetSphere" className="object-contain transition-transform hover:scale-105" style={{ width: '2.5em', height: '2.5em' }} />
                     <h2 
-                        className="text-2xl tracking-tight transition-transform hover:scale-105" 
+                        className="text-xl sm:text-2xl tracking-tight transition-transform hover:scale-105" 
                         style={{ 
                             background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
                             WebkitBackgroundClip: 'text', 

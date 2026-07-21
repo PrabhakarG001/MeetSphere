@@ -76,8 +76,7 @@ export default function ControlBar({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // These items move to the "More Options" menu on mobile
-    const extraControls = (
+    const extraControlsDesktop = (
         <>
             {/* Screen Share */}
             {screenAvailable && (
@@ -94,11 +93,14 @@ export default function ControlBar({
             {/* Emoji / React Button */}
             <div className="relative flex items-center justify-center">
                 {showEmojiPicker && (
-                    <div className="absolute bottom-16 sm:bottom-16 left-1/2 -translate-x-1/2 bg-white dark:bg-[#202124] border border-gray-200 dark:border-gray-700 rounded-full py-2 px-3 flex flex-wrap gap-2 shadow-xl z-50 w-max max-w-[280px] justify-center">
+                    <div className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-white dark:bg-[#202124] border border-gray-200 dark:border-gray-700 rounded-full py-2 px-3 flex flex-wrap gap-2 shadow-xl z-50 w-max max-w-[280px] justify-center">
                         {EMOJIS.map((emoji, index) => (
                             <button 
                                 key={index}
-                                onClick={() => handleEmojiClick(emoji)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEmojiClick(emoji);
+                                }}
                                 className="w-10 h-10 flex items-center justify-center rounded-full text-2xl hover:bg-gray-100 dark:hover:bg-[#3c4043] transition-colors"
                             >
                                 {emoji}
@@ -162,23 +164,100 @@ export default function ControlBar({
             >
                 <MessageSquare size={18} strokeWidth={2} className="w-5 h-5" />
             </ControlButton>
-
-            {/* Settings (Only in More Menu) */}
-            <div className="sm:hidden">
-                <ControlButton
-                    onClick={() => { if(openSettings) openSettings(); setShowMoreMenu(false); }}
-                    isActive={false}
-                    title="Settings"
-                    className="w-12 h-12"
-                >
-                    <Settings size={18} strokeWidth={2} className="w-5 h-5" />
-                </ControlButton>
-            </div>
         </>
     );
 
+    const extraControlsMobile = (
+        <div className="grid grid-cols-4 gap-4 justify-items-center w-full px-2">
+            {screenAvailable && (
+                <ControlButton
+                    onClick={() => { handleScreen(); setShowMoreMenu(false); }}
+                    isActive={screen}
+                    title={screen ? "Stop" : "Share"}
+                    className="w-12 h-12"
+                    noTooltip
+                >
+                    {screen ? <MonitorOff size={20} /> : <MonitorUp size={20} />}
+                </ControlButton>
+            )}
+
+            {/* Emoji / React Button */}
+            <div className="relative flex items-center justify-center">
+                {showEmojiPicker && (
+                    <div className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-white dark:bg-[#202124] border border-gray-200 dark:border-gray-700 rounded-full py-2 px-3 flex flex-wrap gap-2 shadow-xl z-[70] w-max max-w-[280px] justify-center">
+                        {EMOJIS.map((emoji, index) => (
+                            <button 
+                                key={index}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEmojiClick(emoji);
+                                }}
+                                className="w-10 h-10 flex items-center justify-center rounded-full text-2xl hover:bg-gray-100 dark:hover:bg-[#3c4043] transition-colors"
+                            >
+                                {emoji}
+                            </button>
+                        ))}
+                    </div>
+                )}
+                <ControlButton
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowEmojiPicker(!showEmojiPicker);
+                    }}
+                    isActive={showEmojiPicker}
+                    title="React"
+                    className="w-12 h-12"
+                    noTooltip
+                >
+                    <Heart size={20} />
+                </ControlButton>
+            </div>
+
+            {/* Hand Raise */}
+            <ControlButton
+                onClick={() => { toggleRaiseHand(); setShowMoreMenu(false); }}
+                isActive={isRaisedHand}
+                title="Raise"
+                className="w-12 h-12"
+                noTooltip
+            >
+                <Hand size={20} />
+            </ControlButton>
+
+            {/* Participants */}
+            <ControlButton
+                onClick={() => {
+                    if (showModal && activeTab === 'participants') {
+                        closeChat();
+                    } else {
+                        setActiveTab('participants');
+                        openChat();
+                    }
+                    setShowMoreMenu(false);
+                }}
+                isActive={showModal && activeTab === 'participants'}
+                title="People"
+                className="w-12 h-12"
+                noTooltip
+            >
+                <Users size={20} />
+            </ControlButton>
+
+            {/* Settings */}
+            <ControlButton
+                onClick={() => { if(openSettings) openSettings(); setShowMoreMenu(false); }}
+                isActive={false}
+                title="Settings"
+                className="w-12 h-12"
+                noTooltip
+            >
+                <Settings size={20} />
+            </ControlButton>
+        </div>
+    );
+
     return (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full px-4 sm:px-0 pointer-events-none flex justify-center">
+        <div ref={moreMenuRef} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full px-4 sm:px-0 pointer-events-none flex justify-center">
             {/* Desktop Layout (hidden on mobile) */}
             <div className="hidden sm:flex items-center justify-center gap-3 bg-white dark:bg-[#202124] px-4 py-3 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700/50 pointer-events-auto w-max transition-all duration-300">
                 <ControlButton
@@ -201,7 +280,7 @@ export default function ControlBar({
                     {video ? <Video size={20} strokeWidth={2} /> : <VideoOff size={20} strokeWidth={2} />}
                 </ControlButton>
 
-                {extraControls}
+                {extraControlsDesktop}
                 
                 <div className="w-px h-8 bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
@@ -219,17 +298,17 @@ export default function ControlBar({
             </div>
 
             {/* Mobile Layout (hidden on desktop) */}
-            <div className="sm:hidden flex items-center justify-between w-full max-w-sm gap-2 bg-white dark:bg-[#202124] px-4 py-3 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700/50 pointer-events-auto relative" ref={moreMenuRef}>
+            <div className="sm:hidden flex items-center justify-between w-full max-w-sm gap-2 bg-white dark:bg-[#202124] px-4 py-3 rounded-full shadow-2xl border border-gray-200 dark:border-gray-700/50 pointer-events-auto relative">
                 {/* Mobile audio toggle */}
                 <ControlButton
                     onClick={handleAudio}
                     isActive={false}
                     isDanger={!audio}
                     title={audio ? "Turn off mic" : "Turn on mic"}
-                    className="w-12 h-12"
+                    className="w-10 h-10"
                     noTooltip
                 >
-                    {audio ? <Mic size={20} /> : <MicOff size={20} />}
+                    {audio ? <Mic size={18} /> : <MicOff size={18} />}
                 </ControlButton>
 
                 {/* Mobile video toggle */}
@@ -238,10 +317,29 @@ export default function ControlBar({
                     isActive={false}
                     isDanger={!video}
                     title={video ? "Turn off camera" : "Turn on camera"}
-                    className="w-12 h-12"
+                    className="w-10 h-10"
                     noTooltip
                 >
-                    {video ? <Video size={20} /> : <VideoOff size={20} />}
+                    {video ? <Video size={18} /> : <VideoOff size={18} />}
+                </ControlButton>
+
+                {/* Mobile chat toggle (TEXT ICON) */}
+                <ControlButton
+                    onClick={() => {
+                        if (showModal && activeTab === 'chat') {
+                            closeChat();
+                        } else {
+                            setActiveTab('chat');
+                            openChat();
+                        }
+                    }}
+                    isActive={showModal && activeTab === 'chat'}
+                    title="Chat"
+                    badge={!showModal ? newMessages : 0}
+                    className="w-10 h-10"
+                    noTooltip
+                >
+                    <MessageSquare size={18} />
                 </ControlButton>
 
                 {/* More Menu Toggle */}
@@ -250,22 +348,16 @@ export default function ControlBar({
                         onClick={() => setShowMoreMenu(!showMoreMenu)}
                         isActive={showMoreMenu}
                         title="More options"
-                        className="w-12 h-12 relative"
+                        className="w-10 h-10 relative"
                         noTooltip
                     >
-                        <MoreVertical size={20} />
-                        {!showModal && newMessages > 0 && (
-                            <span className="absolute top-0 right-0 flex h-3 w-3 rounded-full bg-red-500 border-2 border-[#202124]" />
-                        )}
+                        <MoreVertical size={18} />
                     </ControlButton>
 
                     {/* More Menu Popover */}
                     {showMoreMenu && (
-                        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-[280px] bg-white dark:bg-[#202124] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700/50 p-4 animate-slide-up origin-bottom">
-                            {/* Scrollable extra controls on mobile */}
-                            <div className="overflow-x-auto flex gap-2">
-                                {extraControls}
-                            </div>
+                        <div className="absolute bottom-14 right-0 w-[260px] bg-white dark:bg-[#202124] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700/50 p-4 animate-slide-up origin-bottom-right z-50">
+                            {extraControlsMobile}
                         </div>
                     )}
                 </div>
@@ -275,10 +367,10 @@ export default function ControlBar({
                     isActive={false}
                     isDanger={true}
                     title="Leave call"
-                    className="w-16 h-12"
+                    className="w-14 h-10"
                     noTooltip
                 >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
                     </svg>
                 </ControlButton>

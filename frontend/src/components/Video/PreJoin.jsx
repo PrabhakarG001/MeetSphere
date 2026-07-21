@@ -229,15 +229,6 @@ export default function PreJoin() {
                             >
                                 Ask to join
                             </button>
-                            
-                            {!userData?.token && (
-                                <button 
-                                    onClick={() => navigate('/login')}
-                                    className="w-full py-3 px-6 rounded-full font-medium text-sm tracking-wide border border-[#5f6368] text-slate-300 hover:bg-[#3c4043] transition-all"
-                                >
-                                    Login to join as host
-                                </button>
-                            )}
                         </div>
                     )}
 

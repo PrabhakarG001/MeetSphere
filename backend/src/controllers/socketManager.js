@@ -49,7 +49,7 @@ export const connectToSocket = (server) => {
       }
     });
 
-    socket.on("join-call", async (path, username, token, isHostLocally) => {
+    socket.on("join-call", async (path, username, token, isHostLocally, picture) => {
         if (!path) {
           return;
         }
@@ -88,7 +88,7 @@ export const connectToSocket = (server) => {
       const existing = connections[roomKey].find(c => c.socketId === socket.id);
       const finalUsername = username || "Participant";
       if (!existing) {
-        connections[roomKey].push({ socketId: socket.id, username: finalUsername, isHost });
+        connections[roomKey].push({ socketId: socket.id, username: finalUsername, isHost, picture });
       }
 
       timeOnline[socket.id] = new Date();

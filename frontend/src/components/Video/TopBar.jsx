@@ -16,13 +16,22 @@ export default function TopBar({ user, username, handleCopyInviteLink, inviteCop
             {/* Left side: MeetSphere Logo */}
             <div className="flex items-center">
                 <button 
-                    className="pointer-events-auto flex items-center sm:flex-col sm:justify-center gap-2 sm:gap-0 sm:-mt-1" 
+                    className="pointer-events-auto flex items-center gap-2" 
                     type="button" 
                     onClick={() => router("/")} 
                     title="Back to Home"
                 >
                     <img src="/logo-navbar.png" alt="MeetSphere" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-                    <span className="text-[#4f46e5] font-bold text-base sm:text-lg drop-shadow-sm" style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', letterSpacing: '-0.5px' }}>
+                    <span 
+                        className="font-bold text-lg sm:text-xl drop-shadow-sm" 
+                        style={{ 
+                            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif', 
+                            letterSpacing: '-0.5px',
+                            background: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)', 
+                            WebkitBackgroundClip: 'text', 
+                            WebkitTextFillColor: 'transparent'
+                        }}
+                    >
                         MeetSphere
                     </span>
                 </button>

@@ -61,14 +61,14 @@ export default function Video() {
         localStreamRef, localVideoref, connectionsRef, socketIdRef, socketRef, getUserMedia, attachLocalStream
     );
 
-    const connect = async (overrideUsername, forceAudio, forceVideo) => {
+    const connect = async (overrideUsername, forceAudio, forceVideo, picture) => {
         joinedWithExistingStreamRef.current = false;
         // Wait for the stream initialization attempt
         await getUserMedia({ forceVideo, forceAudio });
 
         closeChat();
         setAskForUsername(false);
-        connectToSocketServer(overrideUsername);
+        connectToSocketServer(overrideUsername, picture);
     };
 
     const hasAutoConnected = useRef(false);
@@ -112,7 +112,7 @@ export default function Video() {
                     // Auto-connect
                     if (!hasAutoConnected.current) {
                         hasAutoConnected.current = true;
-                        connect(stateName, stateAudio, stateVideo);
+                        connect(stateName, stateAudio, stateVideo, userData?.picture);
                     }
                 } else {
                     setMeetingIsValid(false);
@@ -228,6 +228,7 @@ export default function Video() {
                             audio={audio}
                             username={username}
                             isRaisedHand={isRaisedHand}
+                            userData={userData}
                         />
 
                         <ControlBar

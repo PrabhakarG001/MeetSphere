@@ -19,7 +19,7 @@ export default function RemoteVideo({ video }) {
 
             {video.isVideoEnabled === false && (
                 <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
-                    <Avatar name={video.username || "Guest"} size={96} />
+                    <Avatar name={video.username || "Guest"} picture={video.picture} size={96} />
                 </div>
             )}
             

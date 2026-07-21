@@ -11,7 +11,18 @@ const stringToGradient = (str) => {
     return `linear-gradient(135deg, hsl(${h1}, 70%, 55%), hsl(${h2}, 80%, 45%))`;
 };
 
-export default function Avatar({ name, size = 40, className = "" }) {
+export default function Avatar({ name, picture, size = 40, className = "" }) {
+    if (picture) {
+        return (
+            <div 
+                className={`flex items-center justify-center rounded-full overflow-hidden flex-shrink-0 shadow-sm ${className}`}
+                style={{ width: `${size}px`, height: `${size}px` }}
+                title={name || "Guest"}
+            >
+                <img src={picture} alt={name || "Guest"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            </div>
+        );
+    }
     const validName = name && name.trim() ? name.trim() : "?";
     const initial = validName.charAt(0).toUpperCase();
     
