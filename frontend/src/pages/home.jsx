@@ -10,16 +10,14 @@ import { Video, Keyboard, ChevronLeft, ChevronRight, ShieldCheck, Link, Calendar
 
 const carouselItems = [
     {
-        image: "/Sharelink.png",
+        icon: Link,
         title: "Get a link you can share",
         text: <>Click <strong>New meeting</strong> to get a link you can send to people you want to meet with</>,
-        scale: "scale-[1.6] rounded-full border-[3px] border-[#0b5cff] p-4"
     },
     {
-        image: "/Secure.png",
+        icon: ShieldCheck,
         title: "Your meeting is safe",
         text: "No one can join a meeting unless invited or admitted by the host",
-        scale: "scale-[1.35]"
     }
 ];
 
@@ -303,15 +301,16 @@ function HomeComponent() {
                             </button>
 
                             <div className="w-52 h-52 sm:w-64 sm:h-64 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                {carouselItems[currentSlide].image.startsWith("lucide:") ? (
-                                    <ShieldCheck size={160} className="text-[#0b5cff] opacity-80 transition-opacity duration-500" strokeWidth={1.5} />
-                                ) : (
-                                    <img 
-                                        src={carouselItems[currentSlide].image} 
-                                        alt={carouselItems[currentSlide].title} 
-                                        className={`h-40 sm:h-56 w-full object-contain transition-all duration-500 ${carouselItems[currentSlide].scale || ''}`} 
-                                    />
-                                )}
+                                {(() => {
+                                    const IconComponent = carouselItems[currentSlide].icon;
+                                    return IconComponent ? (
+                                        <IconComponent 
+                                            size={140} 
+                                            className="text-white transition-opacity duration-500 drop-shadow-[0_4px_12px_rgba(255,255,255,0.15)]" 
+                                            strokeWidth={1.2} 
+                                        />
+                                    ) : null;
+                                })()}
                             </div>
 
                             <button 
