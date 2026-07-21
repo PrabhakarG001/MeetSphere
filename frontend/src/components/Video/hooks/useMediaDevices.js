@@ -292,6 +292,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         if (nextCamera) {
             selectedVideoDeviceIdRef.current = nextCamera.deviceId;
             setIsRearCamera(!isRearCamera);
+            stopStream(localStreamRef.current); // Force stop to bypass cache
             await getUserMedia({ forceVideo: true });
         }
     };
