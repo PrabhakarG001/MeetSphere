@@ -1,4 +1,6 @@
 /* src/styles/theme.css */
+@import url('https://fonts.googleapis.com/css2?family=Sofia&display=swap');
+
 :root {
   --gradient-primary: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
   --accent-color: #ff2ea6;
