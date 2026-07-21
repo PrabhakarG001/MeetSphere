@@ -169,17 +169,15 @@ export default function ControlBar({
 
     const extraControlsMobile = (
         <div className="grid grid-cols-4 gap-4 justify-items-center w-full px-2">
-            {screenAvailable && (
-                <ControlButton
-                    onClick={() => { handleScreen(); setShowMoreMenu(false); }}
-                    isActive={screen}
-                    title={screen ? "Stop" : "Share"}
-                    className="w-12 h-12"
-                    noTooltip
-                >
-                    {screen ? <MonitorOff size={20} /> : <MonitorUp size={20} />}
-                </ControlButton>
-            )}
+            <ControlButton
+                onClick={() => { handleScreen(); setShowMoreMenu(false); }}
+                isActive={screen}
+                title={screen ? "Stop" : "Share"}
+                className="w-12 h-12"
+                noTooltip
+            >
+                {screen ? <MonitorOff size={20} /> : <MonitorUp size={20} />}
+            </ControlButton>
 
             {/* Emoji / React Button */}
             <div className="relative flex items-center justify-center">
@@ -312,16 +310,7 @@ export default function ControlBar({
                     {video ? <Video size={18} /> : <VideoOff size={18} />}
                 </ControlButton>
 
-                {/* Mobile screen share */}
-                <ControlButton
-                    onClick={handleScreen}
-                    isActive={screen}
-                    title={screen ? "Stop sharing" : "Share screen"}
-                    className="w-10 h-10"
-                    noTooltip
-                >
-                    {screen ? <MonitorOff size={18} /> : <MonitorUp size={18} />}
-                </ControlButton>
+
 
                 {/* Mobile camera switch */}
                 {camerasCount > 1 && (

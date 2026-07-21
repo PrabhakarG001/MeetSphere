@@ -290,14 +290,61 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         const nextCamera = camerasRef.current[nextIndex];
         
         if (nextCamera) {
-            stopStream(localStreamRef.current); // Force stop to bypass cache
+            // Keep the current audio track to preserve it
+            const existingAudioTrack = localStreamRef.current?.getAudioTracks()[0];
             
-            // Wait 300ms for mobile hardware to fully release the camera before requesting it again
+            // Stop ONLY the video tracks
+            localStreamRef.current?.getVideoTracks().forEach(track => {
+                track.onended = null;
+                track.stop();
+            });
+            
+            // Wait 300ms for mobile hardware to fully release the camera
             await new Promise(resolve => setTimeout(resolve, 300));
             
             selectedVideoDeviceIdRef.current = nextCamera.deviceId;
             setIsRearCamera(!isRearCamera);
-            await getUserMedia({ forceVideo: true });
+            
+            try {
+                // Request ONLY the new video track
+                const newVideoStream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: { exact: nextCamera.deviceId } },
+                    audio: false
+                });
+                
+                const newVideoTrack = newVideoStream.getVideoTracks()[0];
+                newVideoTrack.enabled = video; // Match current video mute state
+                
+                // Attach the new onended listener
+                newVideoTrack.onended = () => {
+                    setVideo(false);
+                };
+                
+                // Create a composite stream
+                const compositeStream = new MediaStream([newVideoTrack]);
+                if (existingAudioTrack) {
+                    compositeStream.addTrack(existingAudioTrack);
+                }
+                
+                localStreamRef.current = compositeStream;
+                window.localStream = compositeStream;
+                attachLocalStream(compositeStream);
+                
+                // Update peers with the new video track
+                for (let id in connectionsRef.current) {
+                    if (id === socketIdRef.current) continue;
+                    const pc = connectionsRef.current[id];
+                    const senders = pc.getSenders();
+                    
+                    const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                    if (videoSender) {
+                        videoSender.replaceTrack(newVideoTrack);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to switch camera video track:", err);
+                await getUserMedia({ forceVideo: true });
+            }
         }
     };
 
