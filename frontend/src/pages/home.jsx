@@ -205,7 +205,7 @@ function HomeComponent() {
                     </h2>
                     
                     <p className="text-lg text-white/70 mb-12 max-w-xl leading-relaxed">
-                        Connect, collaborate, and celebrate from anywhere with MeetSphere. Crystal-clear video calls tailored for modern teams.
+                        Elevate your meetings with seamless video collaboration
                     </p>
 
                     {/* Quick Actions Panel */}
