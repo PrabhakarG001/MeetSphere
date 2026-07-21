@@ -38,6 +38,7 @@
     font-weight: 700;
     font-style: normal;
     font-size: 1em; /* Inherits from container */
+    text-transform: uppercase;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
