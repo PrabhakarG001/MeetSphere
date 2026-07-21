@@ -10,16 +10,14 @@ import { Video, Keyboard, ChevronLeft, ChevronRight, ShieldCheck, Link, Calendar
 
 const carouselItems = [
     {
-        image: "/Sharelink.png",
+        icon: Link,
         title: "Get a link you can share",
         text: <>Click <strong>New meeting</strong> to get a link you can send to people you want to meet with</>,
-        scale: "scale-[1.6] rounded-full border-[3px] border-[#0b5cff] p-4"
     },
     {
-        image: "/Secure.png",
+        icon: ShieldCheck,
         title: "Your meeting is safe",
         text: "No one can join a meeting unless invited or admitted by the host",
-        scale: "scale-[1.35]"
     }
 ];
 
@@ -293,7 +291,7 @@ function HomeComponent() {
                     <div className="w-full flex flex-col items-center justify-center text-center min-h-[420px] group text-white">
                         
                         {/* Image with side arrows */}
-                        <div className="flex items-center justify-center gap-2 sm:gap-8 mb-6 w-full">
+                        <div className="flex items-center justify-center gap-2 sm:gap-8 mb-2 w-full">
                             <button 
                                 onClick={() => setCurrentSlide(prev => (prev - 1 + carouselItems.length) % carouselItems.length)}
                                 className="p-1 sm:p-2 text-white/50 hover:text-white transition-colors flex-shrink-0"
@@ -302,12 +300,17 @@ function HomeComponent() {
                                 <ChevronLeft size={20} />
                             </button>
 
-                            <div className="w-52 h-52 sm:w-64 sm:h-64 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                <img 
-                                    src={carouselItems[currentSlide].image} 
-                                    alt={carouselItems[currentSlide].title} 
-                                    className={`h-40 sm:h-56 w-full object-contain transition-all duration-500 ${carouselItems[currentSlide].scale || ''}`}
-                                />
+                            <div className="flex items-center justify-center flex-shrink-0 overflow-visible py-4">
+                                {(() => {
+                                    const IconComponent = carouselItems[currentSlide].icon;
+                                    return IconComponent ? (
+                                        <IconComponent 
+                                            size={280} 
+                                            className="text-white transition-opacity duration-500 drop-shadow-[0_8px_24px_rgba(255,255,255,0.2)]" 
+                                            strokeWidth={1} 
+                                        />
+                                    ) : null;
+                                })()}
                             </div>
 
                             <button 
