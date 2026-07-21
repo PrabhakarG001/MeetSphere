@@ -11,7 +11,7 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                 if (navigator.mediaDevices.getDisplayMedia) {
                     navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
                         .then(getDislayMediaSuccess)
-                        .catch((e) => console.log(e));
+                        .catch((e) => console.error(e));
                 }
             }
         }
@@ -25,7 +25,7 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
         try {
             localStreamRef.current?.getTracks().forEach(track => track.stop());
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
 
         localStreamRef.current = stream;
@@ -54,7 +54,7 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                         .then(() => {
                             socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
                         })
-                        .catch(e => console.log(e));
+                        .catch(e => console.error(e));
                 });
             }
         }
@@ -67,7 +67,7 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                     let tracks = localVideoref.current.srcObject.getTracks();
                     tracks.forEach(track => track.stop());
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
 
                 let blackSilence = (...args) => new MediaStream([black(...args), silence()]);

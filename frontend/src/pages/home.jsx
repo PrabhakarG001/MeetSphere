@@ -61,8 +61,7 @@ function HomeComponent() {
         };
     }, []);
 
-    const timeString = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const dateString = currentTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+
 
     const handleJoinVideoCall = useCallback(() => {
         if (!meetingCode) return;

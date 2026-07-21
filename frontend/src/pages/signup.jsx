@@ -9,7 +9,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
 import GoogleAuth from '../components/Auth/GoogleAuth';
 import Logo from '../components/common/Logo';
@@ -43,7 +43,6 @@ const getPasswordStrength = (password = '') => {
 
 export default function Signup({ initialMode = 'signup' }) {
     const navigate = useNavigate();
-    const [showLoginForm, setShowLoginForm] = React.useState(false);
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [confirmPassword, setConfirmPassword] = React.useState('');
@@ -53,7 +52,6 @@ export default function Signup({ initialMode = 'signup' }) {
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
     const [error, setError] = React.useState('');
     const [message, setMessage] = React.useState('');
-    const [formState, setFormState] = React.useState(1);
     const [open, setOpen] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [submitted, setSubmitted] = React.useState(false);
@@ -70,7 +68,6 @@ export default function Signup({ initialMode = 'signup' }) {
     };
 
     React.useEffect(() => {
-        setFormState(initialMode === 'login' ? 0 : 1);
         resetFormFeedback();
     }, [initialMode]);
 
@@ -108,12 +105,6 @@ export default function Signup({ initialMode = 'signup' }) {
 
 
 
-    const switchForm = (state) => {
-        setFormState(state);
-        setConfirmPassword('');
-        setAcceptedTerms(false);
-        resetFormFeedback();
-    };
 
     const handleAuth = async (event) => {
         event.preventDefault();
@@ -140,7 +131,6 @@ export default function Signup({ initialMode = 'signup' }) {
             setAcceptedTerms(false);
             setMessage(result || 'Account created successfully. Please login to continue.');
             setOpen(true);
-            setFormState(0);
             resetFormFeedback();
         } catch (err) {
             const apiMessage = err?.response?.data?.message || err.message || 'Something went wrong. Please try again.';

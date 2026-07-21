@@ -25,7 +25,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         const playPromise = localVideoref.current.play?.();
         if (playPromise) {
             playPromise.catch((error) => {
-                console.log("Local video playback will resume after browser interaction", error);
+                // Playback error (usually requires user interaction)
             });
         }
     };
@@ -47,13 +47,10 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             const selectedCamera = cameras[0];
 
             selectedVideoDeviceIdRef.current = selectedCamera?.deviceId || null;
-            if (selectedCamera?.label) {
-                console.log("Selected camera:", selectedCamera.label);
-            }
             setVideoAvailable(cameras.length > 0);
             setAudioAvailable(microphones.length > 0);
         } catch (error) {
-            console.log("Could not enumerate media devices", error);
+            console.error("Could not enumerate media devices", error);
         }
     };
 
@@ -67,7 +64,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         setMediaError("");
 
         const activeCamera = stream.getVideoTracks()[0]?.label;
-        if (activeCamera) console.log("Active camera:", activeCamera);
 
         attachLocalStream(stream);
 
@@ -93,7 +89,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                         .then(() => {
                             socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
                         })
-                        .catch(e => console.log(e));
+                        .catch(e => console.error(e));
                 });
             }
         }
@@ -106,7 +102,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 try {
                     let tracks = localVideoref.current.srcObject.getTracks();
                     tracks.forEach(track => track.stop());
-                } catch (e) { console.log(e); }
+                } catch (e) { console.error(e); }
 
                 let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
                 localStreamRef.current = blackSilence();
@@ -134,7 +130,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                                 .then(() => {
                                     socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
                                 })
-                                .catch(e => console.log(e));
+                                .catch(e => console.error(e));
                         });
                     }
                 }
@@ -230,7 +226,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             setMediaError("");
 
             const activeCamera = userMediaStream.getVideoTracks()[0]?.label;
-            if (activeCamera) console.log("Active camera:", activeCamera);
 
             attachLocalStream(userMediaStream);
             await loadMediaDevices();
@@ -269,7 +264,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         if (!askForUsername) {
             if (!joinedWithExistingStreamRef.current) {
                 getUserMedia({ forceVideo: video, forceAudio: audio });
-                console.log("SET STATE HAS ", video, audio);
             }
         }
     }, [askForUsername]);

@@ -21,7 +21,6 @@ const landingCards = [
 export default function LandingPage() {
     const router = useNavigate();
     const [scrolled, setScrolled] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -35,17 +34,6 @@ export default function LandingPage() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const createMeetingId = () => {
-        const randomPart = Math.random().toString(36).slice(2, 8);
-        return `meet-${Date.now().toString(36)}-${randomPart}`;
-    }
-
-    const createMeeting = () => {
-        const meetingId = createMeetingId();
-        localStorage.setItem(`host_${meetingId}`, "true");
-        localStorage.setItem("pendingMeetingId", meetingId);
-        router(`/room/${meetingId}`);
-    }
 
     const renderCards = (hidden = false) =>
         landingCards.map((card, index) => (

@@ -18,14 +18,14 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         connectionsRef.current[fromId].createAnswer().then((description) => {
                             connectionsRef.current[fromId].setLocalDescription(description).then(() => {
                                 socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': connectionsRef.current[fromId].localDescription }));
-                            }).catch(e => console.log(e));
-                        }).catch(e => console.log(e));
+                            }).catch(e => console.error(e));
+                        }).catch(e => console.error(e));
                     }
-                }).catch(e => console.log(e));
+                }).catch(e => console.error(e));
             }
 
             if (signal.ice) {
-                connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e => console.log(e));
+                connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(signal.ice)).catch(e => console.error(e));
             }
         }
     };
@@ -125,14 +125,14 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
 
                         try {
                             connectionsRef.current[id2].addStream(localStreamRef.current || window.localStream);
-                        } catch (e) { console.log(e); }
+                        } catch (e) { console.error(e); }
 
                         connectionsRef.current[id2].createOffer().then((description) => {
                             connectionsRef.current[id2].setLocalDescription(description)
                                 .then(() => {
                                     socketRef.current.emit('signal', id2, JSON.stringify({ 'sdp': connectionsRef.current[id2].localDescription }));
                                 })
-                                .catch(e => console.log(e));
+                                .catch(e => console.error(e));
                         });
                     }
                 }

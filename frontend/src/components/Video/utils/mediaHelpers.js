@@ -58,7 +58,7 @@ export const stopStream = (stream) => {
     try {
         stream?.getTracks().forEach(track => track.stop());
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 };
 

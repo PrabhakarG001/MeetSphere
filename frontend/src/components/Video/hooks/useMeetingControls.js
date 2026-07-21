@@ -16,7 +16,7 @@ export const useMeetingControls = (socketRef) => {
             let tracks = localStreamRef.current?.getTracks() || localVideoref.current?.srcObject?.getTracks();
             tracks?.forEach(track => track.stop());
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
         if (socketRef && socketRef.current) {
             socketRef.current.disconnect();

@@ -14,7 +14,6 @@ export default function GoogleAuth({ onSuccess, onError, buttonText = "Continue 
         setIsLoading(true);
         try {
             const result = await signInWithPopup(auth, provider);
-console.log('Google sign‑in result:', result);
             const user = result.user;
             
             // You can extract the token or user details here
@@ -30,8 +29,6 @@ console.log('Google sign‑in result:', result);
             }
         } catch (error) {
             console.error("Google Sign-In Error:", error);
-if (onError) onError(error.message);
-
             if (onError) onError(error.message);
         } finally {
             setIsLoading(false);
