@@ -13,6 +13,7 @@
     --gradient-primary: linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%);
     --accent-color: #ff2ea6;
     --accent-border: 3px solid var(--accent-color);
+  }
 }
 
 /* Logo Standardization */
