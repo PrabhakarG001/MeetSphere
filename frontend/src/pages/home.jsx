@@ -192,7 +192,7 @@ function HomeComponent() {
     }, [navigate]);
 
     return (
-        <div className="min-h-screen landingPageContainer font-sans flex flex-col">
+        <div className="min-h-screen dash-page font-sans flex flex-col">
             <DashboardNav onHistory={() => navigate("/history")} onLogout={handleLogout} userPicture={userData?.picture} userName={userData?.name} />
             
             <main className="flex-1 max-w-7xl mx-auto px-6 py-12 md:py-20 w-full flex flex-col md:flex-row items-center justify-between gap-12">
