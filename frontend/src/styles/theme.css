@@ -43,7 +43,8 @@
 }
 
 .logo-icon {
-    width: 0.9em; /* Visually balanced to match text cap height exactly */
-    height: 0.9em;
+    width: 1.35em; /* Explicitly larger than the text (1em) */
+    height: 1.35em;
     object-fit: contain;
+    flex-shrink: 0;
 }
