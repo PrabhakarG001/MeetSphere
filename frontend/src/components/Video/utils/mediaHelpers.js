@@ -56,7 +56,10 @@ export function black({ width = 640, height = 480 } = {}) {
 
 export const stopStream = (stream) => {
     try {
-        stream?.getTracks().forEach(track => track.stop());
+        stream?.getTracks().forEach(track => {
+            track.onended = null; // Prevent async teardown events from firing
+            track.stop();
+        });
     } catch (e) {
         console.error(e);
     }

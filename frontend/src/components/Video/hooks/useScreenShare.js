@@ -24,7 +24,10 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
     const getDislayMediaSuccess = (stream) => {
         try {
             // Stop ONLY the video tracks to free camera, keep audio tracks running
-            localStreamRef.current?.getVideoTracks().forEach(track => track.stop());
+            localStreamRef.current?.getVideoTracks().forEach(track => {
+                track.onended = null;
+                track.stop();
+            });
         } catch (e) {
             console.error(e);
         }
