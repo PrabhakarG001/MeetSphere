@@ -13,11 +13,13 @@ const carouselItems = [
         image: "/Sharelink.png",
         title: "Get a link you can share",
         text: <>Click <strong>New meeting</strong> to get a link you can send to people you want to meet with</>,
+        scale: "scale-[1.6] rounded-full border-[3px] border-[#0b5cff] p-4"
     },
     {
         image: "/Secure.png",
         title: "Your meeting is safe",
         text: "No one can join a meeting unless invited or admitted by the host",
+        scale: "scale-[1.35]"
     }
 ];
 
@@ -304,8 +306,7 @@ function HomeComponent() {
                                 <img 
                                     src={carouselItems[currentSlide].image} 
                                     alt={carouselItems[currentSlide].title} 
-                                    className="h-40 sm:h-56 w-full object-contain transition-all duration-500 scale-[1.35]"
-                                    style={{ filter: "brightness(0) invert(1) drop-shadow(0px 4px 10px rgba(255,255,255,0.2))" }}
+                                    className={`h-40 sm:h-56 w-full object-contain transition-all duration-500 ${carouselItems[currentSlide].scale || ''}`}
                                 />
                             </div>
 
