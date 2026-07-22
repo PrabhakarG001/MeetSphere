@@ -55,7 +55,6 @@ export default function Video() {
     const {
         video, audio, setAudio,
         mediaError, setMediaError,
-        mediaError, setMediaError,
         setLocalVideoElement, getUserMedia, handleVideo, attachLocalStream,
         switchCamera, camerasCount, isRearCamera
     } = useMediaDevices(socketRef, socketIdRef, connectionsRef, askForUsername, joinedWithExistingStreamRef, localVideoref, localStreamRef, initialVideo, initialAudio);
