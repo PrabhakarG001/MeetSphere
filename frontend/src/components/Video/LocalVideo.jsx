@@ -3,12 +3,12 @@ import { memo, useRef, useEffect } from 'react';
 import { MicOff, Hand } from 'lucide-react';
 import Avatar from './Avatar';
 
-const LocalVideo = memo(function LocalVideo({ setLocalVideoElement, video, audio, username, isRaisedHand, picture, isHost, isScreenSharing }) {
+const LocalVideo = memo(function LocalVideo({ setLocalVideoElement, video, audio, username, isRaisedHand, picture, isHost, isScreenSharing, isRearCamera }) {
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video 
                 className={`w-full h-full object-cover ${!video ? 'opacity-0' : 'opacity-100'}`} 
-                style={{ transform: isScreenSharing ? 'scaleX(1)' : 'scaleX(-1)' }}
+                style={{ transform: (isScreenSharing || isRearCamera) ? 'scaleX(1)' : 'scaleX(-1)' }}
                 ref={setLocalVideoElement} 
                 autoPlay 
                 muted 
