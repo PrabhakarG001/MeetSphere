@@ -27,10 +27,13 @@ export const getMediaErrorMessage = (error, mediaType = "camera", isSecure) => {
     }
 };
 
-export const getPreferredMediaConstraints = (selectedVideoDeviceId, useVideo = true, useAudio = true) => {
-    const videoConstraints = selectedVideoDeviceId
-        ? { deviceId: { exact: selectedVideoDeviceId } }
-        : true;
+export const getPreferredMediaConstraints = (selectedVideoDeviceId, useVideo = true, useAudio = true, isRearCamera = false) => {
+    let videoConstraints = true;
+    if (selectedVideoDeviceId) {
+        videoConstraints = { deviceId: { exact: selectedVideoDeviceId } };
+    } else {
+        videoConstraints = { facingMode: isRearCamera ? "environment" : "user" };
+    }
 
     return {
         video: useVideo ? videoConstraints : false,

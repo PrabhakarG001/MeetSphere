@@ -5,34 +5,40 @@ export const removeParticipant = (setVideos, videoRef, id) => {
         return updatedVideos;
     });
 };
-export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream, username = "Guest", isHost = false, picture = null) => {
-    let videoExists = videoRef.current.find(video => video.socketId === socketListId);
+export const updateOrAddParticipant = (setVideos, videoRef, socketListId, track, username = "Guest", isHost = false, picture = null) => {
+    setVideos(videos => {
+        let existingVideo = videos.find(video => video.socketId === socketListId);
 
-    if (videoExists) {
-        setVideos(videos => {
+        let finalStream;
+        if (existingVideo && existingVideo.stream) {
+            // Prevent duplicate tracks of the same kind
+            const existingTracks = existingVideo.stream.getTracks().filter(t => t.kind !== track.kind);
+            finalStream = new MediaStream([...existingTracks, track]);
+        } else {
+            finalStream = new MediaStream([track]);
+        }
+
+        if (existingVideo) {
             const updatedVideos = videos.map(video =>
-                video.socketId === socketListId ? { ...video, stream: stream, ...(username && {username}), isHost, ...(picture && {picture}) } : video
+                video.socketId === socketListId ? { ...video, stream: finalStream, ...(username && {username}), isHost, ...(picture && {picture}) } : video
             );
             videoRef.current = updatedVideos;
             return updatedVideos;
-        });
-    } else {
-        let newVideo = {
-            socketId: socketListId,
-            stream: stream,
-            username: username,
-            isHost: isHost,
-            picture: picture,
-            autoplay: true,
-            playsinline: true
-        };
-
-        setVideos(videos => {
+        } else {
+            let newVideo = {
+                socketId: socketListId,
+                stream: finalStream,
+                username: username,
+                isHost: isHost,
+                picture: picture,
+                autoplay: true,
+                playsinline: true
+            };
             const updatedVideos = [...videos, newVideo];
             videoRef.current = updatedVideos;
             return updatedVideos;
-        });
-    }
+        }
+    });
 };
 
 export const updateParticipantState = (setVideos, videoRef, id, stateUpdates) => {

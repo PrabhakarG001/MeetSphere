@@ -12,6 +12,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
     const selectedVideoDeviceIdRef = useRef(null);
     const camerasRef = useRef([]);
     const [isRearCamera, setIsRearCamera] = useState(false);
+    const isRearCameraRef = useRef(false);
 
     const attachLocalStream = (stream) => {
         localStreamRef.current = stream;
@@ -169,7 +170,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, needsVideo, needsAudio));
+            const stream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, needsVideo, needsAudio, isRearCameraRef.current));
             getUserMediaSuccess(stream);
             return stream;
         } catch (e) {
@@ -221,7 +222,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
 
         try {
             await loadMediaDevices();
-            const userMediaStream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, initialVideo, initialAudio));
+            const userMediaStream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, initialVideo, initialAudio, isRearCameraRef.current));
 
             localStreamRef.current = userMediaStream;
             window.localStream = userMediaStream;
@@ -309,10 +310,11 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         
         if (isMobile) {
             // Mobile: Pure facingMode toggle, ignore device list completely
-            const nextIsRear = !isRearCamera;
+            const nextIsRear = !isRearCameraRef.current;
             setIsRearCamera(nextIsRear);
+            isRearCameraRef.current = nextIsRear;
             selectedVideoDeviceIdRef.current = null; // Clear deviceId so handleVideo uses facingMode instead
-            videoConstraints = { facingMode: { ideal: nextIsRear ? "environment" : "user" } };
+            videoConstraints = { facingMode: nextIsRear ? "environment" : "user" };
         } else {
             // Desktop: Cycle through enumerated devices
             const currentIndex = camerasRef.current.findIndex(c => c.deviceId === selectedVideoDeviceIdRef.current);
@@ -357,6 +359,15 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 const videoSender = senders.find(s => s.track && s.track.kind === 'video');
                 if (videoSender) {
                     videoSender.replaceTrack(newVideoTrack);
+                } else {
+                    pc.addTrack(newVideoTrack, compositeStream);
+                    pc.createOffer().then((description) => {
+                        pc.setLocalDescription(description)
+                            .then(() => {
+                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
+                            })
+                            .catch(e => console.error(e));
+                    });
                 }
             }
         } catch (err) {

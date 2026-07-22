@@ -123,23 +123,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         };
 
                         connectionsRef.current[socketListId].ontrack = (event) => {
-                            const newStream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
-                            
-                            const existingVideo = videoRef.current.find(v => v.socketId === socketListId);
-                            let finalStream = newStream;
-                            
-                            // If stream already exists, we should merge the tracks to prevent overwriting audio with video or vice versa
-                            if (existingVideo && existingVideo.stream && existingVideo.stream.id !== newStream.id) {
-                                // Create a new MediaStream instance to ensure React triggers re-render (reference change)
-                                const allTracks = new Set([...existingVideo.stream.getTracks(), event.track]);
-                                finalStream = new MediaStream(Array.from(allTracks));
-                                
-                                event.track.onended = () => {
-                                    // Handle track end if needed, though React state updates usually recreate it
-                                };
-                            }
-                            
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, finalStream, peerUsername, peerIsHost, peerPicture);
+                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.track, peerUsername, peerIsHost, peerPicture);
                         };
 
                         const currentStream = localStreamRef.current || window.localStream;
