@@ -385,6 +385,85 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         }
     };
 
+    const restartMedia = async () => {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (!isMobile) return; // Apply mostly for mobile
+
+        const currentStream = localStreamRef.current || window.localStream;
+        
+        // Check if stream is inactive or we just want to force restart
+        const isInactive = !currentStream || !currentStream.active || currentStream.getTracks().some(t => t.readyState === "ended");
+        
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => {
+                track.onended = null;
+                track.stop();
+            });
+        }
+
+        // Delay 200ms before restarting
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        let videoConstraints = video;
+        if (video) {
+            videoConstraints = { facingMode: isRearCameraRef.current ? "environment" : "user" };
+        }
+
+        try {
+            const newStream = await navigator.mediaDevices.getUserMedia({
+                video: videoConstraints,
+                audio: audio
+            });
+
+            const newVideoTrack = newStream.getVideoTracks()[0];
+            const newAudioTrack = newStream.getAudioTracks()[0];
+
+            if (newVideoTrack) {
+                newVideoTrack.enabled = video;
+                newVideoTrack.onended = () => setVideo(false);
+            }
+            if (newAudioTrack) {
+                newAudioTrack.enabled = audio;
+            }
+
+            localStreamRef.current = newStream;
+            window.localStream = newStream;
+            
+            if (localVideoref.current) {
+                localVideoref.current.srcObject = newStream;
+            }
+
+            for (let id in connectionsRef.current) {
+                if (id === socketIdRef.current) continue;
+                const pc = connectionsRef.current[id];
+                const senders = pc.getSenders();
+                
+                if (senders.length > 0) {
+                    const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                    if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
+
+                    const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                    if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to restart media on visibility change:", err);
+        }
+    };
+
+    useEffect(() => {
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === "visible") {
+                await restartMedia();
+            }
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, [video, audio]); // Rebind when video/audio state changes
+
     return {
         videoAvailable,
         audioAvailable,
