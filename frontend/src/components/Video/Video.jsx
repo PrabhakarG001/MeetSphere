@@ -29,6 +29,9 @@ export default function Video() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const initialVideo = location.state?.video !== undefined ? location.state.video : true;
+    const initialAudio = location.state?.audio !== undefined ? location.state.audio : true;
+
     const {
         askForUsername, setAskForUsername,
         username, setUsername,
@@ -54,7 +57,7 @@ export default function Video() {
         mediaError, setMediaError,
         setLocalVideoElement, getUserMedia, handleVideo, attachLocalStream,
         switchCamera, camerasCount
-    } = useMediaDevices(socketRef, socketIdRef, connectionsRef, askForUsername, joinedWithExistingStreamRef, localVideoref, localStreamRef);
+    } = useMediaDevices(socketRef, socketIdRef, connectionsRef, askForUsername, joinedWithExistingStreamRef, localVideoref, localStreamRef, initialVideo, initialAudio);
 
     const { handleAudio } = useAudio(audio, setAudio, localStreamRef, getUserMedia, video, socketRef);
 
@@ -107,8 +110,6 @@ export default function Video() {
                     
                     // Determine initial states from location state (set in PreJoin)
                     const stateName = location.state?.username || userData?.name || "Participant";
-                    const stateVideo = location.state?.video !== undefined ? location.state.video : true;
-                    const stateAudio = location.state?.audio !== undefined ? location.state.audio : true;
                     const statePicture = userData?.picture || location.state?.picture || null;
                     
                     setUsername(stateName);
@@ -116,7 +117,7 @@ export default function Video() {
                     // Auto-connect
                     if (!hasAutoConnected.current) {
                         hasAutoConnected.current = true;
-                        connect(stateName, stateAudio, stateVideo, statePicture);
+                        connect(stateName, initialAudio, initialVideo, statePicture);
                     }
                 } else {
                     setMeetingIsValid(false);

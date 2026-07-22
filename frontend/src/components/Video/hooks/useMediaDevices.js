@@ -2,11 +2,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { getMediaErrorMessage, getPreferredMediaConstraints, hasLiveLocalStream, stopStream, black, silence } from '../utils/mediaHelpers';
 import { isLocalSecureContext } from '../utils/meetingHelpers';
 
-export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUsername, joinedWithExistingStreamRef, localVideoref, localStreamRef) => {
+export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUsername, joinedWithExistingStreamRef, localVideoref, localStreamRef, initialVideo = true, initialAudio = true) => {
     const [videoAvailable, setVideoAvailable] = useState(true);
     const [audioAvailable, setAudioAvailable] = useState(true);
-    const [video, setVideo] = useState(true);
-    const [audio, setAudio] = useState(true);
+    const [video, setVideo] = useState(initialVideo);
+    const [audio, setAudio] = useState(initialAudio);
     const [mediaError, setMediaError] = useState("");
 
     const selectedVideoDeviceIdRef = useRef(null);
@@ -221,14 +221,14 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
 
         try {
             await loadMediaDevices();
-            const userMediaStream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, true, true));
+            const userMediaStream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, initialVideo, initialAudio));
 
             localStreamRef.current = userMediaStream;
             window.localStream = userMediaStream;
-            setVideoAvailable(userMediaStream.getVideoTracks().length > 0);
-            setAudioAvailable(userMediaStream.getAudioTracks().length > 0);
-            setVideo(userMediaStream.getVideoTracks().length > 0);
-            setAudio(userMediaStream.getAudioTracks().length > 0);
+            setVideoAvailable(userMediaStream.getVideoTracks().length > 0 || !initialVideo);
+            setAudioAvailable(userMediaStream.getAudioTracks().length > 0 || !initialAudio);
+            setVideo(initialVideo && userMediaStream.getVideoTracks().length > 0);
+            setAudio(initialAudio && userMediaStream.getAudioTracks().length > 0);
             setMediaError("");
 
             const activeCamera = userMediaStream.getVideoTracks()[0]?.label;
@@ -284,6 +284,10 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         videoTracks.forEach(track => {
             track.enabled = nextVideoState;
         });
+
+        if (nextVideoState && videoTracks.length === 0) {
+            getUserMedia({ forceVideo: true, forceAudio: audio });
+        }
     };
 
     const switchCamera = async () => {
