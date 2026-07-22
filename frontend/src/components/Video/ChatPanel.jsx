@@ -101,7 +101,7 @@ export default function ChatPanel({
             {activeTab === 'chat' ? (
                 <>
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-3 md:p-4 flex flex-col gap-3 bg-gray-50 dark:bg-[#202124] custom-scrollbar scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', height: 'calc(100vh - 120px)' }}>
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden w-full p-3 md:p-4 flex flex-col gap-3 bg-gray-50 dark:bg-[#202124] custom-scrollbar scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', height: 'calc(100vh - 80px - 70px)', paddingBottom: '80px' }}>
                         {messages.length !== 0 ? messages.map((item, index) => {
                             const isMe = item.sender === username;
                             return (
@@ -126,7 +126,7 @@ export default function ChatPanel({
                     </div>
 
                     {/* Input Area */}
-                    <div className="sticky bottom-0 w-full p-3 md:p-4 bg-white dark:bg-[#202124] border-t border-gray-200 dark:border-[#3c4043] z-10">
+                    <div className="sticky bottom-0 w-full p-3 md:p-4 bg-white dark:bg-[#202124] border-t border-gray-200 dark:border-[#3c4043] z-10" style={{ paddingBottom: '80px' }}>
                         <div className="flex items-end gap-2 bg-gray-50 dark:bg-[#3c4043] border border-gray-200 dark:border-transparent rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all p-1">
                             <textarea
                                 className="flex-1 max-h-24 min-h-[36px] bg-transparent text-[13px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none outline-none py-2 px-3 custom-scrollbar"

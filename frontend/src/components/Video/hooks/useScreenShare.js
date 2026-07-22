@@ -81,23 +81,57 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
             }
         }
 
-        stream.getVideoTracks()[0].onended = () => {
-                setScreen(false);
+        stream.getVideoTracks()[0].onended = async () => {
+            setScreen(false);
 
-                try {
-                    let tracks = localVideoref.current.srcObject.getTracks();
-                    tracks.forEach(track => track.stop());
-                } catch (e) {
-                    console.error(e);
+            try {
+                // Stop screen share tracks
+                if (localStreamRef.current) {
+                    localStreamRef.current.getTracks().forEach(track => track.stop());
+                }
+                if (localVideoref.current && localVideoref.current.srcObject) {
+                    localVideoref.current.srcObject.getTracks().forEach(track => track.stop());
+                }
+                stream.getTracks().forEach(track => track.stop());
+
+                // Reinitialize camera + mic
+                const newStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                localStreamRef.current = newStream;
+                window.localStream = newStream;
+                
+                if (localVideoref.current) {
+                    localVideoref.current.srcObject = newStream;
+                    await localVideoref.current.play();
                 }
 
-                let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
-                localStreamRef.current = blackSilence();
-                window.localStream = localStreamRef.current;
-                attachLocalStream(localStreamRef.current);
+                // Replace tracks in peer connection
+                for (let id in connections.current) {
+                    if (id === socketIdRef.current) continue;
+                    const pc = connections.current[id];
+                    const senders = pc.getSenders();
+                    
+                    const newVideoTrack = newStream.getVideoTracks()[0];
+                    const newAudioTrack = newStream.getAudioTracks()[0];
 
-                getUserMedia();
-            };
+                    if (senders.length > 0) {
+                        const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                        if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
+                        
+                        const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                        if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
+                    }
+                }
+
+                // Call getUserMedia just to update states correctly
+                getUserMedia({ forceVideo: true, forceAudio: true });
+            } catch (e) {
+                console.error("Failed to restore media after screen share", e);
+            }
+        };
     };
 
     return {

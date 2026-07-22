@@ -296,27 +296,17 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         
         if (!isMobile && camerasRef.current.length < 2) return;
         
-        // Stop ALL existing media tracks before switching
-        if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(track => {
-                track.onended = null;
-                track.stop();
-            });
-        }
-        
-        await new Promise(resolve => setTimeout(resolve, 300));
+        const currentStream = localStreamRef.current || window.localStream;
         
         let videoConstraints;
         
         if (isMobile) {
-            // Mobile: Pure facingMode toggle, ignore device list completely
             const nextIsRear = !isRearCameraRef.current;
             setIsRearCamera(nextIsRear);
             isRearCameraRef.current = nextIsRear;
-            selectedVideoDeviceIdRef.current = null; // Clear deviceId so handleVideo uses facingMode instead
+            selectedVideoDeviceIdRef.current = null;
             videoConstraints = { facingMode: nextIsRear ? "environment" : "user" };
         } else {
-            // Desktop: Cycle through enumerated devices
             const currentIndex = camerasRef.current.findIndex(c => c.deviceId === selectedVideoDeviceIdRef.current);
             const nextIndex = (currentIndex + 1) % camerasRef.current.length;
             const nextCamera = camerasRef.current[nextIndex];
@@ -325,11 +315,18 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 selectedVideoDeviceIdRef.current = nextCamera.deviceId;
                 videoConstraints = { deviceId: { exact: nextCamera.deviceId } };
             } else {
-                return; // Should not happen
+                return;
             }
         }
-        
+
         const fetchAndApplyStream = async () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => {
+                    track.onended = null;
+                    track.stop();
+                });
+            }
+
             const newStream = await navigator.mediaDevices.getUserMedia({
                 video: videoConstraints,
                 audio: true
@@ -338,50 +335,34 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             const newVideoTrack = newStream.getVideoTracks()[0];
             const newAudioTrack = newStream.getAudioTracks()[0];
             
-            if (newVideoTrack) newVideoTrack.enabled = video; 
-            if (newAudioTrack) newAudioTrack.enabled = audio;
-            
             if (newVideoTrack) {
+                newVideoTrack.enabled = video; 
                 newVideoTrack.onended = () => {
                     setVideo(false);
                 };
             }
+            if (newAudioTrack) {
+                newAudioTrack.enabled = audio;
+            }
             
             localStreamRef.current = newStream;
             window.localStream = newStream;
-            attachLocalStream(newStream);
+            
+            if (localVideoref.current) {
+                localVideoref.current.srcObject = newStream;
+            }
             
             for (let id in connectionsRef.current) {
                 if (id === socketIdRef.current) continue;
                 const pc = connectionsRef.current[id];
                 const senders = pc.getSenders();
                 
-                let renegotiationNeeded = false;
-                
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                if (videoSender && newVideoTrack) {
-                    videoSender.replaceTrack(newVideoTrack);
-                } else if (newVideoTrack) {
-                    pc.addTrack(newVideoTrack, newStream);
-                    renegotiationNeeded = true;
-                }
+                if (senders.length > 0) {
+                    const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                    if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
 
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                if (audioSender && newAudioTrack) {
-                    audioSender.replaceTrack(newAudioTrack);
-                } else if (newAudioTrack) {
-                    pc.addTrack(newAudioTrack, newStream);
-                    renegotiationNeeded = true;
-                }
-
-                if (renegotiationNeeded) {
-                    pc.createOffer().then((description) => {
-                        pc.setLocalDescription(description)
-                            .then(() => {
-                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
-                            })
-                            .catch(e => console.error(e));
-                    });
+                    const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                    if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
                 }
             }
         };
