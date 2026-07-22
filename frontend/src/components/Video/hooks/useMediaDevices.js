@@ -361,12 +361,32 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 const pc = connectionsRef.current[id];
                 const senders = pc.getSenders();
                 
-                if (senders.length > 0) {
-                    const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                    if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
+                let renegotiationNeeded = false;
+                
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                if (videoSender && newVideoTrack) {
+                    videoSender.replaceTrack(newVideoTrack);
+                } else if (newVideoTrack) {
+                    pc.addTrack(newVideoTrack, newStream);
+                    renegotiationNeeded = true;
+                }
 
-                    const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                    if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                if (audioSender && newAudioTrack) {
+                    audioSender.replaceTrack(newAudioTrack);
+                } else if (newAudioTrack) {
+                    pc.addTrack(newAudioTrack, newStream);
+                    renegotiationNeeded = true;
+                }
+
+                if (renegotiationNeeded) {
+                    pc.createOffer().then((description) => {
+                        pc.setLocalDescription(description)
+                            .then(() => {
+                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
+                            })
+                            .catch(e => console.error(e));
+                    });
                 }
             }
         };
@@ -438,12 +458,32 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 const pc = connectionsRef.current[id];
                 const senders = pc.getSenders();
                 
-                if (senders.length > 0) {
-                    const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                    if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
+                let renegotiationNeeded = false;
+                
+                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                if (videoSender && newVideoTrack) {
+                    videoSender.replaceTrack(newVideoTrack);
+                } else if (newVideoTrack) {
+                    pc.addTrack(newVideoTrack, newStream);
+                    renegotiationNeeded = true;
+                }
 
-                    const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                    if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                if (audioSender && newAudioTrack) {
+                    audioSender.replaceTrack(newAudioTrack);
+                } else if (newAudioTrack) {
+                    pc.addTrack(newAudioTrack, newStream);
+                    renegotiationNeeded = true;
+                }
+
+                if (renegotiationNeeded) {
+                    pc.createOffer().then((description) => {
+                        pc.setLocalDescription(description)
+                            .then(() => {
+                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
+                            })
+                            .catch(e => console.error(e));
+                    });
                 }
             }
         } catch (err) {
