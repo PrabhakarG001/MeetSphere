@@ -298,6 +298,17 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         
         const currentStream = localStreamRef.current || window.localStream;
         
+        // Completely stop all previous video tracks before switching camera
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => {
+                track.onended = null;
+                track.stop();
+            });
+        }
+
+        // Add a small delay (300ms) before reinitializing camera (important for mobile Chrome)
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         let videoConstraints;
         
         if (isMobile) {
@@ -320,13 +331,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         }
 
         const fetchAndApplyStream = async () => {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => {
-                    track.onended = null;
-                    track.stop();
-                });
-            }
-
             const newStream = await navigator.mediaDevices.getUserMedia({
                 video: videoConstraints,
                 audio: true
