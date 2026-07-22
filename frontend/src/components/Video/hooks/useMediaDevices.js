@@ -296,13 +296,13 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         
         if (!isMobile && camerasRef.current.length < 2) return;
         
-        const existingAudioTrack = localStreamRef.current?.getAudioTracks()[0];
-        
-        // Stop ONLY the video tracks
-        localStreamRef.current?.getVideoTracks().forEach(track => {
-            track.onended = null;
-            track.stop();
-        });
+        // Stop ALL existing media tracks before switching
+        if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
+                track.onended = null;
+                track.stop();
+            });
+        }
         
         await new Promise(resolve => setTimeout(resolve, 300));
         
@@ -329,38 +329,52 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             }
         }
         
-        try {
-            const newVideoStream = await navigator.mediaDevices.getUserMedia({
+        const fetchAndApplyStream = async () => {
+            const newStream = await navigator.mediaDevices.getUserMedia({
                 video: videoConstraints,
-                audio: false
+                audio: true
             });
             
-            const newVideoTrack = newVideoStream.getVideoTracks()[0];
-            newVideoTrack.enabled = video; 
+            const newVideoTrack = newStream.getVideoTracks()[0];
+            const newAudioTrack = newStream.getAudioTracks()[0];
             
-            newVideoTrack.onended = () => {
-                setVideo(false);
-            };
+            if (newVideoTrack) newVideoTrack.enabled = video; 
+            if (newAudioTrack) newAudioTrack.enabled = audio;
             
-            const compositeStream = new MediaStream([newVideoTrack]);
-            if (existingAudioTrack) {
-                compositeStream.addTrack(existingAudioTrack);
+            if (newVideoTrack) {
+                newVideoTrack.onended = () => {
+                    setVideo(false);
+                };
             }
             
-            localStreamRef.current = compositeStream;
-            window.localStream = compositeStream;
-            attachLocalStream(compositeStream);
+            localStreamRef.current = newStream;
+            window.localStream = newStream;
+            attachLocalStream(newStream);
             
             for (let id in connectionsRef.current) {
                 if (id === socketIdRef.current) continue;
                 const pc = connectionsRef.current[id];
                 const senders = pc.getSenders();
                 
+                let renegotiationNeeded = false;
+                
                 const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                if (videoSender) {
+                if (videoSender && newVideoTrack) {
                     videoSender.replaceTrack(newVideoTrack);
-                } else {
-                    pc.addTrack(newVideoTrack, compositeStream);
+                } else if (newVideoTrack) {
+                    pc.addTrack(newVideoTrack, newStream);
+                    renegotiationNeeded = true;
+                }
+
+                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                if (audioSender && newAudioTrack) {
+                    audioSender.replaceTrack(newAudioTrack);
+                } else if (newAudioTrack) {
+                    pc.addTrack(newAudioTrack, newStream);
+                    renegotiationNeeded = true;
+                }
+
+                if (renegotiationNeeded) {
                     pc.createOffer().then((description) => {
                         pc.setLocalDescription(description)
                             .then(() => {
@@ -370,9 +384,19 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                     });
                 }
             }
+        };
+
+        try {
+            await fetchAndApplyStream();
         } catch (err) {
-            console.error("Failed to switch camera video track:", err);
-            await getUserMedia({ forceVideo: true });
+            console.error("Failed to switch camera video track, retrying once:", err);
+            try {
+                // Retry once
+                await fetchAndApplyStream();
+            } catch (err2) {
+                console.error("Retry failed, reverting to default:", err2);
+                await getUserMedia({ forceVideo: true });
+            }
         }
     };
 

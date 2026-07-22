@@ -35,10 +35,10 @@ export default function ChatPanel({
 
     return (
         <div 
-            className={`flex-shrink-0 bg-white dark:bg-[#202124] border-l border-gray-200 dark:border-[#3c4043] flex flex-col transition-all duration-300 ease-in-out z-20 ${showModal ? 'w-full md:w-80 lg:w-80 translate-x-0' : 'w-0 translate-x-full overflow-hidden'}`}
+            className={`flex-shrink-0 bg-white dark:bg-[#202124] border-l border-gray-200 dark:border-[#3c4043] flex flex-col transition-all duration-300 ease-in-out z-50 absolute md:relative right-0 h-full ${showModal ? 'w-full md:w-80 lg:w-80 translate-x-0' : 'w-0 translate-x-full overflow-hidden'}`}
         >
             {/* Header / Tabs */}
-            <div className="flex flex-col border-b border-[#e5e7eb] dark:border-[#2a2a2a]">
+            <div className="flex flex-col border-b border-[#e5e7eb] dark:border-[#2a2a2a] sticky top-0 z-10 bg-white dark:bg-[#202124]">
                 <div className="flex items-center justify-between px-4 py-3">
                     <h2 className="text-[15px] font-semibold text-slate-900 dark:text-slate-100 m-0">Meeting Chat</h2>
                     <button 
@@ -101,7 +101,7 @@ export default function ChatPanel({
             {activeTab === 'chat' ? (
                 <>
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50 dark:bg-[#202124] custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-3 md:p-4 flex flex-col gap-3 bg-gray-50 dark:bg-[#202124] custom-scrollbar scroll-smooth" style={{ WebkitOverflowScrolling: 'touch', height: 'calc(100vh - 120px)' }}>
                         {messages.length !== 0 ? messages.map((item, index) => {
                             const isMe = item.sender === username;
                             return (
@@ -109,9 +109,10 @@ export default function ChatPanel({
                                     <span className="text-[11px] font-medium text-slate-500 mb-1 px-1">
                                         {isMe ? 'You' : item.sender}
                                     </span>
-                                    <div className={`max-w-[85%] px-3 py-2 rounded-lg text-[13px] leading-relaxed shadow-sm ${isMe ? 'bg-[#8ab4f8] text-[#202124] rounded-tr-sm font-medium' : 'bg-[#8ab4f8]/20 text-slate-900 dark:text-slate-100 rounded-tl-sm border border-[#8ab4f8]/30'}`}
+                                    <div className={`max-w-[80%] px-3 py-2 rounded-lg text-[13px] leading-relaxed shadow-sm ${isMe ? 'bg-[#8ab4f8] text-[#202124] rounded-tr-sm font-medium' : 'bg-[#8ab4f8]/20 text-slate-900 dark:text-slate-100 rounded-tl-sm border border-[#8ab4f8]/30'}`}
+                                         style={{ wordBreak: 'break-word' }}
                                     >
-                                        <p className="m-0 break-words">{item.data}</p>
+                                        <p className="m-0" style={{ wordBreak: 'break-word' }}>{item.data}</p>
                                     </div>
                                 </div>
                             );
@@ -121,11 +122,11 @@ export default function ChatPanel({
                                 <p className="text-sm text-slate-500">No messages yet.</p>
                             </div>
                         )}
-                        <div ref={messagesEndRef} />
+                        <div ref={messagesEndRef} className="h-1" />
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-4 bg-white dark:bg-[#202124] border-t border-gray-200 dark:border-[#3c4043]">
+                    <div className="sticky bottom-0 w-full p-3 md:p-4 bg-white dark:bg-[#202124] border-t border-gray-200 dark:border-[#3c4043] z-10">
                         <div className="flex items-end gap-2 bg-gray-50 dark:bg-[#3c4043] border border-gray-200 dark:border-transparent rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all p-1">
                             <textarea
                                 className="flex-1 max-h-24 min-h-[36px] bg-transparent text-[13px] text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none outline-none py-2 px-3 custom-scrollbar"
