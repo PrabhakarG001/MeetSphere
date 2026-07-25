@@ -74,10 +74,9 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         };
 
         const currentStream = localStreamRef.current || window.localStream;
-        const liveTracks = currentStream?.getTracks().filter(t => t.readyState === 'live') || [];
-        if (liveTracks.length > 0) {
-            liveTracks.forEach(track => {
-                console.log(`[WebRTC] Adding local track (${track.kind}, readyState=${track.readyState}) to PC for ${targetSocketId}`);
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => {
+                console.log(`[WebRTC] Adding local track (${track.kind}) to PC for ${targetSocketId}`);
                 pc.addTrack(track, currentStream);
             });
         } else {
