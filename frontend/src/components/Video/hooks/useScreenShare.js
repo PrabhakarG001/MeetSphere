@@ -38,18 +38,32 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
             const newVideoTrack = screenVideoTrack;
             const newAudioTrack = existingAudioTrack;
 
+            let renegotiationNeeded = false;
+
             const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
             if (videoSender && newVideoTrack) {
                 console.log(`[WebRTC] Screen share: replacing video track for ${id}`);
                 videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
             } else if (newVideoTrack) {
                 pc.addTrack(newVideoTrack, compositeStream);
+                renegotiationNeeded = true;
             }
 
             const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
             if (audioSender && newAudioTrack) {
                 console.log(`[WebRTC] Screen share: replacing audio track for ${id}`);
                 audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
+            } else if (newAudioTrack) {
+                pc.addTrack(newAudioTrack, compositeStream);
+                renegotiationNeeded = true;
+            }
+
+            if (renegotiationNeeded) {
+                pc.createOffer().then((description) => {
+                    pc.setLocalDescription(description).then(() => {
+                        socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
+                    }).catch(e => console.error(e));
+                }).catch(e => console.error(e));
             }
         }
 
@@ -89,16 +103,32 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                     const newVideoTrack = newStream.getVideoTracks()[0];
                     const newAudioTrack = newStream.getAudioTracks()[0];
 
+                    let renegotiationNeeded = false;
+
                     const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
                     if (videoSender && newVideoTrack) {
                         console.log(`[WebRTC] Restoring camera video track for ${id}`);
                         videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
+                    } else if (newVideoTrack) {
+                        pc.addTrack(newVideoTrack, newStream);
+                        renegotiationNeeded = true;
                     }
                     
                     const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
                     if (audioSender && newAudioTrack) {
                         console.log(`[WebRTC] Restoring mic audio track for ${id}`);
                         audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
+                    } else if (newAudioTrack) {
+                        pc.addTrack(newAudioTrack, newStream);
+                        renegotiationNeeded = true;
+                    }
+
+                    if (renegotiationNeeded) {
+                        pc.createOffer().then((description) => {
+                            pc.setLocalDescription(description).then(() => {
+                                socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
+                            }).catch(e => console.error(e));
+                        }).catch(e => console.error(e));
                     }
                 }
 

@@ -77,6 +77,8 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             const newVideoTrack = window.localStream.getVideoTracks()[0];
             const newAudioTrack = window.localStream.getAudioTracks()[0];
 
+            let renegotiationNeeded = false;
+
             const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
             if (videoSender && newVideoTrack) {
                 console.log(`[WebRTC] Replacing video track for ${id}`);
@@ -84,6 +86,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             } else if (newVideoTrack) {
                 console.log(`[WebRTC] Adding new video track for ${id}`);
                 pc.addTrack(newVideoTrack, window.localStream);
+                renegotiationNeeded = true;
             }
 
             const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
@@ -93,6 +96,15 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             } else if (newAudioTrack) {
                 console.log(`[WebRTC] Adding new audio track for ${id}`);
                 pc.addTrack(newAudioTrack, window.localStream);
+                renegotiationNeeded = true;
+            }
+
+            if (renegotiationNeeded) {
+                pc.createOffer().then((description) => {
+                    pc.setLocalDescription(description).then(() => {
+                        socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
+                    }).catch(e => console.error(e));
+                }).catch(e => console.error(e));
             }
         }
 
@@ -119,11 +131,14 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                     const newVideoTrack = localStreamRef.current.getVideoTracks()[0];
                     const newAudioTrack = localStreamRef.current.getAudioTracks()[0];
 
+                    let renegotiationNeeded = false;
+
                     const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
                     if (videoSender && newVideoTrack) {
                         videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
                     } else if (newVideoTrack) {
                         pc.addTrack(newVideoTrack, localStreamRef.current);
+                        renegotiationNeeded = true;
                     }
                     
                     const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
@@ -131,6 +146,15 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                         audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
                     } else if (newAudioTrack) {
                         pc.addTrack(newAudioTrack, localStreamRef.current);
+                        renegotiationNeeded = true;
+                    }
+
+                    if (renegotiationNeeded) {
+                        pc.createOffer().then((description) => {
+                            pc.setLocalDescription(description).then(() => {
+                                socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
+                            }).catch(e => console.error(e));
+                        }).catch(e => console.error(e));
                     }
                 }
             };
