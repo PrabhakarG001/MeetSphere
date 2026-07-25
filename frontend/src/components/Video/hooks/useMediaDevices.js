@@ -119,23 +119,18 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                     const newVideoTrack = localStreamRef.current.getVideoTracks()[0];
                     const newAudioTrack = localStreamRef.current.getAudioTracks()[0];
 
-                    if (senders.length > 0) {
-                        const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                        if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
-                        
-                        const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                        if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
-                    } else {
-                        localStreamRef.current.getTracks().forEach(track => {
-                            pc.addTrack(track, localStreamRef.current);
-                        });
-                        pc.createOffer().then((description) => {
-                            pc.setLocalDescription(description)
-                                .then(() => {
-                                    socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
-                                })
-                                .catch(e => console.error(e));
-                        });
+                    const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
+                    if (videoSender && newVideoTrack) {
+                        videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
+                    } else if (newVideoTrack) {
+                        pc.addTrack(newVideoTrack, localStreamRef.current);
+                    }
+                    
+                    const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
+                    if (audioSender && newAudioTrack) {
+                        audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
+                    } else if (newAudioTrack) {
+                        pc.addTrack(newAudioTrack, localStreamRef.current);
                     }
                 }
             };
@@ -454,17 +449,17 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 
                 let renegotiationNeeded = false;
                 
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
                 if (videoSender && newVideoTrack) {
-                    videoSender.replaceTrack(newVideoTrack);
+                    videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
                 } else if (newVideoTrack) {
                     pc.addTrack(newVideoTrack, newStream);
                     renegotiationNeeded = true;
                 }
 
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
                 if (audioSender && newAudioTrack) {
-                    audioSender.replaceTrack(newAudioTrack);
+                    audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
                 } else if (newAudioTrack) {
                     pc.addTrack(newAudioTrack, newStream);
                     renegotiationNeeded = true;

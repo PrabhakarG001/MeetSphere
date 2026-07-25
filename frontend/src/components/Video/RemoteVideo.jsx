@@ -28,10 +28,13 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
         }
     };
 
+    const hasLiveVideo = video.stream && video.stream.getVideoTracks().some(t => t.readyState === "live" && t.enabled !== false);
+    const isVideoVisible = video.isVideoEnabled !== false && hasLiveVideo;
+
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video
-                className={`w-full h-full object-cover ${video.isVideoEnabled === false ? 'opacity-0' : 'opacity-100'}`}
+                className={`w-full h-full object-cover ${!isVideoVisible ? 'opacity-0' : 'opacity-100'}`}
                 data-socket={video.socketId}
                 ref={videoElRef}
                 autoPlay
@@ -39,7 +42,7 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
                 onLoadedMetadata={handleLoadedMetadata}
             ></video>
 
-            {video.isVideoEnabled === false && (
+            {!isVideoVisible && (
                 <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
                     <Avatar name={video.username || "Guest"} picture={video.picture} size={96} />
                 </div>
