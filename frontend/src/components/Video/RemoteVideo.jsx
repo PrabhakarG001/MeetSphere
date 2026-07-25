@@ -7,21 +7,41 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
     const videoElRef = useRef(null);
 
     useEffect(() => {
-        if (videoElRef.current && video.stream) {
-            videoElRef.current.srcObject = video.stream;
-            
-            const playPromise = videoElRef.current.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("[WebRTC] Remote video play error:", error);
-                });
+        const el = videoElRef.current;
+        if (el && video.stream) {
+            if (el.srcObject !== video.stream) {
+                el.srcObject = video.stream;
             }
+            
+            const attemptPlay = () => {
+                if (!el) return;
+                el.play().catch(error => {
+                    console.log("[WebRTC] Remote video play deferred (autoplay policy):", error?.message || error);
+                });
+            };
+
+            attemptPlay();
+
+            // Fallback: retry play on user interaction if blocked by autoplay policy
+            const handleUserInteraction = () => {
+                if (el && el.paused) {
+                    attemptPlay();
+                }
+            };
+
+            window.addEventListener('click', handleUserInteraction, { once: true });
+            window.addEventListener('touchstart', handleUserInteraction, { once: true });
+
+            return () => {
+                window.removeEventListener('click', handleUserInteraction);
+                window.removeEventListener('touchstart', handleUserInteraction);
+            };
         }
     }, [video.stream, video.isVideoEnabled, video.socketId]);
 
     const handleLoadedMetadata = () => {
         if (videoElRef.current) {
-            videoElRef.current.play().catch(e => console.log("[WebRTC] play on loadedmetadata deferred:", e));
+            videoElRef.current.play().catch(e => console.log("[WebRTC] play on loadedmetadata deferred:", e?.message || e));
         }
     };
 
@@ -31,7 +51,7 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video
-                className={`w-full h-full object-cover ${!isVideoVisible ? 'hidden' : 'block'}`}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${!isVideoVisible ? 'opacity-0' : 'opacity-100'}`}
                 data-socket={video.socketId}
                 ref={videoElRef}
                 autoPlay
@@ -40,7 +60,7 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
             ></video>
 
             {!isVideoVisible && (
-                <div className="absolute inset-0 flex items-center justify-center bg-[#202124]">
+                <div className="absolute inset-0 flex items-center justify-center bg-[#202124] z-10">
                     <Avatar name={video.username || "Guest"} picture={video.picture} size={96} />
                 </div>
             )}
