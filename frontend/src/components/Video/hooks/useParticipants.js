@@ -181,7 +181,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                 removeParticipant(setVideos, videoRef, id);
             });
 
-            socketRef.current.on('user-joined', (id, clients, joinedUsername) => {
+            socketRef.current.on('user-joined', (id, clients) => {
                 console.log(`[WebRTC] User joined event (joined ID: ${id}, total clients: ${clients.length})`);
                 clients.forEach((clientInfo) => {
                     const socketListId = typeof clientInfo === 'string' ? clientInfo : clientInfo.socketId;

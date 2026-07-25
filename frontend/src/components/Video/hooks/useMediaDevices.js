@@ -26,7 +26,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         
         const playPromise = localVideoref.current.play?.();
         if (playPromise) {
-            playPromise.catch((error) => {
+            playPromise.catch(() => {
                 // Playback error (usually requires user interaction)
             });
         }
@@ -65,8 +65,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         localStreamRef.current = stream;
         window.localStream = stream;
         setMediaError("");
-
-        const activeCamera = stream.getVideoTracks()[0]?.label;
 
         attachLocalStream(stream);
 
@@ -230,8 +228,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             setVideo(initialVideo && userMediaStream.getVideoTracks().length > 0);
             setAudio(initialAudio && userMediaStream.getAudioTracks().length > 0);
             setMediaError("");
-
-            const activeCamera = userMediaStream.getVideoTracks()[0]?.label;
 
             attachLocalStream(userMediaStream);
             await loadMediaDevices();
@@ -411,9 +407,6 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         if (!isMobile) return; // Apply mostly for mobile
 
         const currentStream = localStreamRef.current || window.localStream;
-        
-        // Check if stream is inactive or we just want to force restart
-        const isInactive = !currentStream || !currentStream.active || currentStream.getTracks().some(t => t.readyState === "ended");
         
         if (currentStream) {
             currentStream.getTracks().forEach(track => {

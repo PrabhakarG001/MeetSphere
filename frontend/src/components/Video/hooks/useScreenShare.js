@@ -1,33 +1,10 @@
 import { useState, useEffect } from 'react';
-import { black, silence } from '../utils/mediaHelpers';
 
 export const useScreenShare = (localStreamRef, localVideoref, connections, socketIdRef, socketRef, getUserMedia, attachLocalStream) => {
     const [screen, setScreen] = useState();
     const [screenAvailable, setScreenAvailable] = useState(Boolean(navigator.mediaDevices?.getDisplayMedia));
 
-    useEffect(() => {
-        if (screen !== undefined) {
-            if (screen) {
-                if (navigator.mediaDevices.getDisplayMedia) {
-                    navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-                        .then(getDislayMediaSuccess)
-                        .catch((e) => {
-                            console.error(e);
-                            setScreen(false); // Reset state if user cancels or fails
-                        });
-                } else {
-                    alert("Screen sharing is not supported by your current browser. Please try using a different browser like Chrome or Safari.");
-                    setScreen(false);
-                }
-            }
-        }
-    }, [screen]);
-
-    const handleScreen = () => {
-        setScreen(!screen);
-    };
-
-    const getDislayMediaSuccess = (stream) => {
+    const getDisplayMediaSuccess = (stream) => {
         try {
             // Stop ONLY the video tracks to free camera, keep audio tracks running
             localStreamRef.current?.getVideoTracks().forEach(track => {
@@ -131,6 +108,28 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                 console.error("Failed to restore media after screen share", e);
             }
         };
+    };
+
+    useEffect(() => {
+        if (screen !== undefined) {
+            if (screen) {
+                if (navigator.mediaDevices.getDisplayMedia) {
+                    navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+                        .then(getDisplayMediaSuccess)
+                        .catch((e) => {
+                            console.error(e);
+                            setScreen(false);
+                        });
+                } else {
+                    alert("Screen sharing is not supported by your current browser. Please try using a different browser like Chrome or Safari.");
+                    setScreen(false);
+                }
+            }
+        }
+    }, [screen]);
+
+    const handleScreen = () => {
+        setScreen(!screen);
     };
 
     return {
