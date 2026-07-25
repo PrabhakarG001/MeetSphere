@@ -7,44 +7,120 @@ import { black, silence } from '../utils/mediaHelpers';
 export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdRef, connectionsRef) => {
     const videoRef = useRef([]);
     const [videos, setVideos] = useState([]);
-
     const iceCandidateQueue = useRef({});
 
-    const gotMessageFromServer = async (fromId, message) => {
-        var signal = JSON.parse(message);
+    const getOrCreatePeerConnection = (targetSocketId, peerUsername = "Guest", peerIsHost = false, peerPicture = null) => {
+        if (connectionsRef.current[targetSocketId]) {
+            return connectionsRef.current[targetSocketId];
+        }
 
-        if (fromId !== socketIdRef.current) {
-            if (signal.sdp) {
-                try {
-                    await connectionsRef.current[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                    if (signal.sdp.type === 'offer') {
-                        const description = await connectionsRef.current[fromId].createAnswer();
-                        await connectionsRef.current[fromId].setLocalDescription(description);
-                        socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': connectionsRef.current[fromId].localDescription }));
-                    }
-                    // Process queued ICE candidates
-                    if (iceCandidateQueue.current[fromId]) {
-                        for (let ice of iceCandidateQueue.current[fromId]) {
-                            await connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.error(e));
-                        }
-                        iceCandidateQueue.current[fromId] = [];
-                    }
-                } catch (e) {
-                    console.error("Error processing SDP:", e);
-                }
+        console.log(`[WebRTC] Creating RTCPeerConnection for ${targetSocketId}`);
+        const pc = new RTCPeerConnection(PEER_CONFIG_CONNECTIONS);
+
+        pc.onicecandidate = (event) => {
+            if (event.candidate != null) {
+                console.log(`[WebRTC] Sending ICE candidate to ${targetSocketId}`);
+                socketRef.current?.emit('signal', targetSocketId, JSON.stringify({ 'ice': event.candidate }));
             }
+        };
 
-            if (signal.ice) {
-                try {
-                    if (connectionsRef.current[fromId].remoteDescription) {
-                        await connectionsRef.current[fromId].addIceCandidate(new RTCIceCandidate(signal.ice));
-                    } else {
-                        if (!iceCandidateQueue.current[fromId]) iceCandidateQueue.current[fromId] = [];
-                        iceCandidateQueue.current[fromId].push(signal.ice);
-                    }
-                } catch (e) {
-                    console.error("Error processing ICE:", e);
+        pc.onconnectionstatechange = () => {
+            console.log(`[WebRTC] Connection state with ${targetSocketId}: ${pc.connectionState}`);
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            console.log(`[WebRTC] ICE connection state with ${targetSocketId}: ${pc.iceConnectionState}`);
+        };
+
+        pc.ontrack = (event) => {
+            console.log(`[WebRTC] Received remote track (${event.track.kind}) from ${targetSocketId}`);
+            const remoteStream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
+
+            event.track.onmute = () => {
+                console.log(`[WebRTC] Track muted from ${targetSocketId}:`, event.track.kind);
+                if (event.track.kind === 'video') {
+                    updateParticipantState(setVideos, videoRef, targetSocketId, { isVideoEnabled: false });
                 }
+            };
+            event.track.onunmute = () => {
+                console.log(`[WebRTC] Track unmuted from ${targetSocketId}:`, event.track.kind);
+                if (event.track.kind === 'video') {
+                    updateParticipantState(setVideos, videoRef, targetSocketId, { isVideoEnabled: true });
+                }
+            };
+
+            updateOrAddParticipant(setVideos, videoRef, targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
+        };
+
+        const currentStream = localStreamRef.current || window.localStream;
+        if (currentStream && currentStream.getTracks().length > 0) {
+            currentStream.getTracks().forEach(track => {
+                console.log(`[WebRTC] Adding local track (${track.kind}) to PC for ${targetSocketId}`);
+                pc.addTrack(track, currentStream);
+            });
+        } else {
+            let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
+            localStreamRef.current = blackSilence();
+            window.localStream = localStreamRef.current;
+            localStreamRef.current.getTracks().forEach(track => {
+                pc.addTrack(track, localStreamRef.current);
+            });
+        }
+
+        connectionsRef.current[targetSocketId] = pc;
+        return pc;
+    };
+
+    const gotMessageFromServer = async (fromId, message) => {
+        if (fromId === socketIdRef.current) return;
+
+        let signal;
+        try {
+            signal = JSON.parse(message);
+        } catch (e) {
+            console.error("[WebRTC] Error parsing signal message:", e);
+            return;
+        }
+
+        const pc = getOrCreatePeerConnection(fromId);
+
+        if (signal.sdp) {
+            try {
+                console.log(`[WebRTC] Received SDP (${signal.sdp.type}) from ${fromId}`);
+                await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+
+                if (signal.sdp.type === 'offer') {
+                    const description = await pc.createAnswer();
+                    await pc.setLocalDescription(description);
+                    console.log(`[WebRTC] Sending SDP answer to ${fromId}`);
+                    socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': pc.localDescription }));
+                }
+
+                // Process queued ICE candidates after setting remote description for BOTH offer and answer
+                if (iceCandidateQueue.current[fromId] && iceCandidateQueue.current[fromId].length > 0) {
+                    console.log(`[WebRTC] Flushing ${iceCandidateQueue.current[fromId].length} queued ICE candidates for ${fromId}`);
+                    for (let ice of iceCandidateQueue.current[fromId]) {
+                        await pc.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.error("[WebRTC] Error adding queued ICE candidate:", e));
+                    }
+                    iceCandidateQueue.current[fromId] = [];
+                }
+            } catch (e) {
+                console.error("[WebRTC] Error processing SDP from " + fromId + ":", e);
+            }
+        }
+
+        if (signal.ice) {
+            try {
+                if (pc.remoteDescription && pc.remoteDescription.type) {
+                    console.log(`[WebRTC] Adding ICE candidate from ${fromId}`);
+                    await pc.addIceCandidate(new RTCIceCandidate(signal.ice));
+                } else {
+                    console.log(`[WebRTC] Queuing ICE candidate from ${fromId}`);
+                    if (!iceCandidateQueue.current[fromId]) iceCandidateQueue.current[fromId] = [];
+                    iceCandidateQueue.current[fromId].push(signal.ice);
+                }
+            } catch (e) {
+                console.error("[WebRTC] Error processing ICE from " + fromId + ":", e);
             }
         }
     };
@@ -65,6 +141,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             socketRef.current.on('chat-message', addMessage);
 
             socketRef.current.on('user-left', (id) => {
+                console.log(`[WebRTC] User left: ${id}`);
                 if (connectionsRef.current[id]) {
                     connectionsRef.current[id].close();
                     delete connectionsRef.current[id];
@@ -87,7 +164,6 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             });
 
             socketRef.current.on('force-mute', () => {
-                // If the user gets forcefully muted, we emit an event that other components can listen to, or we directly turn off the mic
                 const event = new CustomEvent('force-mute-local');
                 window.dispatchEvent(event);
             });
@@ -106,60 +182,30 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             });
 
             socketRef.current.on('user-joined', (id, clients, joinedUsername) => {
+                console.log(`[WebRTC] User joined event (joined ID: ${id}, total clients: ${clients.length})`);
                 clients.forEach((clientInfo) => {
-                    // Backwards compatibility for if clients array has strings or objects
                     const socketListId = typeof clientInfo === 'string' ? clientInfo : clientInfo.socketId;
                     const peerUsername = typeof clientInfo === 'string' ? "Guest" : clientInfo.username;
                     const peerIsHost = typeof clientInfo === 'string' ? false : !!clientInfo.isHost;
                     const peerPicture = typeof clientInfo === 'string' ? null : clientInfo.picture;
 
-                    if (connectionsRef.current[socketListId] === undefined) {
-                        connectionsRef.current[socketListId] = new RTCPeerConnection(PEER_CONFIG_CONNECTIONS);
-                        
-                        connectionsRef.current[socketListId].onicecandidate = function (event) {
-                            if (event.candidate != null) {
-                                socketRef.current.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }));
-                            }
-                        };
-
-                        connectionsRef.current[socketListId].ontrack = (event) => {
-                            updateOrAddParticipant(setVideos, videoRef, socketListId, event.track, peerUsername, peerIsHost, peerPicture);
-                        };
-
-                        const currentStream = localStreamRef.current || window.localStream;
-                        if (currentStream !== undefined && currentStream !== null) {
-                            currentStream.getTracks().forEach(track => {
-                                connectionsRef.current[socketListId].addTrack(track, currentStream);
-                            });
-                        } else {
-                            let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
-                            localStreamRef.current = blackSilence();
-                            window.localStream = localStreamRef.current;
-                            localStreamRef.current.getTracks().forEach(track => {
-                                connectionsRef.current[socketListId].addTrack(track, localStreamRef.current);
-                            });
-                        }
+                    if (socketListId !== socketIdRef.current) {
+                        getOrCreatePeerConnection(socketListId, peerUsername, peerIsHost, peerPicture);
                     }
                 });
 
                 if (id === socketIdRef.current) {
-                    for (let id2 in connectionsRef.current) {
-                        if (id2 === socketIdRef.current) continue;
-
-                        try {
-                            const streamToAdd = localStreamRef.current || window.localStream;
-                            streamToAdd.getTracks().forEach(track => {
-                                connectionsRef.current[id2].addTrack(track, streamToAdd);
-                            });
-                        } catch (e) { console.error(e); }
-
-                        connectionsRef.current[id2].createOffer().then((description) => {
-                            connectionsRef.current[id2].setLocalDescription(description)
-                                .then(() => {
-                                    socketRef.current.emit('signal', id2, JSON.stringify({ 'sdp': connectionsRef.current[id2].localDescription }));
-                                })
-                                .catch(e => console.error(e));
-                        });
+                    for (let targetId in connectionsRef.current) {
+                        if (targetId === socketIdRef.current) continue;
+                        const pc = connectionsRef.current[targetId];
+                        console.log(`[WebRTC] Creating SDP offer for ${targetId}`);
+                        pc.createOffer()
+                            .then((description) => pc.setLocalDescription(description))
+                            .then(() => {
+                                console.log(`[WebRTC] Sending SDP offer to ${targetId}`);
+                                socketRef.current.emit('signal', targetId, JSON.stringify({ 'sdp': pc.localDescription }));
+                            })
+                            .catch(e => console.error("[WebRTC] Error creating offer for " + targetId + ":", e));
                     }
                 }
             });

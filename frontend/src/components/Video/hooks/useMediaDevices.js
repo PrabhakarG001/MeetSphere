@@ -79,23 +79,22 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             const newVideoTrack = window.localStream.getVideoTracks()[0];
             const newAudioTrack = window.localStream.getAudioTracks()[0];
 
-            if (senders.length > 0) {
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
-                
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
-            } else {
-                window.localStream.getTracks().forEach(track => {
-                    pc.addTrack(track, window.localStream);
-                });
-                pc.createOffer().then((description) => {
-                    pc.setLocalDescription(description)
-                        .then(() => {
-                            socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
-                        })
-                        .catch(e => console.error(e));
-                });
+            const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
+            if (videoSender && newVideoTrack) {
+                console.log(`[WebRTC] Replacing video track for ${id}`);
+                videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
+            } else if (newVideoTrack) {
+                console.log(`[WebRTC] Adding new video track for ${id}`);
+                pc.addTrack(newVideoTrack, window.localStream);
+            }
+
+            const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
+            if (audioSender && newAudioTrack) {
+                console.log(`[WebRTC] Replacing audio track for ${id}`);
+                audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
+            } else if (newAudioTrack) {
+                console.log(`[WebRTC] Adding new audio track for ${id}`);
+                pc.addTrack(newAudioTrack, window.localStream);
             }
         }
 
@@ -363,17 +362,19 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 
                 let renegotiationNeeded = false;
                 
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+                const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
                 if (videoSender && newVideoTrack) {
-                    videoSender.replaceTrack(newVideoTrack);
+                    console.log(`[WebRTC] Camera switch: replacing video track for ${id}`);
+                    videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
                 } else if (newVideoTrack) {
                     pc.addTrack(newVideoTrack, newStream);
                     renegotiationNeeded = true;
                 }
 
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
                 if (audioSender && newAudioTrack) {
-                    audioSender.replaceTrack(newAudioTrack);
+                    console.log(`[WebRTC] Camera switch: replacing audio track for ${id}`);
+                    audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
                 } else if (newAudioTrack) {
                     pc.addTrack(newAudioTrack, newStream);
                     renegotiationNeeded = true;

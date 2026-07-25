@@ -13,6 +13,12 @@ const findRoomBySocketId = (socketId) => {
   );
 };
 
+const getCanonicalRoomKey = (path) => {
+  if (!path) return '';
+  const cleanPath = path.split('?')[0].replace(/\/$/, '');
+  return cleanPath.replace(/^\/join\//, '/meeting/').replace(/^\/room\//, '/meeting/');
+};
+
 export const connectToSocket = (server) => {
   const io = new Server(server, {
     cors: {
@@ -78,7 +84,7 @@ export const connectToSocket = (server) => {
         }
 
       // Convert paths to a canonical room path for sockets to group properly regardless of URL route
-      const roomKey = path.replace(/^\/join\//, '/meeting/').replace(/^\/room\//, '/meeting/');
+      const roomKey = getCanonicalRoomKey(path);
 
       if (!connections[roomKey]) {
         connections[roomKey] = [];
@@ -106,7 +112,7 @@ export const connectToSocket = (server) => {
     });
 
     socket.on("request-join", (path, username) => {
-      const roomKey = path.replace(/^\/join\//, '/meeting/').replace(/^\/room\//, '/meeting/');
+      const roomKey = getCanonicalRoomKey(path);
       const hostPeer = connections[roomKey]?.find(p => p.isHost);
       if (hostPeer) {
         io.to(hostPeer.socketId).emit("join-request", { socketId: socket.id, username, path: roomKey });
@@ -123,7 +129,7 @@ export const connectToSocket = (server) => {
     });
 
     socket.on("admit-user", (targetSocketId, path, username) => {
-      const roomKey = path.replace(/^\/join\//, '/meeting/').replace(/^\/room\//, '/meeting/');
+      const roomKey = getCanonicalRoomKey(path);
       const hostPeer = connections[roomKey]?.find(p => p.socketId === socket.id && p.isHost);
       if (hostPeer) {
         io.to(targetSocketId).emit("join-approved");
@@ -134,7 +140,7 @@ export const connectToSocket = (server) => {
     });
 
     socket.on("reject-user", (targetSocketId, path) => {
-      const roomKey = path.replace(/^\/join\//, '/meeting/').replace(/^\/room\//, '/meeting/');
+      const roomKey = getCanonicalRoomKey(path);
       const hostPeer = connections[roomKey]?.find(p => p.socketId === socket.id && p.isHost);
       if (hostPeer) {
         io.to(targetSocketId).emit("join-rejected");

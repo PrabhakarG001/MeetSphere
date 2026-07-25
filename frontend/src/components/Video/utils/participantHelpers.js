@@ -5,23 +5,41 @@ export const removeParticipant = (setVideos, videoRef, id) => {
         return updatedVideos;
     });
 };
-export const updateOrAddParticipant = (setVideos, videoRef, socketListId, track, username = "Guest", isHost = false, picture = null) => {
+export const updateOrAddParticipant = (setVideos, videoRef, socketListId, streamOrTrack, username = "Guest", isHost = false, picture = null) => {
     setVideos(videos => {
-        let existingVideo = videos.find(video => video.socketId === socketListId);
+        let existingIndex = videos.findIndex(video => video.socketId === socketListId);
 
         let finalStream;
-        if (existingVideo && existingVideo.stream) {
-            // Prevent duplicate tracks of the same kind
-            const existingTracks = existingVideo.stream.getTracks().filter(t => t.kind !== track.kind);
-            finalStream = new MediaStream([...existingTracks, track]);
+        if (streamOrTrack instanceof MediaStream) {
+            finalStream = streamOrTrack;
+        } else if (streamOrTrack && streamOrTrack.kind) {
+            const track = streamOrTrack;
+            if (existingIndex !== -1 && videos[existingIndex].stream) {
+                const existingTracks = videos[existingIndex].stream.getTracks().filter(t => t.kind !== track.kind);
+                finalStream = new MediaStream([...existingTracks, track]);
+            } else {
+                finalStream = new MediaStream([track]);
+            }
         } else {
-            finalStream = new MediaStream([track]);
+            finalStream = streamOrTrack;
         }
 
-        if (existingVideo) {
-            const updatedVideos = videos.map(video =>
-                video.socketId === socketListId ? { ...video, stream: finalStream, ...(username && {username}), isHost, ...(picture && {picture}) } : video
-            );
+        if (existingIndex !== -1) {
+            const existingVideo = videos[existingIndex];
+            if (existingVideo.stream === finalStream && 
+                existingVideo.username === username && 
+                existingVideo.isHost === isHost && 
+                existingVideo.picture === picture) {
+                return videos;
+            }
+            const updatedVideos = [...videos];
+            updatedVideos[existingIndex] = {
+                ...existingVideo,
+                stream: finalStream,
+                username: username || existingVideo.username,
+                isHost: isHost !== undefined ? isHost : existingVideo.isHost,
+                picture: picture || existingVideo.picture
+            };
             videoRef.current = updatedVideos;
             return updatedVideos;
         } else {
@@ -32,7 +50,9 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, track,
                 isHost: isHost,
                 picture: picture,
                 autoplay: true,
-                playsinline: true
+                playsinline: true,
+                isVideoEnabled: true,
+                isAudioEnabled: true
             };
             const updatedVideos = [...videos, newVideo];
             videoRef.current = updatedVideos;

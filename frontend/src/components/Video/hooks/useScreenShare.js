@@ -61,23 +61,18 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
             const newVideoTrack = screenVideoTrack;
             const newAudioTrack = existingAudioTrack;
 
-            if (senders.length > 0) {
-                const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
-                
-                const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
-            } else {
-                localStreamRef.current.getTracks().forEach(track => {
-                    pc.addTrack(track, localStreamRef.current);
-                });
-                pc.createOffer().then((description) => {
-                    pc.setLocalDescription(description)
-                        .then(() => {
-                            socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
-                        })
-                        .catch(e => console.error(e));
-                });
+            const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
+            if (videoSender && newVideoTrack) {
+                console.log(`[WebRTC] Screen share: replacing video track for ${id}`);
+                videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
+            } else if (newVideoTrack) {
+                pc.addTrack(newVideoTrack, compositeStream);
+            }
+
+            const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
+            if (audioSender && newAudioTrack) {
+                console.log(`[WebRTC] Screen share: replacing audio track for ${id}`);
+                audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
             }
         }
 
@@ -117,12 +112,16 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                     const newVideoTrack = newStream.getVideoTracks()[0];
                     const newAudioTrack = newStream.getAudioTracks()[0];
 
-                    if (senders.length > 0) {
-                        const videoSender = senders.find(s => s.track && s.track.kind === 'video');
-                        if (videoSender && newVideoTrack) videoSender.replaceTrack(newVideoTrack);
-                        
-                        const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
-                        if (audioSender && newAudioTrack) audioSender.replaceTrack(newAudioTrack);
+                    const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
+                    if (videoSender && newVideoTrack) {
+                        console.log(`[WebRTC] Restoring camera video track for ${id}`);
+                        videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
+                    }
+                    
+                    const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
+                    if (audioSender && newAudioTrack) {
+                        console.log(`[WebRTC] Restoring mic audio track for ${id}`);
+                        audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
                     }
                 }
 
