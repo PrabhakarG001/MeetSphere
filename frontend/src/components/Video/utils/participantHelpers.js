@@ -25,7 +25,7 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
         }
 
         const videoTracks = finalStream?.getVideoTracks?.() || [];
-        const isVideoEnabled = videoTracks.length > 0 && videoTracks.some(t => t.enabled !== false);
+        const isVideoEnabled = videoTracks.length > 0;
         const audioTracks = finalStream?.getAudioTracks?.() || [];
         const isAudioEnabled = audioTracks.length > 0 ? audioTracks.some(t => t.enabled !== false) : true;
 

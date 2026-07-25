@@ -53,7 +53,13 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
 
         pc.ontrack = (event) => {
             console.log(`[WebRTC] Received remote track (${event.track.kind}) from ${targetSocketId}`, event.streams);
-            const remoteStream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
+            if (event.track) {
+                event.track.enabled = true;
+            }
+
+            const remoteStream = (event.streams && event.streams[0]) 
+                ? new MediaStream(event.streams[0].getTracks()) 
+                : new MediaStream([event.track]);
 
             const meta = peerMetadataRef.current[targetSocketId] || {};
             const finalUsername = meta.username || peerUsername || "Guest";

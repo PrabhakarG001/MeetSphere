@@ -6,21 +6,18 @@ import Avatar from './Avatar';
 const RemoteVideo = memo(function RemoteVideo({ video }) {
     const videoElRef = useRef(null);
 
-    // Only update srcObject when stream actually changes
     useEffect(() => {
         if (videoElRef.current && video.stream) {
-            if (videoElRef.current.srcObject !== video.stream) {
-                videoElRef.current.srcObject = video.stream;
-            }
+            videoElRef.current.srcObject = video.stream;
             
             const playPromise = videoElRef.current.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    console.log("[WebRTC] Remote video play deferred until user interaction:", error);
+                    console.log("[WebRTC] Remote video play error:", error);
                 });
             }
         }
-    }, [video.stream]);
+    }, [video.stream, video.isVideoEnabled, video.socketId]);
 
     const handleLoadedMetadata = () => {
         if (videoElRef.current) {
@@ -28,13 +25,13 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
         }
     };
 
-    const hasLiveVideo = video.stream && video.stream.getVideoTracks().some(t => t.readyState === "live" && t.enabled !== false);
-    const isVideoVisible = video.isVideoEnabled !== false && hasLiveVideo;
+    const hasVideoTrack = video.stream && video.stream.getVideoTracks().length > 0;
+    const isVideoVisible = video.isVideoEnabled !== false && hasVideoTrack;
 
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
             <video
-                className={`w-full h-full object-cover ${!isVideoVisible ? 'opacity-0' : 'opacity-100'}`}
+                className={`w-full h-full object-cover ${!isVideoVisible ? 'hidden' : 'block'}`}
                 data-socket={video.socketId}
                 ref={videoElRef}
                 autoPlay
