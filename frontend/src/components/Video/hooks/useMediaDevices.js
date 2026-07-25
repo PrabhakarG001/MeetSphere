@@ -170,23 +170,40 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         }
 
         const currentStream = localStreamRef.current || window.localStream;
-        const needsVideo = video && (videoAvailable || forceVideo);
-        const needsAudio = audio && (audioAvailable || forceAudio);
+        // Always request video/audio if the device is available to ensure WebRTC transceivers are created correctly
+        const requestVideo = videoAvailable || forceVideo;
+        const requestAudio = audioAvailable || forceAudio;
 
-        if (hasLiveLocalStream(currentStream, needsVideo, needsAudio)) {
+        // The actual desired states based on user preference
+        const targetVideoState = video || forceVideo;
+        const targetAudioState = audio || forceAudio;
+
+        if (hasLiveLocalStream(currentStream, requestVideo, requestAudio)) {
             joinedWithExistingStreamRef.current = true;
             setMediaError("");
+            
+            // Apply desired enabled states
+            if (currentStream) {
+                currentStream.getVideoTracks().forEach(t => t.enabled = targetVideoState);
+                currentStream.getAudioTracks().forEach(t => t.enabled = targetAudioState);
+            }
+            
             attachLocalStream(currentStream);
             return currentStream;
         }
 
-        if (!needsVideo && !needsAudio) {
+        if (!requestVideo && !requestAudio) {
             stopStream(localStreamRef.current || localVideoref.current?.srcObject);
             return null;
         }
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, needsVideo, needsAudio, isRearCameraRef.current));
+            const stream = await navigator.mediaDevices.getUserMedia(getPreferredMediaConstraints(selectedVideoDeviceIdRef.current, requestVideo, requestAudio, isRearCameraRef.current));
+            
+            // Apply desired enabled states
+            stream.getVideoTracks().forEach(t => t.enabled = targetVideoState);
+            stream.getAudioTracks().forEach(t => t.enabled = targetAudioState);
+            
             getUserMediaSuccess(stream);
             return stream;
         } catch (e) {
@@ -197,7 +214,11 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 selectedVideoDeviceIdRef.current = null;
 
                 try {
-                    const retryStream = await navigator.mediaDevices.getUserMedia({ video: needsVideo, audio: needsAudio });
+                    const retryStream = await navigator.mediaDevices.getUserMedia({ video: requestVideo, audio: requestAudio });
+                    
+                    retryStream.getVideoTracks().forEach(t => t.enabled = targetVideoState);
+                    retryStream.getAudioTracks().forEach(t => t.enabled = targetAudioState);
+                    
                     getUserMediaSuccess(retryStream);
                     return retryStream;
                 } catch (retryError) {
@@ -206,9 +227,12 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 }
             }
 
-            if (needsVideo && needsAudio) {
+            if (requestVideo && requestAudio) {
                 try {
                     const audioOnlyStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+                    
+                    audioOnlyStream.getAudioTracks().forEach(t => t.enabled = targetAudioState);
+                    
                     getUserMediaSuccess(audioOnlyStream);
                     setVideo(false);
                     setVideoAvailable(false);
