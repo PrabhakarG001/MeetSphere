@@ -39,6 +39,16 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
 
         pc.oniceconnectionstatechange = () => {
             console.log(`[WebRTC] ICE connection state with ${targetSocketId}: ${pc.iceConnectionState}`);
+            if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+                console.log(`[WebRTC] ICE state ${pc.iceConnectionState} with ${targetSocketId}, triggering ICE restart...`);
+                pc.createOffer({ iceRestart: true })
+                    .then(offer => pc.setLocalDescription(offer))
+                    .then(() => {
+                        console.log(`[WebRTC] Sent ICE restart offer to ${targetSocketId}`);
+                        socketRef.current?.emit('signal', targetSocketId, JSON.stringify({ 'sdp': pc.localDescription }));
+                    })
+                    .catch(e => console.error(`[WebRTC] ICE restart failed for ${targetSocketId}:`, e));
+            }
         };
 
         pc.ontrack = (event) => {
