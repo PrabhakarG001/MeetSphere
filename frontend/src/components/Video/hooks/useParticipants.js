@@ -8,8 +8,17 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
     const videoRef = useRef([]);
     const [videos, setVideos] = useState([]);
     const iceCandidateQueue = useRef({});
+    const peerMetadataRef = useRef({});
 
     const getOrCreatePeerConnection = (targetSocketId, peerUsername = "Guest", peerIsHost = false, peerPicture = null) => {
+        if (peerUsername && peerUsername !== "Guest") {
+            peerMetadataRef.current[targetSocketId] = {
+                username: peerUsername,
+                isHost: peerIsHost,
+                picture: peerPicture
+            };
+        }
+
         if (connectionsRef.current[targetSocketId]) {
             return connectionsRef.current[targetSocketId];
         }
@@ -33,23 +42,15 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         };
 
         pc.ontrack = (event) => {
-            console.log(`[WebRTC] Received remote track (${event.track.kind}) from ${targetSocketId}`);
+            console.log(`[WebRTC] Received remote track (${event.track.kind}) from ${targetSocketId}`, event.streams);
             const remoteStream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
 
-            event.track.onmute = () => {
-                console.log(`[WebRTC] Track muted from ${targetSocketId}:`, event.track.kind);
-                if (event.track.kind === 'video') {
-                    updateParticipantState(setVideos, videoRef, targetSocketId, { isVideoEnabled: false });
-                }
-            };
-            event.track.onunmute = () => {
-                console.log(`[WebRTC] Track unmuted from ${targetSocketId}:`, event.track.kind);
-                if (event.track.kind === 'video') {
-                    updateParticipantState(setVideos, videoRef, targetSocketId, { isVideoEnabled: true });
-                }
-            };
+            const meta = peerMetadataRef.current[targetSocketId] || {};
+            const finalUsername = meta.username || peerUsername || "Guest";
+            const finalIsHost = meta.isHost !== undefined ? meta.isHost : peerIsHost;
+            const finalPicture = meta.picture || peerPicture;
 
-            updateOrAddParticipant(setVideos, videoRef, targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
+            updateOrAddParticipant(setVideos, videoRef, targetSocketId, remoteStream, finalUsername, finalIsHost, finalPicture);
         };
 
         const currentStream = localStreamRef.current || window.localStream;
@@ -96,7 +97,6 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': pc.localDescription }));
                 }
 
-                // Process queued ICE candidates after setting remote description for BOTH offer and answer
                 if (iceCandidateQueue.current[fromId] && iceCandidateQueue.current[fromId].length > 0) {
                     console.log(`[WebRTC] Flushing ${iceCandidateQueue.current[fromId].length} queued ICE candidates for ${fromId}`);
                     for (let ice of iceCandidateQueue.current[fromId]) {
@@ -146,6 +146,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     connectionsRef.current[id].close();
                     delete connectionsRef.current[id];
                 }
+                delete peerMetadataRef.current[id];
                 removeParticipant(setVideos, videoRef, id);
             });
 
@@ -178,6 +179,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     connectionsRef.current[id].close();
                     delete connectionsRef.current[id];
                 }
+                delete peerMetadataRef.current[id];
                 removeParticipant(setVideos, videoRef, id);
             });
 
@@ -190,6 +192,11 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     const peerPicture = typeof clientInfo === 'string' ? null : clientInfo.picture;
 
                     if (socketListId !== socketIdRef.current) {
+                        peerMetadataRef.current[socketListId] = {
+                            username: peerUsername,
+                            isHost: peerIsHost,
+                            picture: peerPicture
+                        };
                         getOrCreatePeerConnection(socketListId, peerUsername, peerIsHost, peerPicture);
                     }
                 });

@@ -13,16 +13,20 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
                 videoElRef.current.srcObject = video.stream;
             }
             
-            // Explicitly call play to handle cases where autoPlay attribute is not enough
             const playPromise = videoElRef.current.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    console.error("Error playing remote video:", error);
-                    // Browsers require user interaction to play unmuted video.
+                    console.log("[WebRTC] Remote video play deferred until user interaction:", error);
                 });
             }
         }
     }, [video.stream]);
+
+    const handleLoadedMetadata = () => {
+        if (videoElRef.current) {
+            videoElRef.current.play().catch(e => console.log("[WebRTC] play on loadedmetadata deferred:", e));
+        }
+    };
 
     return (
         <div className="relative w-full h-full min-h-[200px] bg-[#1a1a1a] rounded-xl overflow-hidden shadow-sm border border-[#2a2a2a] group flex items-center justify-center">
@@ -32,6 +36,7 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
                 ref={videoElRef}
                 autoPlay
                 playsInline
+                onLoadedMetadata={handleLoadedMetadata}
             ></video>
 
             {video.isVideoEnabled === false && (

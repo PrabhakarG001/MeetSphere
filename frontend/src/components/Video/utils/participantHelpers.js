@@ -11,7 +11,7 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
 
         let finalStream;
         if (streamOrTrack instanceof MediaStream) {
-            finalStream = streamOrTrack;
+            finalStream = new MediaStream(streamOrTrack.getTracks());
         } else if (streamOrTrack && streamOrTrack.kind) {
             const track = streamOrTrack;
             if (existingIndex !== -1 && videos[existingIndex].stream) {
@@ -24,21 +24,22 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
             finalStream = streamOrTrack;
         }
 
+        const videoTracks = finalStream?.getVideoTracks?.() || [];
+        const isVideoEnabled = videoTracks.length > 0 && videoTracks.some(t => t.enabled !== false);
+        const audioTracks = finalStream?.getAudioTracks?.() || [];
+        const isAudioEnabled = audioTracks.length > 0 ? audioTracks.some(t => t.enabled !== false) : true;
+
         if (existingIndex !== -1) {
             const existingVideo = videos[existingIndex];
-            if (existingVideo.stream === finalStream && 
-                existingVideo.username === username && 
-                existingVideo.isHost === isHost && 
-                existingVideo.picture === picture) {
-                return videos;
-            }
             const updatedVideos = [...videos];
             updatedVideos[existingIndex] = {
                 ...existingVideo,
                 stream: finalStream,
-                username: username || existingVideo.username,
+                username: (username && username !== "Guest") ? username : (existingVideo.username || username),
                 isHost: isHost !== undefined ? isHost : existingVideo.isHost,
-                picture: picture || existingVideo.picture
+                picture: picture || existingVideo.picture,
+                isVideoEnabled: isVideoEnabled,
+                isAudioEnabled: isAudioEnabled
             };
             videoRef.current = updatedVideos;
             return updatedVideos;
@@ -51,8 +52,8 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
                 picture: picture,
                 autoplay: true,
                 playsinline: true,
-                isVideoEnabled: true,
-                isAudioEnabled: true
+                isVideoEnabled: isVideoEnabled,
+                isAudioEnabled: isAudioEnabled
             };
             const updatedVideos = [...videos, newVideo];
             videoRef.current = updatedVideos;
