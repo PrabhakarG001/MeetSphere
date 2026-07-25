@@ -38,31 +38,14 @@ const VideoGrid = memo(function VideoGrid({ videos, setLocalVideoElement, video,
     }, [totalParticipants]);
 
     return (
-        <div className="flex-1 w-full h-full p-4 flex items-center justify-center overflow-hidden bg-transparent">
-            <div className={`w-full h-full max-h-full grid ${gridClass} gap-4 auto-rows-fr max-w-7xl mx-auto`}>
+        <div className="video-grid-outer flex-1 w-full h-full p-4 flex items-center justify-center overflow-hidden bg-transparent">
+            <div className={`video-grid-container w-full h-full max-h-full grid ${gridClass} gap-4 auto-rows-fr max-w-7xl mx-auto`}>
                 
-                {/* Local Video */}
-                <div 
-                    className={`relative w-full h-full transition-all duration-300 rounded-xl ${isRaisedHand ? 'p-[3px]' : ''}`}
-                    style={isRaisedHand ? { backgroundImage: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)' } : {}}
-                >
-                    <div className="w-full h-full rounded-[10px] overflow-hidden relative">
-                        <LocalVideo setLocalVideoElement={setLocalVideoElement} video={video} audio={audio} username={username} isRaisedHand={isRaisedHand} picture={userData?.picture} isHost={isHost} isScreenSharing={screen} isRearCamera={isRearCamera} />
-                    </div>
-                    
-                    {/* Render local reactions */}
-                    {reactions.filter(r => r.socketId === 'local').map(r => (
-                        <div key={r.id} className="absolute bottom-10 left-1/2 -translate-x-1/2 text-4xl animate-float-up pointer-events-none z-50">
-                            {r.emoji}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Remote Videos */}
+                {/* Remote Videos (Top 50% on Mobile) */}
                 {videos.map((video) => (
                     <div 
                         key={video.socketId} 
-                        className={`relative w-full h-full transition-all duration-300 rounded-xl overflow-hidden ${video.isRaisedHand ? 'p-[3px]' : (video.isAudioEnabled ? 'ring-2 ring-green-500/50 ring-offset-2 ring-offset-[#202124]' : '')}`}
+                        className={`video-tile-remote relative w-full h-full transition-all duration-300 rounded-xl overflow-hidden ${video.isRaisedHand ? 'p-[3px]' : (video.isAudioEnabled ? 'ring-2 ring-green-500/50 ring-offset-2 ring-offset-[#202124]' : '')}`}
                         style={video.isRaisedHand ? { backgroundImage: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)' } : {}}
                     >
                         <div className="w-full h-full rounded-[10px] overflow-hidden relative">
@@ -77,6 +60,23 @@ const VideoGrid = memo(function VideoGrid({ videos, setLocalVideoElement, video,
                         ))}
                     </div>
                 ))}
+
+                {/* Local Video (Bottom 50% on Mobile) */}
+                <div 
+                    className={`video-tile-local ${videos.length === 0 ? 'single-participant' : ''} relative w-full h-full transition-all duration-300 rounded-xl ${isRaisedHand ? 'p-[3px]' : ''}`}
+                    style={isRaisedHand ? { backgroundImage: 'linear-gradient(135deg, #ff2ea6 0%, #7b61ff 50%, #2d4fc2 100%)' } : {}}
+                >
+                    <div className="w-full h-full rounded-[10px] overflow-hidden relative">
+                        <LocalVideo setLocalVideoElement={setLocalVideoElement} video={video} audio={audio} username={username} isRaisedHand={isRaisedHand} picture={userData?.picture} isHost={isHost} isScreenSharing={screen} isRearCamera={isRearCamera} />
+                    </div>
+                    
+                    {/* Render local reactions */}
+                    {reactions.filter(r => r.socketId === 'local').map(r => (
+                        <div key={r.id} className="absolute bottom-10 left-1/2 -translate-x-1/2 text-4xl animate-float-up pointer-events-none z-50">
+                            {r.emoji}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
