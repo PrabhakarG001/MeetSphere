@@ -75,7 +75,7 @@ export default function PreJoin() {
                 s = io(server, { secure: true, reconnection: true, rejectUnauthorized: false });
                 socketRef.current = s;
 
-            s.on("join-approved", () => {
+            const handleApproved = () => {
                 sessionStorage.setItem(`approved_${url}`, "true");
                 navigate(`/meeting/${url}`, { 
                     state: { 
@@ -85,11 +85,17 @@ export default function PreJoin() {
                         picture: userData?.picture || null
                     } 
                 });
-            });
+            };
 
-            s.on("join-rejected", () => {
+            const handleRejected = () => {
                 setRequestStatus("rejected");
-            });
+            };
+
+            s.on("join-approved", handleApproved);
+            s.on("admitted", handleApproved);
+
+            s.on("join-rejected", handleRejected);
+            s.on("denied", handleRejected);
 
             s.on("join-error", (msg) => {
                 alert(msg || "Could not request join");

@@ -159,15 +159,16 @@ export default function Video() {
 
     const handleAdmit = (socketId, username, path) => {
         if (socketRef.current) {
-            socketRef.current.emit("admit-user", socketId, path, username);
-            setJoinRequests(prev => prev.filter(r => r.socketId !== socketId));
+            socketRef.current.emit("admit-user", { targetSocketId: socketId, userId: socketId, path, username });
+            setJoinRequests(prev => prev.filter(r => r.socketId !== socketId && r.userId !== socketId));
         }
     };
 
     const handleReject = (socketId, path) => {
         if (socketRef.current) {
+            socketRef.current.emit("deny-user", { targetSocketId: socketId, userId: socketId, path });
             socketRef.current.emit("reject-user", socketId, path);
-            setJoinRequests(prev => prev.filter(r => r.socketId !== socketId));
+            setJoinRequests(prev => prev.filter(r => r.socketId !== socketId && r.userId !== socketId));
         }
     };
 

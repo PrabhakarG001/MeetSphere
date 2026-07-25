@@ -111,44 +111,83 @@ export const connectToSocket = (server) => {
       }
     });
 
-    socket.on("request-join", (path, username) => {
+    const handleRequestJoin = (pathArg, usernameArg) => {
+      let path = pathArg;
+      let username = usernameArg;
+      if (typeof pathArg === 'object' && pathArg !== null) {
+        path = pathArg.path || pathArg.roomId || pathArg.url || "";
+        username = pathArg.userName || pathArg.username || pathArg.name || "Participant";
+      }
       const roomKey = getCanonicalRoomKey(path);
       const hostPeer = connections[roomKey]?.find(p => p.isHost);
+      const reqObj = { socketId: socket.id, userId: socket.id, username, userName: username, path: roomKey };
+
       if (hostPeer) {
-        io.to(hostPeer.socketId).emit("join-request", { socketId: socket.id, username, path: roomKey });
+        io.to(hostPeer.socketId).emit("join-request", reqObj);
       } else {
         if (!pendingJoinRequests[roomKey]) {
             pendingJoinRequests[roomKey] = [];
         }
-        // Remove duplicate requests from the same socket
-        pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== socket.id);
-        pendingJoinRequests[roomKey].push({ socketId: socket.id, username, path: roomKey });
+        pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== socket.id && req.userId !== socket.id);
+        pendingJoinRequests[roomKey].push(reqObj);
         
         socket.emit("join-pending", "Waiting for host to start the meeting...");
       }
-    });
+    };
 
-    socket.on("admit-user", (targetSocketId, path, username) => {
-      const roomKey = getCanonicalRoomKey(path);
-      const hostPeer = connections[roomKey]?.find(p => p.socketId === socket.id && p.isHost);
-      if (hostPeer) {
-        io.to(targetSocketId).emit("join-approved");
-        if (pendingJoinRequests[roomKey]) {
-          pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== targetSocketId);
-        }
-      }
-    });
+    socket.on("request-join", handleRequestJoin);
+    socket.on("join-request", handleRequestJoin);
 
-    socket.on("reject-user", (targetSocketId, path) => {
-      const roomKey = getCanonicalRoomKey(path);
-      const hostPeer = connections[roomKey]?.find(p => p.socketId === socket.id && p.isHost);
-      if (hostPeer) {
-        io.to(targetSocketId).emit("join-rejected");
-        if (pendingJoinRequests[roomKey]) {
-          pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== targetSocketId);
-        }
+    const handleAdmit = (targetSocketIdOrObj, pathArg) => {
+      let targetSocketId = targetSocketIdOrObj;
+      let path = pathArg;
+      if (typeof targetSocketIdOrObj === 'object' && targetSocketIdOrObj !== null) {
+        targetSocketId = targetSocketIdOrObj.targetSocketId || targetSocketIdOrObj.userId || targetSocketIdOrObj.socketId;
+        path = targetSocketIdOrObj.path;
       }
-    });
+      
+      io.to(targetSocketId).emit("join-approved");
+      io.to(targetSocketId).emit("admitted");
+
+      if (path) {
+        const roomKey = getCanonicalRoomKey(path);
+        if (pendingJoinRequests[roomKey]) {
+          pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== targetSocketId && req.userId !== targetSocketId);
+        }
+      } else {
+        Object.keys(pendingJoinRequests).forEach(rk => {
+          pendingJoinRequests[rk] = pendingJoinRequests[rk].filter(req => req.socketId !== targetSocketId && req.userId !== targetSocketId);
+        });
+      }
+    };
+
+    socket.on("admit-user", handleAdmit);
+
+    const handleDeny = (targetSocketIdOrObj, pathArg) => {
+      let targetSocketId = targetSocketIdOrObj;
+      let path = pathArg;
+      if (typeof targetSocketIdOrObj === 'object' && targetSocketIdOrObj !== null) {
+        targetSocketId = targetSocketIdOrObj.targetSocketId || targetSocketIdOrObj.userId || targetSocketIdOrObj.socketId;
+        path = targetSocketIdOrObj.path;
+      }
+
+      io.to(targetSocketId).emit("join-rejected");
+      io.to(targetSocketId).emit("denied");
+
+      if (path) {
+        const roomKey = getCanonicalRoomKey(path);
+        if (pendingJoinRequests[roomKey]) {
+          pendingJoinRequests[roomKey] = pendingJoinRequests[roomKey].filter(req => req.socketId !== targetSocketId && req.userId !== targetSocketId);
+        }
+      } else {
+        Object.keys(pendingJoinRequests).forEach(rk => {
+          pendingJoinRequests[rk] = pendingJoinRequests[rk].filter(req => req.socketId !== targetSocketId && req.userId !== targetSocketId);
+        });
+      }
+    };
+
+    socket.on("reject-user", handleDeny);
+    socket.on("deny-user", handleDeny);
 
     socket.on("signal", (toId, payload) => {
       io.to(toId).emit("signal", socket.id, payload);
