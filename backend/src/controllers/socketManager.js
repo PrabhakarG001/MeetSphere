@@ -241,6 +241,15 @@ export const connectToSocket = (server) => {
       }
     });
 
+    socket.on("video-status-change", (isVideoEnabled) => {
+      const roomKey = findRoomBySocketId(socket.id);
+      if (roomKey) {
+        connections[roomKey].forEach((peer) => {
+          io.to(peer.socketId).emit("user-video-status", socket.id, isVideoEnabled);
+        });
+      }
+    });
+
     socket.on("mute-participant", (targetSocketId) => {
       const roomKey = findRoomBySocketId(socket.id);
       if (roomKey) {

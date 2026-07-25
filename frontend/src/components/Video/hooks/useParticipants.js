@@ -164,6 +164,10 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                 updateParticipantState(setVideos, videoRef, id, { isAudioEnabled });
             });
 
+            socketRef.current.on('user-video-status', (id, isVideoEnabled) => {
+                updateParticipantState(setVideos, videoRef, id, { isVideoEnabled });
+            });
+
             socketRef.current.on('force-mute', () => {
                 const event = new CustomEvent('force-mute-local');
                 window.dispatchEvent(event);

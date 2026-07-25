@@ -276,6 +276,8 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             track.enabled = nextVideoState;
         });
 
+        socketRef.current?.emit("video-status-change", nextVideoState);
+
         if (nextVideoState && videoTracks.length === 0) {
             getUserMedia({ forceVideo: true, forceAudio: audio });
         }
@@ -381,6 +383,8 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                     });
                 }
             }
+
+            socketRef.current?.emit("video-status-change", video);
         };
 
         try {
