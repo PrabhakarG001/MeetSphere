@@ -85,6 +85,7 @@ export const connectToSocket = (server) => {
 
       // Convert paths to a canonical room path for sockets to group properly regardless of URL route
       const roomKey = getCanonicalRoomKey(path);
+      socket.join(roomKey);
 
       if (!connections[roomKey]) {
         connections[roomKey] = [];

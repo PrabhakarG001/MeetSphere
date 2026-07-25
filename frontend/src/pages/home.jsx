@@ -77,32 +77,43 @@ function HomeComponent() {
     const handleNewMeeting = useCallback(async () => {
         try {
             const token = localStorage.getItem("token");
-            if (!token) {
-                alert("Please login to create a meeting.");
-                navigate('/login');
-                return;
+            let meetingCode = "";
+
+            if (token) {
+                const response = await fetch(`${server}/api/v1/meetings/create`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ userId: userData?.username || userData?.name || "Host" })
+                });
+                const data = await response.json();
+                if (response.ok && data.meetingCode) {
+                    meetingCode = data.meetingCode;
+                }
             }
 
-            const response = await fetch(`${server}/api/v1/meetings/create`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ userId: userData?.username || userData?.name || "Host" })
-            });
-            const data = await response.json();
-            
-            if (response.ok && data.meetingCode) {
-                sessionStorage.setItem(`host_${data.meetingCode}`, "true");
-                addToUserHistory(data.meetingCode).catch(e => console.error("Could not add to history:", e));
-                navigate(`/join/${data.meetingCode}`);
-            } else {
-                alert(data.message || "Failed to create meeting");
+            if (!meetingCode) {
+                // Fallback meeting code generation
+                meetingCode = Math.random().toString(36).substring(2, 7) + "-" + Math.random().toString(36).substring(2, 7);
             }
+
+            sessionStorage.setItem(`host_${meetingCode}`, "true");
+            sessionStorage.setItem(`approved_${meetingCode}`, "true");
+            sessionStorage.setItem(`instant_show_modal_${meetingCode}`, "true");
+            addToUserHistory(meetingCode).catch(e => console.error("Could not add to history:", e));
+
+            setShowDropdown(false);
+            navigate(`/meeting/${meetingCode}`, { state: { autoJoin: true, isInstant: true } });
         } catch (error) {
-            console.error("Error creating meeting:", error);
-            alert("Error creating meeting. Please try again.");
+            console.error("Error creating instant meeting:", error);
+            const fallbackCode = Math.random().toString(36).substring(2, 7) + "-" + Math.random().toString(36).substring(2, 7);
+            sessionStorage.setItem(`host_${fallbackCode}`, "true");
+            sessionStorage.setItem(`approved_${fallbackCode}`, "true");
+            sessionStorage.setItem(`instant_show_modal_${fallbackCode}`, "true");
+            setShowDropdown(false);
+            navigate(`/meeting/${fallbackCode}`, { state: { autoJoin: true, isInstant: true } });
         }
     }, [addToUserHistory, navigate, userData]);
 

@@ -17,6 +17,7 @@ import ChatPanel from './ChatPanel';
 import SettingsModal from './SettingsModal';
 import Avatar from './Avatar';
 import { useNavigate, useLocation } from "react-router-dom";
+import { Copy, Check, Share2, X, ShieldCheck } from 'lucide-react';
 
 export default function Video() {
     const { userData } = useContext(AuthContext);
@@ -31,6 +32,44 @@ export default function Video() {
 
     const initialVideo = location.state?.video !== undefined ? location.state.video : true;
     const initialAudio = location.state?.audio !== undefined ? location.state.audio : true;
+
+    const [showInstantModal, setShowInstantModal] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+    const [copiedLink, setCopiedLink] = useState(false);
+
+    const meetingCode = window.location.pathname.split('/').filter(Boolean).pop() || "";
+    const meetingLink = `${window.location.origin}/meeting/${meetingCode}`;
+
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(meetingLink);
+            setCopiedLink(true);
+            setToastMessage("Link copied");
+            setTimeout(() => setCopiedLink(false), 2500);
+            setTimeout(() => setToastMessage(""), 2500);
+        } catch (e) {
+            console.error("Copy failed:", e);
+        }
+    };
+
+    const handleShareLink = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: "Join my MeetSphere meeting",
+                    text: "Join my MeetSphere video meeting:",
+                    url: meetingLink
+                });
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    console.error("Share failed:", e);
+                    handleCopyLink();
+                }
+            }
+        } else {
+            handleCopyLink();
+        }
+    };
 
     const {
         askForUsername, setAskForUsername,
@@ -96,7 +135,6 @@ export default function Video() {
                 const data = await response.json();
                 
                 if (response.ok && data.valid) {
-                    
                     const isApproved = sessionStorage.getItem(`approved_${meetingCode}`);
                     
                     if (!data.isHost && !isApproved) {
@@ -107,7 +145,13 @@ export default function Video() {
 
                     setMeetingIsValid(true);
                     setIsHost(!!data.isHost);
-                    
+
+                    const shouldShowInstant = sessionStorage.getItem(`instant_show_modal_${meetingCode}`) === "true" || location.state?.isInstant;
+                    if (shouldShowInstant) {
+                        setShowInstantModal(true);
+                        sessionStorage.removeItem(`instant_show_modal_${meetingCode}`);
+                    }
+
                     // Determine initial states from location state (set in PreJoin)
                     const stateName = location.state?.username || userData?.name || "Participant";
                     const statePicture = userData?.picture || location.state?.picture || null;
@@ -248,6 +292,69 @@ export default function Video() {
                             screen={screen}
                             isRearCamera={isRearCamera}
                         />
+
+                        {/* Instant Meeting Ready Modal (Google Meet Style) */}
+                        {showInstantModal && (
+                            <div className="absolute bottom-24 left-4 sm:left-6 z-40 bg-[#28292c] border border-white/10 text-white rounded-xl shadow-2xl p-5 w-[360px] max-w-[calc(100vw-32px)] transition-all animate-slide-up">
+                                <div className="flex items-center justify-between mb-3">
+                                    <h3 className="text-base font-semibold text-white tracking-tight">Your meeting's ready</h3>
+                                    <button 
+                                        onClick={() => setShowInstantModal(false)}
+                                        className="p-1 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+                                        title="Close"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                
+                                <p className="text-xs text-white/70 mb-4 leading-relaxed">
+                                    Share this meeting link with others you want in the meeting
+                                </p>
+
+                                <div className="flex items-center gap-2 mb-4">
+                                    <button 
+                                        onClick={handleShareLink}
+                                        className="flex-1 py-2 px-3 bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0] font-semibold text-xs rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
+                                    >
+                                        <Share2 size={15} />
+                                        <span>Share link</span>
+                                    </button>
+                                    <button 
+                                        onClick={handleCopyLink}
+                                        className="py-2 px-3 bg-white/10 hover:bg-white/20 border border-white/10 text-white font-medium text-xs rounded-full flex items-center justify-center gap-1.5 transition-all"
+                                    >
+                                        {copiedLink ? <Check size={15} className="text-green-400" /> : <Copy size={15} />}
+                                        <span>{copiedLink ? "Copied" : "Copy"}</span>
+                                    </button>
+                                </div>
+
+                                <div className="bg-black/30 flex items-center justify-between p-2.5 rounded-lg border border-white/10 text-xs">
+                                    <span className="text-white/90 truncate pr-2 font-mono selection:bg-[#8ab4f8] selection:text-black">
+                                        {meetingLink}
+                                    </span>
+                                    <button 
+                                        onClick={handleCopyLink}
+                                        className="p-1.5 text-white/70 hover:text-white rounded hover:bg-white/10 transition-colors flex-shrink-0"
+                                        title="Copy link"
+                                    >
+                                        {copiedLink ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                                    </button>
+                                </div>
+
+                                <p className="text-[11px] text-white/40 mt-3 flex items-center gap-1.5">
+                                    <ShieldCheck size={13} className="text-blue-400 flex-shrink-0" />
+                                    <span>People who use this link must get your permission before joining.</span>
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Toast Notification */}
+                        {toastMessage && (
+                            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#323232] text-white text-xs px-4 py-2.5 rounded-lg shadow-xl border border-white/10 flex items-center gap-2 animate-fade-in">
+                                <Check size={16} className="text-green-400" />
+                                <span>{toastMessage}</span>
+                            </div>
+                        )}
 
                         <ControlBar
                             video={video}
