@@ -61,16 +61,16 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                 event.track.enabled = true;
             }
 
-            const remoteStream = (event.streams && event.streams.length > 0) 
+            const streamOrTrack = (event.streams && event.streams.length > 0) 
                 ? event.streams[0] 
-                : new MediaStream([event.track]);
+                : event.track;
 
             const meta = peerMetadataRef.current[targetSocketId] || {};
             const finalUsername = meta.username || peerUsername || "Guest";
             const finalIsHost = meta.isHost !== undefined ? meta.isHost : peerIsHost;
             const finalPicture = meta.picture || peerPicture;
 
-            updateOrAddParticipant(setVideos, videoRef, targetSocketId, remoteStream, finalUsername, finalIsHost, finalPicture);
+            updateOrAddParticipant(setVideos, videoRef, targetSocketId, streamOrTrack, finalUsername, finalIsHost, finalPicture);
         };
 
         const currentStream = localStreamRef.current || window.localStream;
