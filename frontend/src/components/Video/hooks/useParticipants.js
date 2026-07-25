@@ -61,8 +61,8 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                 event.track.enabled = true;
             }
 
-            const remoteStream = (event.streams && event.streams[0]) 
-                ? new MediaStream(event.streams[0].getTracks()) 
+            const remoteStream = (event.streams && event.streams.length > 0) 
+                ? event.streams[0] 
                 : new MediaStream([event.track]);
 
             const meta = peerMetadataRef.current[targetSocketId] || {};

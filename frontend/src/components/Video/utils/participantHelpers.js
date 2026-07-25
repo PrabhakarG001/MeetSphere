@@ -11,12 +11,15 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
 
         let finalStream;
         if (streamOrTrack instanceof MediaStream) {
-            finalStream = new MediaStream(streamOrTrack.getTracks());
+            finalStream = streamOrTrack; // DO NOT CLONE: WebRTC updates this stream directly on replaceTrack
         } else if (streamOrTrack && streamOrTrack.kind) {
             const track = streamOrTrack;
             if (existingIndex !== -1 && videos[existingIndex].stream) {
-                const existingTracks = videos[existingIndex].stream.getTracks().filter(t => t.kind !== track.kind);
-                finalStream = new MediaStream([...existingTracks, track]);
+                const existingStream = videos[existingIndex].stream;
+                if (!existingStream.getTracks().includes(track)) {
+                    existingStream.addTrack(track);
+                }
+                finalStream = existingStream;
             } else {
                 finalStream = new MediaStream([track]);
             }
