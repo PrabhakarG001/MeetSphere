@@ -39,15 +39,19 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
 
         pc.oniceconnectionstatechange = () => {
             console.log(`[WebRTC] ICE connection state with ${targetSocketId}: ${pc.iceConnectionState}`);
-            if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
-                console.log(`[WebRTC] ICE state ${pc.iceConnectionState} with ${targetSocketId}, triggering ICE restart...`);
-                pc.createOffer({ iceRestart: true })
-                    .then(offer => pc.setLocalDescription(offer))
-                    .then(() => {
-                        console.log(`[WebRTC] Sent ICE restart offer to ${targetSocketId}`);
-                        socketRef.current?.emit('signal', targetSocketId, JSON.stringify({ 'sdp': pc.localDescription }));
-                    })
-                    .catch(e => console.error(`[WebRTC] ICE restart failed for ${targetSocketId}:`, e));
+            if (pc.iceConnectionState === 'failed') {
+                console.log(`[WebRTC] ICE failed with ${targetSocketId}, triggering ICE restart...`);
+                if (pc.signalingState === 'stable') {
+                    pc.createOffer({ iceRestart: true })
+                        .then(offer => pc.setLocalDescription(offer))
+                        .then(() => {
+                            console.log(`[WebRTC] Sent ICE restart offer to ${targetSocketId}`);
+                            socketRef.current?.emit('signal', targetSocketId, JSON.stringify({ 'sdp': pc.localDescription }));
+                        })
+                        .catch(e => console.error(`[WebRTC] ICE restart failed for ${targetSocketId}:`, e));
+                } else {
+                    console.log(`[WebRTC] Skipping ICE restart: signalingState=${pc.signalingState}`);
+                }
             }
         };
 
@@ -70,12 +74,14 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         };
 
         const currentStream = localStreamRef.current || window.localStream;
-        if (currentStream && currentStream.getTracks().length > 0) {
-            currentStream.getTracks().forEach(track => {
-                console.log(`[WebRTC] Adding local track (${track.kind}) to PC for ${targetSocketId}`);
+        const liveTracks = currentStream?.getTracks().filter(t => t.readyState === 'live') || [];
+        if (liveTracks.length > 0) {
+            liveTracks.forEach(track => {
+                console.log(`[WebRTC] Adding local track (${track.kind}, readyState=${track.readyState}) to PC for ${targetSocketId}`);
                 pc.addTrack(track, currentStream);
             });
         } else {
+            console.log(`[WebRTC] No live local tracks, using black+silence placeholder for ${targetSocketId}`);
             let blackSilence = (...args) => new MediaStream([black(...args), silence()]);
             localStreamRef.current = blackSilence();
             window.localStream = localStreamRef.current;
@@ -103,14 +109,28 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
 
         if (signal.sdp) {
             try {
-                console.log(`[WebRTC] Received SDP (${signal.sdp.type}) from ${fromId}`);
-                await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
+                console.log(`[WebRTC] Received SDP (${signal.sdp.type}) from ${fromId}, signalingState=${pc.signalingState}`);
 
                 if (signal.sdp.type === 'offer') {
+                    // Handle offer collision (glare): if we also sent an offer, use polite peer logic
+                    if (pc.signalingState === 'have-local-offer') {
+                        const isPolite = socketIdRef.current < fromId;
+                        if (isPolite) {
+                            console.log(`[WebRTC] Offer collision with ${fromId}, rolling back (we are polite peer)`);
+                            await pc.setLocalDescription({ type: "rollback" });
+                        } else {
+                            console.log(`[WebRTC] Offer collision with ${fromId}, ignoring (we are impolite peer)`);
+                            return;
+                        }
+                    }
+                    await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
                     const description = await pc.createAnswer();
                     await pc.setLocalDescription(description);
                     console.log(`[WebRTC] Sending SDP answer to ${fromId}`);
                     socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': pc.localDescription }));
+                } else {
+                    // It's an answer
+                    await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
                 }
 
                 if (iceCandidateQueue.current[fromId] && iceCandidateQueue.current[fromId].length > 0) {
