@@ -190,6 +190,19 @@ export const connectToSocket = (server) => {
     socket.on("reject-user", handleDeny);
     socket.on("deny-user", handleDeny);
 
+    socket.on("offer", ({ to, offer }) => {
+      io.to(to).emit("offer", { from: socket.id, offer });
+    });
+
+    socket.on("answer", ({ to, answer }) => {
+      io.to(to).emit("answer", { from: socket.id, answer });
+    });
+
+    socket.on("ice-candidate", ({ to, candidate }) => {
+      io.to(to).emit("ice-candidate", { from: socket.id, candidate });
+    });
+
+    // Keeping signal for backwards compatibility if needed
     socket.on("signal", (toId, payload) => {
       io.to(toId).emit("signal", socket.id, payload);
     });

@@ -29,7 +29,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         pc.onicecandidate = (event) => {
             if (event.candidate != null) {
                 console.log(`[WebRTC] Sending ICE candidate to ${targetSocketId}`);
-                socketRef.current?.emit('signal', targetSocketId, JSON.stringify({ 'ice': event.candidate }));
+                socketRef.current?.emit('ice-candidate', { to: targetSocketId, candidate: event.candidate });
             }
         };
 
@@ -46,7 +46,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                         .then(offer => pc.setLocalDescription(offer))
                         .then(() => {
                             console.log(`[WebRTC] Sent ICE restart offer to ${targetSocketId}`);
-                            socketRef.current?.emit('signal', targetSocketId, JSON.stringify({ 'sdp': pc.localDescription }));
+                            socketRef.current?.emit('offer', { to: targetSocketId, offer: pc.localDescription });
                         })
                         .catch(e => console.error(`[WebRTC] ICE restart failed for ${targetSocketId}:`, e));
                 } else {
@@ -94,76 +94,77 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         return pc;
     };
 
-    const gotMessageFromServer = async (fromId, message) => {
-        if (fromId === socketIdRef.current) return;
-
-        let signal;
-        try {
-            signal = JSON.parse(message);
-        } catch (e) {
-            console.error("[WebRTC] Error parsing signal message:", e);
-            return;
-        }
-
-        const pc = getOrCreatePeerConnection(fromId);
-
-        if (signal.sdp) {
-            try {
-                console.log(`[WebRTC] Received SDP (${signal.sdp.type}) from ${fromId}, signalingState=${pc.signalingState}`);
-
-                if (signal.sdp.type === 'offer') {
-                    // Handle offer collision (glare): if we also sent an offer, use polite peer logic
-                    if (pc.signalingState === 'have-local-offer') {
-                        const isPolite = socketIdRef.current < fromId;
-                        if (isPolite) {
-                            console.log(`[WebRTC] Offer collision with ${fromId}, rolling back (we are polite peer)`);
-                            await pc.setLocalDescription({ type: "rollback" });
-                        } else {
-                            console.log(`[WebRTC] Offer collision with ${fromId}, ignoring (we are impolite peer)`);
-                            return;
-                        }
-                    }
-                    await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                    const description = await pc.createAnswer();
-                    await pc.setLocalDescription(description);
-                    console.log(`[WebRTC] Sending SDP answer to ${fromId}`);
-                    socketRef.current.emit('signal', fromId, JSON.stringify({ 'sdp': pc.localDescription }));
-                } else {
-                    // It's an answer
-                    await pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
-                }
-
-                if (iceCandidateQueue.current[fromId] && iceCandidateQueue.current[fromId].length > 0) {
-                    console.log(`[WebRTC] Flushing ${iceCandidateQueue.current[fromId].length} queued ICE candidates for ${fromId}`);
-                    for (let ice of iceCandidateQueue.current[fromId]) {
-                        await pc.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.error("[WebRTC] Error adding queued ICE candidate:", e));
-                    }
-                    iceCandidateQueue.current[fromId] = [];
-                }
-            } catch (e) {
-                console.error("[WebRTC] Error processing SDP from " + fromId + ":", e);
-            }
-        }
-
-        if (signal.ice) {
-            try {
-                if (pc.remoteDescription && pc.remoteDescription.type) {
-                    console.log(`[WebRTC] Adding ICE candidate from ${fromId}`);
-                    await pc.addIceCandidate(new RTCIceCandidate(signal.ice));
-                } else {
-                    console.log(`[WebRTC] Queuing ICE candidate from ${fromId}`);
-                    if (!iceCandidateQueue.current[fromId]) iceCandidateQueue.current[fromId] = [];
-                    iceCandidateQueue.current[fromId].push(signal.ice);
-                }
-            } catch (e) {
-                console.error("[WebRTC] Error processing ICE from " + fromId + ":", e);
-            }
-        }
-    };
-
     const connectToSocketServer = (username, picture) => {
         socketRef.current = initializeSocket();
-        socketRef.current.on('signal', gotMessageFromServer);
+
+        socketRef.current.on('offer', async ({ from, offer }) => {
+            console.log(`[WebRTC] Received offer from ${from}`);
+            const pc = getOrCreatePeerConnection(from);
+            
+            try {
+                if (pc.signalingState === 'have-local-offer') {
+                    const isPolite = socketIdRef.current < from;
+                    if (isPolite) {
+                        console.log(`[WebRTC] Offer collision with ${from}, rolling back`);
+                        await pc.setLocalDescription({ type: "rollback" });
+                    } else {
+                        console.log(`[WebRTC] Offer collision with ${from}, ignoring`);
+                        return;
+                    }
+                }
+                
+                await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                console.log(`[WebRTC] Sending answer to ${from}`);
+                socketRef.current.emit('answer', { to: from, answer: pc.localDescription });
+                
+                if (iceCandidateQueue.current[from] && iceCandidateQueue.current[from].length > 0) {
+                    console.log(`[WebRTC] Flushing ${iceCandidateQueue.current[from].length} queued ICE candidates for ${from}`);
+                    for (let ice of iceCandidateQueue.current[from]) {
+                        await pc.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.error("[WebRTC] Error adding queued ICE:", e));
+                    }
+                    iceCandidateQueue.current[from] = [];
+                }
+            } catch (e) {
+                console.error("[WebRTC] Error processing offer from " + from + ":", e);
+            }
+        });
+
+        socketRef.current.on('answer', async ({ from, answer }) => {
+            console.log(`[WebRTC] Received answer from ${from}`);
+            const pc = getOrCreatePeerConnection(from);
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(answer));
+                
+                if (iceCandidateQueue.current[from] && iceCandidateQueue.current[from].length > 0) {
+                    console.log(`[WebRTC] Flushing ${iceCandidateQueue.current[from].length} queued ICE candidates for ${from}`);
+                    for (let ice of iceCandidateQueue.current[from]) {
+                        await pc.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.error("[WebRTC] Error adding queued ICE:", e));
+                    }
+                    iceCandidateQueue.current[from] = [];
+                }
+            } catch (e) {
+                console.error("[WebRTC] Error processing answer from " + from + ":", e);
+            }
+        });
+
+        socketRef.current.on('ice-candidate', async ({ from, candidate }) => {
+            console.log(`[WebRTC] Received ICE candidate from ${from}`);
+            const pc = getOrCreatePeerConnection(from);
+            try {
+                if (pc.remoteDescription && pc.remoteDescription.type) {
+                    console.log(`[WebRTC] Adding ICE candidate from ${from}`);
+                    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                } else {
+                    console.log(`[WebRTC] Queuing ICE candidate from ${from}`);
+                    if (!iceCandidateQueue.current[from]) iceCandidateQueue.current[from] = [];
+                    iceCandidateQueue.current[from].push(candidate);
+                }
+            } catch (e) {
+                console.error("[WebRTC] Error processing ICE from " + from + ":", e);
+            }
+        });
 
         socketRef.current.on('connect', () => {
             const token = localStorage.getItem("token");
@@ -250,7 +251,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                             .then((description) => pc.setLocalDescription(description))
                             .then(() => {
                                 console.log(`[WebRTC] Sending SDP offer to ${targetId}`);
-                                socketRef.current.emit('signal', targetId, JSON.stringify({ 'sdp': pc.localDescription }));
+                                socketRef.current.emit('offer', { to: targetId, offer: pc.localDescription });
                             })
                             .catch(e => console.error("[WebRTC] Error creating offer for " + targetId + ":", e));
                     }

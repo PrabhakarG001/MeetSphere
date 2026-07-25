@@ -377,7 +377,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                     pc.createOffer().then((description) => {
                         pc.setLocalDescription(description)
                             .then(() => {
-                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
+                                socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
                             })
                             .catch(e => console.error(e));
                     });
@@ -473,7 +473,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                     pc.createOffer().then((description) => {
                         pc.setLocalDescription(description)
                             .then(() => {
-                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': pc.localDescription }));
+                                socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
                             })
                             .catch(e => console.error(e));
                     });
