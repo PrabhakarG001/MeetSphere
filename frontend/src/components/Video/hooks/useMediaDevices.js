@@ -32,6 +32,25 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         }
     };
 
+    const findSenderByKind = (pc, kind) => {
+        return pc.getSenders().find(sender => sender.track?.kind === kind)
+            || pc.getSenders().find(sender => pc.getTransceivers?.().some(transceiver => (
+                transceiver.sender === sender && transceiver.receiver?.track?.kind === kind
+            )));
+    };
+
+    const renegotiatePeer = async (pc, id) => {
+        if (pc.signalingState !== "stable") {
+            console.log(`[WebRTC] Skipping renegotiation for ${id}: signalingState=${pc.signalingState}`);
+            return;
+        }
+
+        const description = await pc.createOffer();
+        await pc.setLocalDescription(description);
+        console.log(`[WebRTC] Sending renegotiation offer to ${id}`);
+        socketRef.current?.emit('offer', { to: id, offer: pc.localDescription });
+    };
+
     const setLocalVideoElement = useCallback((node) => {
         localVideoref.current = node;
         if (node && localStreamRef.current) {
@@ -337,14 +356,20 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
         if (!isMobile && camerasRef.current.length < 2) return;
         
         const currentStream = localStreamRef.current || window.localStream;
+        const previousIsRear = isRearCameraRef.current;
+        const existingAudioTracks = currentStream?.getAudioTracks?.().filter(track => track.readyState === "live") || [];
         
-        // Completely stop all previous video tracks before switching camera
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => {
-                track.onended = null;
-                track.stop();
-            });
-        }
+        console.log("[WebRTC] Switching camera", {
+            isMobile,
+            currentFacingMode: isRearCameraRef.current ? "environment" : "user",
+            localTracks: currentStream?.getTracks?.().map(track => `${track.kind}:${track.readyState}:enabled=${track.enabled}`) || []
+        });
+
+        currentStream?.getVideoTracks?.().forEach(track => {
+            console.log(`[WebRTC] Stopping previous camera track ${track.id}`);
+            track.onended = null;
+            track.stop();
+        });
 
         // Add a small delay (300ms) before reinitializing camera (important for mobile Chrome)
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -356,7 +381,7 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             setIsRearCamera(nextIsRear);
             isRearCameraRef.current = nextIsRear;
             selectedVideoDeviceIdRef.current = null;
-            videoConstraints = { facingMode: nextIsRear ? "environment" : "user" };
+            videoConstraints = { facingMode: { exact: nextIsRear ? "environment" : "user" } };
         } else {
             const currentIndex = camerasRef.current.findIndex(c => c.deviceId === selectedVideoDeviceIdRef.current);
             const nextIndex = (currentIndex + 1) % camerasRef.current.length;
@@ -370,80 +395,79 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
             }
         }
 
-        const fetchAndApplyStream = async () => {
+        const fetchAndApplyStream = async (constraints) => {
             const newStream = await navigator.mediaDevices.getUserMedia({
-                video: videoConstraints,
-                audio: true
+                video: constraints,
+                audio: false
             });
             
             const newVideoTrack = newStream.getVideoTracks()[0];
-            const newAudioTrack = newStream.getAudioTracks()[0];
-            
-            if (newVideoTrack) {
-                newVideoTrack.enabled = video; 
-                newVideoTrack.onended = () => {
-                    setVideo(false);
-                };
+            if (!newVideoTrack) {
+                throw new Error("Camera switch did not return a video track.");
             }
-            if (newAudioTrack) {
-                newAudioTrack.enabled = audio;
-            }
+
+            const nextStream = new MediaStream([newVideoTrack, ...existingAudioTracks]);
             
-            localStreamRef.current = newStream;
-            window.localStream = newStream;
+            newVideoTrack.enabled = video;
+            newVideoTrack.onended = () => {
+                console.log("[WebRTC] Switched camera track ended");
+                setVideo(false);
+            };
+            existingAudioTracks.forEach(track => {
+                track.enabled = audio;
+            });
             
-            if (localVideoref.current) {
-                localVideoref.current.srcObject = newStream;
-            }
+            attachLocalStream(nextStream);
             
             for (let id in connectionsRef.current) {
                 if (id === socketIdRef.current) continue;
                 const pc = connectionsRef.current[id];
-                const senders = pc.getSenders();
                 
                 let renegotiationNeeded = false;
                 
-                const videoSender = senders.find(s => s.track?.kind === 'video') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'video'));
-                if (videoSender && newVideoTrack) {
-                    console.log(`[WebRTC] Camera switch: replacing video track for ${id}`);
-                    videoSender.replaceTrack(newVideoTrack).catch(e => console.error(e));
-                } else if (newVideoTrack) {
-                    pc.addTrack(newVideoTrack, newStream);
+                const videoSender = findSenderByKind(pc, 'video');
+                if (videoSender) {
+                    console.log(`[WebRTC] Camera switch: replacing video track for ${id}`, newVideoTrack.id);
+                    await videoSender.replaceTrack(newVideoTrack);
+                } else {
+                    console.log(`[WebRTC] Camera switch: adding video track for ${id}`, newVideoTrack.id);
+                    pc.addTrack(newVideoTrack, nextStream);
                     renegotiationNeeded = true;
                 }
 
-                const audioSender = senders.find(s => s.track?.kind === 'audio') || senders.find(s => pc.getTransceivers?.().find(t => t.sender === s && t.receiver?.track?.kind === 'audio'));
-                if (audioSender && newAudioTrack) {
-                    console.log(`[WebRTC] Camera switch: replacing audio track for ${id}`);
-                    audioSender.replaceTrack(newAudioTrack).catch(e => console.error(e));
-                } else if (newAudioTrack) {
-                    pc.addTrack(newAudioTrack, newStream);
+                const audioTrack = existingAudioTracks[0];
+                const audioSender = findSenderByKind(pc, 'audio');
+                if (!audioSender && audioTrack) {
+                    console.log(`[WebRTC] Camera switch: adding missing audio track for ${id}`, audioTrack.id);
+                    pc.addTrack(audioTrack, nextStream);
                     renegotiationNeeded = true;
                 }
 
                 if (renegotiationNeeded) {
-                    pc.createOffer().then((description) => {
-                        pc.setLocalDescription(description)
-                            .then(() => {
-                                socketRef.current.emit('offer', { to: id, offer: pc.localDescription });
-                            })
-                            .catch(e => console.error(e));
-                    });
+                    await renegotiatePeer(pc, id);
                 }
             }
 
             socketRef.current?.emit("video-status-change", video);
+            await loadMediaDevices();
+            return nextStream;
         };
 
         try {
-            await fetchAndApplyStream();
+            await fetchAndApplyStream(videoConstraints);
         } catch (err) {
-            console.error("Failed to switch camera video track, retrying once:", err);
+            console.error("Failed to switch camera video track, retrying with ideal facingMode:", err);
             try {
-                // Retry once
-                await fetchAndApplyStream();
+                if (isMobile) {
+                    const fallbackFacingMode = isRearCameraRef.current ? "environment" : "user";
+                    await fetchAndApplyStream({ facingMode: fallbackFacingMode });
+                } else {
+                    await fetchAndApplyStream(videoConstraints);
+                }
             } catch (err2) {
                 console.error("Retry failed, reverting to default:", err2);
+                setIsRearCamera(previousIsRear);
+                isRearCameraRef.current = previousIsRear;
                 await getUserMedia({ forceVideo: true });
             }
         }

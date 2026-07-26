@@ -9,6 +9,25 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
     const [videos, setVideos] = useState([]);
     const iceCandidateQueue = useRef({});
     const peerMetadataRef = useRef({});
+    const remoteStreamsRef = useRef({});
+
+    const getPeerMetadata = (targetSocketId, fallbackUsername = "Guest", fallbackIsHost = false, fallbackPicture = null) => {
+        const meta = peerMetadataRef.current[targetSocketId] || {};
+        return {
+            username: meta.username || fallbackUsername || "Guest",
+            isHost: meta.isHost !== undefined ? meta.isHost : fallbackIsHost,
+            picture: meta.picture || fallbackPicture
+        };
+    };
+
+    const publishRemoteStream = (targetSocketId, stream, fallbackUsername, fallbackIsHost, fallbackPicture) => {
+        const meta = getPeerMetadata(targetSocketId, fallbackUsername, fallbackIsHost, fallbackPicture);
+        console.log(
+            `[WebRTC] Publishing remote stream for ${targetSocketId}`,
+            stream.getTracks().map(track => `${track.kind}:${track.readyState}:enabled=${track.enabled}`)
+        );
+        updateOrAddParticipant(setVideos, videoRef, targetSocketId, stream, meta.username, meta.isHost, meta.picture);
+    };
 
     const getOrCreatePeerConnection = (targetSocketId, peerUsername = "Guest", peerIsHost = false, peerPicture = null) => {
         if (peerUsername && peerUsername !== "Guest") {
@@ -56,28 +75,50 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         };
 
         pc.ontrack = (event) => {
-            console.log(`[WebRTC] Received remote track (${event.track.kind}) from ${targetSocketId}`, event.streams);
-            if (event.track) {
-                event.track.enabled = true;
-            }
+            console.log(
+                `[WebRTC] Received remote track (${event.track.kind}) from ${targetSocketId}`,
+                {
+                    trackId: event.track.id,
+                    readyState: event.track.readyState,
+                    streamIds: event.streams?.map(stream => stream.id) || []
+                }
+            );
 
-            const streamOrTrack = (event.streams && event.streams.length > 0) 
-                ? event.streams[0] 
-                : event.track;
+            const remoteStream = remoteStreamsRef.current[targetSocketId] || new MediaStream();
+            remoteStreamsRef.current[targetSocketId] = remoteStream;
 
-            const meta = peerMetadataRef.current[targetSocketId] || {};
-            const finalUsername = meta.username || peerUsername || "Guest";
-            const finalIsHost = meta.isHost !== undefined ? meta.isHost : peerIsHost;
-            const finalPicture = meta.picture || peerPicture;
+            const incomingTracks = event.streams?.length
+                ? event.streams.flatMap(stream => stream.getTracks())
+                : [event.track];
 
-            updateOrAddParticipant(setVideos, videoRef, targetSocketId, streamOrTrack, finalUsername, finalIsHost, finalPicture);
+            incomingTracks.filter(Boolean).forEach(track => {
+                if (!remoteStream.getTracks().some(existingTrack => existingTrack.id === track.id)) {
+                    console.log(`[WebRTC] Adding remote ${track.kind} track ${track.id} from ${targetSocketId}`);
+                    remoteStream.addTrack(track);
+                }
+
+                track.onunmute = () => {
+                    console.log(`[WebRTC] Remote ${track.kind} track unmuted from ${targetSocketId}`);
+                    publishRemoteStream(targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
+                };
+
+                track.onended = () => {
+                    console.log(`[WebRTC] Remote ${track.kind} track ended from ${targetSocketId}`);
+                    publishRemoteStream(targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
+                };
+            });
+
+            publishRemoteStream(targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
         };
 
         const currentStream = localStreamRef.current || window.localStream;
         if (currentStream) {
             currentStream.getTracks().forEach(track => {
-                console.log(`[WebRTC] Adding local track (${track.kind}) to PC for ${targetSocketId}`);
-                pc.addTrack(track, currentStream);
+                const hasSender = pc.getSenders().some(sender => sender.track === track);
+                if (!hasSender) {
+                    console.log(`[WebRTC] Adding local track (${track.kind}:${track.id}) to PC for ${targetSocketId}`);
+                    pc.addTrack(track, currentStream);
+                }
             });
         } else {
             console.log(`[WebRTC] No live local tracks, using black+silence placeholder for ${targetSocketId}`);
@@ -171,8 +212,9 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             const url = pathParts[pathParts.length - 1];
             const isHostLocally = !!sessionStorage.getItem(`host_${url}`);
             
-            socketRef.current.emit('join-call', window.location.pathname, username, token, isHostLocally, picture);
             socketIdRef.current = socketRef.current.id;
+            console.log(`[Socket.io] Connected with socket id ${socketIdRef.current}`);
+            socketRef.current.emit('join-call', window.location.pathname, username, token, isHostLocally, picture);
 
             socketRef.current.on('chat-message', addMessage);
 
@@ -183,6 +225,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     delete connectionsRef.current[id];
                 }
                 delete peerMetadataRef.current[id];
+                delete remoteStreamsRef.current[id];
                 removeParticipant(setVideos, videoRef, id);
             });
 
@@ -220,10 +263,11 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
                     delete connectionsRef.current[id];
                 }
                 delete peerMetadataRef.current[id];
+                delete remoteStreamsRef.current[id];
                 removeParticipant(setVideos, videoRef, id);
             });
 
-            socketRef.current.on('user-joined', (id, clients) => {
+            socketRef.current.on('user-joined', (id, clients = []) => {
                 console.log(`[WebRTC] User joined event (joined ID: ${id}, total clients: ${clients.length})`);
                 clients.forEach((clientInfo) => {
                     const socketListId = typeof clientInfo === 'string' ? clientInfo : clientInfo.socketId;

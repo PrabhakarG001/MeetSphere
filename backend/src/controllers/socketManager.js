@@ -99,6 +99,7 @@ export const connectToSocket = (server) => {
       }
 
       timeOnline[socket.id] = new Date();
+      console.log(`[Socket.io] ${socket.id} joined ${roomKey}. Peers: ${connections[roomKey].map(peer => peer.socketId).join(", ")}`);
 
       connections[roomKey].forEach((peer) => {
         io.to(peer.socketId).emit("user-joined", socket.id, connections[roomKey], finalUsername);
@@ -191,14 +192,29 @@ export const connectToSocket = (server) => {
     socket.on("deny-user", handleDeny);
 
     socket.on("offer", ({ to, offer }) => {
+      if (!to || !offer) {
+        console.warn(`[Socket.io] Ignoring malformed offer from ${socket.id}`);
+        return;
+      }
+      console.log(`[Socket.io] Relaying offer ${socket.id} -> ${to}`);
       io.to(to).emit("offer", { from: socket.id, offer });
     });
 
     socket.on("answer", ({ to, answer }) => {
+      if (!to || !answer) {
+        console.warn(`[Socket.io] Ignoring malformed answer from ${socket.id}`);
+        return;
+      }
+      console.log(`[Socket.io] Relaying answer ${socket.id} -> ${to}`);
       io.to(to).emit("answer", { from: socket.id, answer });
     });
 
     socket.on("ice-candidate", ({ to, candidate }) => {
+      if (!to || !candidate) {
+        console.warn(`[Socket.io] Ignoring malformed ICE candidate from ${socket.id}`);
+        return;
+      }
+      console.log(`[Socket.io] Relaying ICE candidate ${socket.id} -> ${to}`);
       io.to(to).emit("ice-candidate", { from: socket.id, candidate });
     });
 

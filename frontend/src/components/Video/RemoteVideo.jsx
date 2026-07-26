@@ -45,7 +45,9 @@ const RemoteVideo = memo(function RemoteVideo({ video }) {
         }
     };
 
-    const hasVideoTrack = video.stream && video.stream.getVideoTracks().length > 0;
+    const hasVideoTrack = video.stream?.getVideoTracks?.().some(track => (
+        track.readyState === "live" && track.enabled !== false
+    ));
     const isVideoVisible = video.isVideoEnabled !== false && hasVideoTrack;
 
     return (
