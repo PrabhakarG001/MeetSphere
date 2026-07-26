@@ -8,7 +8,7 @@ import {
 
 const EMOJIS = ['\u2764\uFE0F', '\uD83D\uDC4D', '\uD83C\uDF89', '\uD83D\uDC4F', '\uD83D\uDE02', '\uD83D\uDE2E', '\uD83D\uDE22', '\uD83E\uDD14', '\uD83D\uDC4E'];
 
-const ControlButton = ({ onClick, isActive, title, children, isDanger, isPrimary, badge, className = "", noTooltip = false }) => {
+const ControlButton = ({ onClick, isActive, title, children, isDanger, isPrimary, badge, className = "", noTooltip = false, disabled = false }) => {
     let bgClass = isActive 
         ? 'bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0]' 
         : 'bg-gray-100 dark:bg-[#3c4043] text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-[#4a4d51]';
@@ -19,12 +19,19 @@ const ControlButton = ({ onClick, isActive, title, children, isDanger, isPrimary
         bgClass = 'bg-[#8ab4f8] text-[#202124] hover:bg-[#9ebcf0]';
     }
 
+    if (disabled) {
+        bgClass = 'bg-gray-100 dark:bg-[#2f3134] text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60';
+    }
+
     return (
         <div className="relative group flex items-center justify-center">
             <button 
                 className={`flex items-center justify-center rounded-full transition-colors ${bgClass} ${className}`}
-                onClick={onClick}
+                onClick={disabled ? undefined : onClick}
                 type="button"
+                disabled={disabled}
+                title={title}
+                aria-label={title}
             >
                 {children}
             </button>
@@ -55,6 +62,8 @@ export default function ControlBar({
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const moreMenuRef = useRef(null);
+    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || window.matchMedia?.("(max-width: 640px)")?.matches;
 
     const handleEmojiClick = (emoji) => {
         if (sendReaction) {
@@ -172,9 +181,10 @@ export default function ControlBar({
             <ControlButton
                 onClick={() => { handleScreen(); setShowMoreMenu(false); }}
                 isActive={screen}
-                title={screen ? "Stop" : "Share"}
+                title={isMobileDevice ? "Available on desktop only" : (screen ? "Stop" : "Share")}
                 className="w-12 h-12"
                 noTooltip
+                disabled={isMobileDevice || !screenAvailable}
             >
                 {screen ? <MonitorOff size={20} /> : <MonitorUp size={20} />}
             </ControlButton>

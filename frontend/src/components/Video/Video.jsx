@@ -100,7 +100,7 @@ export default function Video() {
 
     const { handleAudio } = useAudio(audio, setAudio, localStreamRef, getUserMedia, video, socketRef);
 
-    const { screen, screenAvailable, handleScreen } = useScreenShare(
+    const { screen, screenAvailable, screenShareMessage, handleScreen } = useScreenShare(
         localStreamRef, localVideoref, connectionsRef, socketIdRef, socketRef, getUserMedia, attachLocalStream
     );
 
@@ -185,6 +185,14 @@ export default function Video() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!screenShareMessage) return;
+
+        setToastMessage(screenShareMessage);
+        const timeoutId = setTimeout(() => setToastMessage(""), 3000);
+        return () => clearTimeout(timeoutId);
+    }, [screenShareMessage]);
 
     // Listen for join requests if host
     useEffect(() => {

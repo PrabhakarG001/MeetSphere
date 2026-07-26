@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react';
 
+const isMobileDevice = () => (
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || window.matchMedia?.("(max-width: 640px)")?.matches
+);
+
+const isScreenShareSupported = () => (
+    !isMobileDevice()
+    && Boolean(navigator.mediaDevices?.getDisplayMedia)
+);
+
 export const useScreenShare = (localStreamRef, localVideoref, connections, socketIdRef, socketRef, getUserMedia, attachLocalStream) => {
     const [screen, setScreen] = useState();
-    const [screenAvailable, setScreenAvailable] = useState(Boolean(navigator.mediaDevices?.getDisplayMedia));
+    const [screenAvailable, setScreenAvailable] = useState(isScreenShareSupported());
+    const [screenShareMessage, setScreenShareMessage] = useState("");
 
     const getDisplayMediaSuccess = (stream) => {
         try {
@@ -141,9 +152,28 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
     };
 
     useEffect(() => {
+        const updateScreenShareAvailability = () => {
+            setScreenAvailable(isScreenShareSupported());
+        };
+
+        updateScreenShareAvailability();
+        window.addEventListener("resize", updateScreenShareAvailability);
+        return () => window.removeEventListener("resize", updateScreenShareAvailability);
+    }, []);
+
+    useEffect(() => {
         if (screen !== undefined) {
             if (screen) {
-                if (navigator.mediaDevices.getDisplayMedia) {
+                if (isMobileDevice()) {
+                    const message = "Screen sharing is not supported on mobile devices. Please use a desktop browser.";
+                    console.log(`[ScreenShare] ${message}`);
+                    setScreenShareMessage(message);
+                    setScreen(false);
+                    return;
+                }
+
+                if (navigator.mediaDevices?.getDisplayMedia) {
+                    setScreenShareMessage("");
                     navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
                         .then(getDisplayMediaSuccess)
                         .catch((e) => {
@@ -151,7 +181,9 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
                             setScreen(false);
                         });
                 } else {
-                    alert("Screen sharing is not supported by your current browser. Please try using a different browser like Chrome or Safari.");
+                    const message = "Screen sharing is not available in this browser. Please use a desktop browser.";
+                    console.log(`[ScreenShare] ${message}`);
+                    setScreenShareMessage(message);
                     setScreen(false);
                 }
             }
@@ -159,6 +191,21 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
     }, [screen]);
 
     const handleScreen = () => {
+        if (isMobileDevice()) {
+            const message = "Screen sharing is not supported on mobile devices. Please use a desktop browser.";
+            console.log(`[ScreenShare] ${message}`);
+            setScreenShareMessage(message);
+            return;
+        }
+
+        if (!navigator.mediaDevices?.getDisplayMedia) {
+            const message = "Screen sharing is not available in this browser. Please use a desktop browser.";
+            console.log(`[ScreenShare] ${message}`);
+            setScreenShareMessage(message);
+            return;
+        }
+
+        setScreenShareMessage("");
         setScreen(!screen);
     };
 
@@ -166,6 +213,7 @@ export const useScreenShare = (localStreamRef, localVideoref, connections, socke
         screen,
         screenAvailable,
         setScreenAvailable,
+        screenShareMessage,
         handleScreen
     };
 };
