@@ -384,7 +384,7 @@ h1, h2, h3, h4, h5, h6, button {
   letter-spacing: -0.01em;
 }
 
-.footerCol p {
+.landingFooter p {
   margin: 0;
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.92rem;
@@ -406,10 +406,11 @@ h1, h2, h3, h4, h5, h6, button {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
   font-size: 0.92rem;
-  font-weight: 500;
+  line-height: 1.65;
+  font-weight: 400;
   padding: 0.4rem 0;
   transition: color 0.3s ease, transform 0.3s ease;
 }
@@ -438,13 +439,7 @@ h1, h2, h3, h4, h5, h6, button {
   text-align: center;
 }
 
-.footerBottom p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.82rem;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
+
 
 
 /* Responsive Styles */

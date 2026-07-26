@@ -93,8 +93,8 @@ export default function LandingPage() {
             <footer className="landingFooter">
                 <div className="footerInner">
                     <div className="footerCol footerProject">
-                        <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
-                            <span className="footerHeading" style={{ fontSize: '1.75rem' }}>MeetSphere</span>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <span className="footerHeading">MeetSphere</span>
                         </div>
                         <p>A real-time communication platform built for seamless, low-latency video interaction. Crystal-clear calls, instant connections, zero compromise.</p>
                     </div>
