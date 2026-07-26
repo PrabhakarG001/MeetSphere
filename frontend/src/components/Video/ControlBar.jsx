@@ -52,7 +52,7 @@ const ControlButton = ({ onClick, isActive, title, children, isDanger, isPrimary
 export default function ControlBar({
     video, handleVideo,
     audio, handleAudio,
-    screenAvailable, screen, handleScreen,
+    screenAvailable, screen, handleScreen, isMobileScreenShareLimited,
     newMessages, showModal, openChat, closeChat,
     activeTab, setActiveTab,
     handleEndCall,
@@ -62,9 +62,6 @@ export default function ControlBar({
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [showMoreMenu, setShowMoreMenu] = useState(false);
     const moreMenuRef = useRef(null);
-    const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-        || window.matchMedia?.("(max-width: 640px)")?.matches;
-
     const handleEmojiClick = (emoji) => {
         if (sendReaction) {
             sendReaction(emoji);
@@ -92,7 +89,7 @@ export default function ControlBar({
                 <ControlButton
                     onClick={() => { handleScreen(); setShowMoreMenu(false); }}
                     isActive={screen}
-                    title={screen ? "Stop presenting" : "Present now"}
+                    title={screen ? "Stop presenting" : "Share your screen"}
                     className="w-12 h-12"
                 >
                     {screen ? <MonitorOff size={18} strokeWidth={2} className="w-5 h-5" /> : <MonitorUp size={18} strokeWidth={2} className="w-5 h-5" />}
@@ -181,10 +178,9 @@ export default function ControlBar({
             <ControlButton
                 onClick={() => { handleScreen(); setShowMoreMenu(false); }}
                 isActive={screen}
-                title={isMobileDevice ? "Available on desktop only" : (screen ? "Stop" : "Share")}
+                title={isMobileScreenShareLimited ? "Limited support on mobile" : (screen ? "Stop" : "Share")}
                 className="w-12 h-12"
                 noTooltip
-                disabled={isMobileDevice || !screenAvailable}
             >
                 {screen ? <MonitorOff size={20} /> : <MonitorUp size={20} />}
             </ControlButton>

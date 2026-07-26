@@ -100,8 +100,8 @@ export default function Video() {
 
     const { handleAudio } = useAudio(audio, setAudio, localStreamRef, getUserMedia, video, socketRef);
 
-    const { screen, screenAvailable, screenShareMessage, handleScreen } = useScreenShare(
-        localStreamRef, localVideoref, connectionsRef, socketIdRef, socketRef, getUserMedia, attachLocalStream
+    const { screen, screenAvailable, screenShareMessage, isMobileScreenShareLimited, handleScreen } = useScreenShare(
+        localStreamRef, localVideoref, connectionsRef, socketIdRef, socketRef, getUserMedia, attachLocalStream, switchCamera
     );
 
     const connect = async (overrideUsername, forceAudio, forceVideo, picture) => {
@@ -372,6 +372,7 @@ export default function Video() {
                             screenAvailable={screenAvailable}
                             screen={screen}
                             handleScreen={handleScreen}
+                            isMobileScreenShareLimited={isMobileScreenShareLimited}
                             newMessages={newMessages}
                             showModal={showModal}
                             openChat={openChat}
