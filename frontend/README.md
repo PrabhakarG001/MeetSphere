@@ -1,16 +1,29 @@
-# React + Vite
+# 📱 MeetSphere — Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder contains the client-side React single-page application for **MeetSphere**, built with React 19, Vite, Tailwind CSS v4, Material-UI, Socket.io-client, and WebRTC.
 
-Currently, two official plugins are available:
+For complete project documentation, tech stack details, architecture, and setup guide, please refer to the [Root README.md](../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Quick Start (Frontend)
 
-## React Compiler
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. **Environment Configuration**:
+   Create a `.env` file in this directory:
+   ```env
+   VITE_BACKEND_URL=http://localhost:8000
+   ```
 
-## Expanding the ESLint configuration
+3. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:5173` in your browser.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+4. **Build for Production**:
+   ```bash
+   npm run build
+   ```
