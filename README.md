@@ -119,3 +119,5 @@ Feel free to check the repository issues or submit a pull request.
 ## 📄 License
 
 This project is licensed under the [ISC License](LICENSE).
+
+<!-- Minor format update -->
