@@ -143,6 +143,10 @@ export const useMediaDevices = (socketRef, socketIdRef, connectionsRef, askForUs
                 window.localStream = localStreamRef.current;
                 attachLocalStream(localStreamRef.current);
 
+                // Media devices died: tell peers to switch back to the avatar view
+                socketRef.current?.emit("video-status-change", false);
+                socketRef.current?.emit("audio-status-change", false);
+
                 for (let id in connectionsRef.current) {
                     if (id === socketIdRef.current) continue;
                     const pc = connectionsRef.current[id];

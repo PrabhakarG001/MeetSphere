@@ -16,17 +16,51 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
         return {
             username: meta.username || fallbackUsername || "Guest",
             isHost: meta.isHost !== undefined ? meta.isHost : fallbackIsHost,
-            picture: meta.picture || fallbackPicture
+            picture: meta.picture || fallbackPicture,
+            isVideoEnabled: meta.isVideoEnabled,
+            isAudioEnabled: meta.isAudioEnabled
         };
     };
 
     const publishRemoteStream = (targetSocketId, stream, fallbackUsername, fallbackIsHost, fallbackPicture) => {
+        // Ignore late async events (e.g. remote tracks ending after a peer was removed)
+        // that would otherwise re-add a departed participant as a ghost tile.
+        if (!connectionsRef.current[targetSocketId]) {
+            console.log(`[WebRTC] Skipping stream publish for removed peer ${targetSocketId}`);
+            return;
+        }
+
         const meta = getPeerMetadata(targetSocketId, fallbackUsername, fallbackIsHost, fallbackPicture);
         console.log(
             `[WebRTC] Publishing remote stream for ${targetSocketId}`,
             stream.getTracks().map(track => `${track.kind}:${track.readyState}:enabled=${track.enabled}`)
         );
-        updateOrAddParticipant(setVideos, videoRef, targetSocketId, stream, meta.username, meta.isHost, meta.picture);
+        updateOrAddParticipant(setVideos, videoRef, targetSocketId, stream, meta.username, meta.isHost, meta.picture, meta.isVideoEnabled, meta.isAudioEnabled);
+    };
+
+    const cleanupPeer = (id) => {
+        const pc = connectionsRef.current[id];
+        if (pc) {
+            try {
+                // Detach remote-track handlers before closing: pc.close() ends remote tracks
+                // asynchronously, and those events must not re-publish the removed peer.
+                pc.getReceivers?.().forEach((receiver) => {
+                    const track = receiver.track;
+                    if (track) {
+                        track.onunmute = null;
+                        track.onmute = null;
+                        track.onended = null;
+                    }
+                });
+                pc.close();
+            } catch (e) {
+                console.error(`[WebRTC] Error closing connection to ${id}:`, e);
+            }
+            delete connectionsRef.current[id];
+        }
+        delete peerMetadataRef.current[id];
+        delete remoteStreamsRef.current[id];
+        delete iceCandidateQueue.current[id];
     };
 
     const getOrCreatePeerConnection = (targetSocketId, peerUsername = "Guest", peerIsHost = false, peerPicture = null) => {
@@ -99,6 +133,11 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
 
                 track.onunmute = () => {
                     console.log(`[WebRTC] Remote ${track.kind} track unmuted from ${targetSocketId}`);
+                    publishRemoteStream(targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
+                };
+
+                track.onmute = () => {
+                    console.log(`[WebRTC] Remote ${track.kind} track muted from ${targetSocketId}`);
                     publishRemoteStream(targetSocketId, remoteStream, peerUsername, peerIsHost, peerPicture);
                 };
 
@@ -214,18 +253,16 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             
             socketIdRef.current = socketRef.current.id;
             console.log(`[Socket.io] Connected with socket id ${socketIdRef.current}`);
-            socketRef.current.emit('join-call', window.location.pathname, username, token, isHostLocally, picture);
+            const localStreamForStatus = localStreamRef.current || window.localStream;
+            const videoOn = !!localStreamForStatus?.getVideoTracks?.().some(track => track.readyState === 'live' && track.enabled !== false);
+            const audioOn = !!localStreamForStatus?.getAudioTracks?.().some(track => track.readyState === 'live' && track.enabled !== false);
+            socketRef.current.emit('join-call', window.location.pathname, username, token, isHostLocally, picture, videoOn, audioOn);
 
             socketRef.current.on('chat-message', addMessage);
 
             socketRef.current.on('user-left', (id) => {
                 console.log(`[WebRTC] User left: ${id}`);
-                if (connectionsRef.current[id]) {
-                    connectionsRef.current[id].close();
-                    delete connectionsRef.current[id];
-                }
-                delete peerMetadataRef.current[id];
-                delete remoteStreamsRef.current[id];
+                cleanupPeer(id);
                 removeParticipant(setVideos, videoRef, id);
             });
 
@@ -240,10 +277,12 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             });
 
             socketRef.current.on('user-audio-status', (id, isAudioEnabled) => {
+                peerMetadataRef.current[id] = { ...(peerMetadataRef.current[id] || {}), isAudioEnabled };
                 updateParticipantState(setVideos, videoRef, id, { isAudioEnabled });
             });
 
             socketRef.current.on('user-video-status', (id, isVideoEnabled) => {
+                peerMetadataRef.current[id] = { ...(peerMetadataRef.current[id] || {}), isVideoEnabled };
                 updateParticipantState(setVideos, videoRef, id, { isVideoEnabled });
             });
 
@@ -258,12 +297,7 @@ export const useParticipants = (addMessage, localStreamRef, socketRef, socketIdR
             });
 
             socketRef.current.on('participant-kicked', (id) => {
-                if (connectionsRef.current[id]) {
-                    connectionsRef.current[id].close();
-                    delete connectionsRef.current[id];
-                }
-                delete peerMetadataRef.current[id];
-                delete remoteStreamsRef.current[id];
+                cleanupPeer(id);
                 removeParticipant(setVideos, videoRef, id);
             });
 

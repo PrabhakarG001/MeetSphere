@@ -61,7 +61,7 @@ export default function History() {
 
     const handleRejoin = useCallback(async (meetingCode) => {
         await addToUserHistory(meetingCode);
-        routeTo(`/${meetingCode}`);
+        routeTo(`/join/${meetingCode}`);
     }, [addToUserHistory, routeTo]);
 
     const showToast = (type, message) => {

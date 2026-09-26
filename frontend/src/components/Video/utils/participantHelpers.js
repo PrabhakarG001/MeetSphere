@@ -5,7 +5,7 @@ export const removeParticipant = (setVideos, videoRef, id) => {
         return updatedVideos;
     });
 };
-export const updateOrAddParticipant = (setVideos, videoRef, socketListId, streamOrTrack, username = "Guest", isHost = false, picture = null) => {
+export const updateOrAddParticipant = (setVideos, videoRef, socketListId, streamOrTrack, username = "Guest", isHost = false, picture = null, explicitVideoEnabled, explicitAudioEnabled) => {
     setVideos(videos => {
         let existingIndex = videos.findIndex(video => video.socketId === socketListId);
 
@@ -28,11 +28,19 @@ export const updateOrAddParticipant = (setVideos, videoRef, socketListId, stream
         }
 
         const videoTracks = finalStream?.getVideoTracks?.() || [];
-        const isVideoEnabled = videoTracks.some(track => track.readyState === "live" && track.enabled !== false);
         const audioTracks = finalStream?.getAudioTracks?.() || [];
-        const isAudioEnabled = audioTracks.length > 0
-            ? audioTracks.some(track => track.readyState === "live" && track.enabled !== false)
-            : true;
+
+        // For remote peers, prefer the explicit camera/mic state delivered via socket
+        // status events; fall back to track-derived state. `muted` reflects whether the
+        // remote side is actually sending media right now.
+        const isVideoEnabled = explicitVideoEnabled !== undefined
+            ? explicitVideoEnabled
+            : videoTracks.some(track => track.readyState === "live" && !track.muted && track.enabled !== false);
+        const isAudioEnabled = explicitAudioEnabled !== undefined
+            ? explicitAudioEnabled
+            : (audioTracks.length > 0
+                ? audioTracks.some(track => track.readyState === "live" && !track.muted && track.enabled !== false)
+                : true);
 
         if (existingIndex !== -1) {
             const existingVideo = videos[existingIndex];

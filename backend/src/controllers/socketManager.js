@@ -55,7 +55,7 @@ export const connectToSocket = (server) => {
       }
     });
 
-    socket.on("join-call", async (path, username, token, isHostLocally, picture) => {
+    socket.on("join-call", async (path, username, token, isHostLocally, picture, videoOn, audioOn) => {
         if (!path) {
           return;
         }
@@ -95,7 +95,14 @@ export const connectToSocket = (server) => {
       const existing = connections[roomKey].find(c => c.socketId === socket.id);
       const finalUsername = username || "Participant";
       if (!existing) {
-        connections[roomKey].push({ socketId: socket.id, username: finalUsername, isHost, picture });
+        connections[roomKey].push({
+          socketId: socket.id,
+          username: finalUsername,
+          isHost,
+          picture,
+          videoEnabled: videoOn !== false,
+          audioEnabled: audioOn !== false
+        });
       }
 
       timeOnline[socket.id] = new Date();
@@ -103,6 +110,14 @@ export const connectToSocket = (server) => {
 
       connections[roomKey].forEach((peer) => {
         io.to(peer.socketId).emit("user-joined", socket.id, connections[roomKey], finalUsername);
+
+        // Sync camera/mic state so every peer renders the correct video tile or avatar
+        io.to(peer.socketId).emit("user-video-status", socket.id, videoOn !== false);
+        io.to(peer.socketId).emit("user-audio-status", socket.id, audioOn !== false);
+        if (peer.socketId !== socket.id) {
+          io.to(socket.id).emit("user-video-status", peer.socketId, peer.videoEnabled !== false);
+          io.to(socket.id).emit("user-audio-status", peer.socketId, peer.audioEnabled !== false);
+        }
       });
 
       // If this is the host joining, send them all pending requests for this room
@@ -265,6 +280,8 @@ export const connectToSocket = (server) => {
     socket.on("audio-status-change", (isAudioEnabled) => {
       const roomKey = findRoomBySocketId(socket.id);
       if (roomKey) {
+        const sender = connections[roomKey].find(peer => peer.socketId === socket.id);
+        if (sender) sender.audioEnabled = !!isAudioEnabled;
         connections[roomKey].forEach((peer) => {
           io.to(peer.socketId).emit("user-audio-status", socket.id, isAudioEnabled);
         });
@@ -274,6 +291,8 @@ export const connectToSocket = (server) => {
     socket.on("video-status-change", (isVideoEnabled) => {
       const roomKey = findRoomBySocketId(socket.id);
       if (roomKey) {
+        const sender = connections[roomKey].find(peer => peer.socketId === socket.id);
+        if (sender) sender.videoEnabled = !!isVideoEnabled;
         connections[roomKey].forEach((peer) => {
           io.to(peer.socketId).emit("user-video-status", socket.id, isVideoEnabled);
         });
