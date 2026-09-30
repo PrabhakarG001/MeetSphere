@@ -31,7 +31,6 @@ function HomeComponent() {
     const { addToUserHistory, userData } = useContext(AuthContext);
     const [meetingCode, setMeetingCode] = useState("");
     const [currentSlide, setCurrentSlide] = useState(0);
-    const [currentTime, setCurrentTime] = useState(new Date());
 
     // New Meeting Options State
     const [showDropdown, setShowDropdown] = useState(false);
@@ -52,11 +51,9 @@ function HomeComponent() {
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000 * 60);
         const slideTimer = setInterval(() => setCurrentSlide(prev => (prev + 1) % carouselItems.length), 5000);
         
         return () => {
-            clearInterval(timer);
             clearInterval(slideTimer);
         };
     }, []);
