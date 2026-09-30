@@ -5,6 +5,7 @@ import connectToSocket from "./controllers/socketManager.js";
 import cors from "cors";
 import userRoutes from "./controllers/routes/users.routes.js";
 import meetingRoutes from "./controllers/routes/meeting.routes.js";
+import githubRoutes from "./controllers/routes/github.routes.js";
 
 
 const app = express();
@@ -30,6 +31,9 @@ let databaseError = "";
 mongoose.set("bufferCommands", false);
 
 app.use(cors());
+// GitHub routes parse their own larger JSON body (pushed file content), so
+// they are mounted before the global 40kb JSON parser.
+app.use("/api/v1/github", express.json({ limit: "2mb" }), githubRoutes);
 app.use(express.json({limit: "40kb"}));
 app.use(express.urlencoded({limit:"40kb", extended:true}));
 

@@ -9,6 +9,7 @@ import PreJoinComponent from './components/Video/PreJoin';
 import HomeComponent, { GuestHomeComponent } from './pages/home';
 import History from './pages/history';
 import AccountSelection from './pages/AccountSelection';
+import GitHubCallback from './pages/GitHubCallback';
   
 
 
@@ -37,6 +38,7 @@ function App() {
             <Route path='/meeting/:url' element={<VideoMeetComponent />} />
             <Route path='/meet/:url' element={<PreJoinComponent />} />
             <Route path='/room/:url' element={<PreJoinComponent />} />
+            <Route path='/github/callback' element={<GitHubCallback />} />
           </Routes>
         </AuthProvider>
       </Router>

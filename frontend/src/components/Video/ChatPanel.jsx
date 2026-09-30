@@ -1,7 +1,9 @@
 import '../../styles/ChatPanel.css';
-import { useRef, useEffect } from "react";
-import { Send, X, MessageSquare, Users } from 'lucide-react';
+import { useRef, useEffect, useState } from "react";
+import { Send, X, MessageSquare } from 'lucide-react';
 import Avatar from './Avatar';
+import GitHubIcon from '../common/GitHubIcon';
+import PushGitHubModal from './PushGitHubModal';
 
 export default function ChatPanel({
     showModal,
@@ -22,6 +24,7 @@ export default function ChatPanel({
     handleReject
 }) {
     const messagesEndRef = useRef(null);
+    const [showGitHubModal, setShowGitHubModal] = useState(false);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,13 +44,25 @@ export default function ChatPanel({
             <div className="flex flex-col border-b border-[#e5e7eb] dark:border-[#2a2a2a] sticky top-0 z-10 bg-white dark:bg-[#202124]">
                 <div className="flex items-center justify-between px-4 py-3">
                     <h2 className="text-[15px] font-semibold text-slate-900 dark:text-slate-100 m-0">Meeting Chat</h2>
-                    <button 
-                        className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-white/5"
-                        onClick={closeChat} 
-                        aria-label="Close panel"
-                    >
-                        <X size={18} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setShowGitHubModal(true)}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-[#3c4043] hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                            title="Push chat to GitHub"
+                            aria-label="Push to GitHub"
+                        >
+                            <GitHubIcon size={14} />
+                            Push to GitHub
+                        </button>
+                        <button 
+                            className="text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-white/5"
+                            onClick={closeChat} 
+                            aria-label="Close panel"
+                        >
+                            <X size={18} />
+                        </button>
+                    </div>
                 </div>
                 
                 {/* Simulated Tabs (Zoom style) */}
@@ -198,6 +213,15 @@ export default function ChatPanel({
                         )) : null}
                     </div>
                 </div>
+            )}
+
+            {showGitHubModal && (
+                <PushGitHubModal
+                    onClose={() => setShowGitHubModal(false)}
+                    messages={messages}
+                    username={username}
+                    videos={videos}
+                />
             )}
         </div>
     );

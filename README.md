@@ -104,6 +104,19 @@ MeetSphere/
 - `GET /get_all_activity` — Retrieve past meeting history for the user.
 - `POST /delete_activity` — Remove a meeting log entry from history.
 
+### GitHub Routes (`/api/v1/github`)
+- `GET /login` — Start the GitHub OAuth flow (returns the authorization URL).
+- `GET /callback` — OAuth callback; exchanges the code and stores the token server-side.
+- `GET /status` — Report GitHub connection status (never returns the token).
+- `GET /repos` — List repositories the connected account can push to.
+- `POST /repos` — Create a new repository.
+- `POST /push` — Push the meeting chat export file to a repository.
+
+> **Push to GitHub setup**: create a GitHub OAuth App with callback URL
+> `<BACKEND_URL>/api/v1/github/callback` and set `GITHUB_CLIENT_ID`,
+> `GITHUB_CLIENT_SECRET`, `GITHUB_REDIRECT_URI` and `FRONTEND_URL` on the backend.
+> Access tokens stay in MongoDB and are never sent to the browser.
+
 ### System Routes
 - `GET /health` — Health check endpoint returning backend & database connection status.
 
@@ -119,5 +132,3 @@ Feel free to check the repository issues or submit a pull request.
 ## 📄 License
 
 This project is licensed under the [ISC License](LICENSE).
-
-<!-- Minor format update -->
